@@ -2,6 +2,13 @@
 name = "leenfetch"
 version = "0.1.0"
 edition = "2021"
+description = "Fast, minimal, customizable system info tool in Rust (Neofetch alternative)"
+license = "MIT"
+repository = "https://github.com/drunkleen/leenfetch"
+readme = "README.md"
+categories = ["command-line-utilities", "visualization", "system"]
+keywords = ["neofetch", "system", "terminal", "info", "rustfetch", "leenfetch"]
+authors = ["DrunkLeen <snape@drunkleen.com>"]
 
 [dependencies]
 dirs = "6.0.0"
