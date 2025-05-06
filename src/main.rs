@@ -4,7 +4,7 @@ mod modules;
 use crate::config::default::ConfigsExt;
 use modules::ascii::get_ascii_art;
 use modules::helper::list_options;
-use modules::system::distro::{get_distro, DistroShorthand};
+use modules::system::distro::{get_distro, DistroDisplay};
 
 use config::default::Configs;
 
@@ -21,7 +21,9 @@ fn main() {
             return;
         }
         Some("--init" | "-i") => {
-            Configs::ensure_config_exists();
+            if !Configs::ensure_config_exists() {
+                println!("⚠️ Config file already exists");
+            }
             return;
         }
         _ => {}
@@ -34,7 +36,7 @@ fn main() {
     if let Some(layout) = cfg.get("layout") {
         let filled = Configs::fill_layout(layout, &cfg);
         let ascii_path = cfg.get("ascii_path");
-        let distro = get_distro(DistroShorthand::Tiny).unwrap_or_else(|| "Linux".into());
+        let distro = get_distro(DistroDisplay::Name);
         let ascii = get_ascii_art(&distro, ascii_path);
         print_ascii_and_info(
             &ascii,

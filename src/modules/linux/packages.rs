@@ -74,7 +74,7 @@ pub fn get_packages(shorthand: PackageShorthand) -> Option<String> {
     }
 
     match shorthand {
-        PackageShorthand::Off => Some(format!("{}", packages)),
+        PackageShorthand::Off => Some(format!("{} total", packages)),
         PackageShorthand::On => Some(managers.join(", ")),
         PackageShorthand::Tiny => Some(format!("{} ({})", packages, manager_string.join(", "))),
     }
@@ -88,7 +88,6 @@ fn is_installed(cmd: &str) -> bool {
         .unwrap_or(false)
 }
 
-#[cfg(target_os = "linux")]
 fn count_lines(cmd: &mut Command) -> Option<u64> {
     let output = cmd.output().ok()?;
     if !output.status.success() {

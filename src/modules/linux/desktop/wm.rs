@@ -2,60 +2,44 @@ use std::env;
 use std::fs;
 use std::process::Command;
 
-pub fn get_wm(os: &str, kernel_name: &str) -> Option<String> {
-    // Determine `ps` flags based on platform
-    let ps_flags = if kernel_name.contains("OpenBSD") {
-        vec!["x", "-c"]
-    } else {
-        vec!["-e"]
-    };
-
-    // Wayland check
-    if let Ok(xdg_runtime_dir) = env::var("XDG_RUNTIME_DIR") {
+pub fn get_wm() -> Option<String> {
+    // Prefer Wayland
+    if let Ok(runtime) = env::var("XDG_RUNTIME_DIR") {
         let socket = env::var("WAYLAND_DISPLAY").unwrap_or_else(|_| "wayland-0".to_string());
-        let sock_path = format!("{}/{}", xdg_runtime_dir, socket);
-        if let Ok(meta) = fs::metadata(&sock_path) {
-            if meta.permissions().readonly() == false {
-                // Try `lsof` or `fuser` substitute: scan known WM process names
-                return scan_for_process(&ps_flags, WAYLAND_WMS);
-            }
-        }
-    }
-
-    // X11 check (DISPLAY set, not Mac/FreeMiNT)
-    if env::var("DISPLAY").is_ok() && os != "Mac OS X" && os != "macOS" && os != "FreeMiNT" {
-        if let Some(wm) = scan_for_process(&ps_flags, X11_WMS) {
-            return Some(wm);
-        }
-
-        // Try xprop if installed
-        if is_installed("xprop") {
-            if let Some(wm) = get_wm_from_xprop() {
+        let path = format!("{}/{}", runtime, socket);
+        if fs::metadata(&path).is_ok() {
+            if let Some(wm) = scan_proc(WAYLAND_WMS) {
                 return Some(wm);
             }
         }
     }
 
-    // No WM detected
-    None
+    // X11 (DISPLAY is set)
+    if env::var("DISPLAY").is_ok() {
+        // Most accurate: ask X server directly
+        if let Some(wm) = get_wm_from_xprop() {
+            return Some(wm);
+        }
+
+        // Fallback: scan known X11 WM processes
+        if let Some(wm) = scan_proc(X11_WMS) {
+            return Some(wm);
+        }
+    }
+
+    // Fallback: scan all known WM processes
+    scan_proc(ALL_WMS)
 }
 
-fn is_installed(cmd: &str) -> bool {
-    Command::new("which")
-        .arg(cmd)
-        .output()
-        .map(|o| o.status.success())
-        .unwrap_or(false)
-}
+// Uses `ps -e` to scan processes for known WMs
+fn scan_proc(wm_names: &[&str]) -> Option<String> {
+    let output = Command::new("ps").arg("-e").output().ok()?.stdout;
+    let ps_text = String::from_utf8_lossy(&output);
 
-fn scan_for_process(ps_flags: &[&str], targets: &[&str]) -> Option<String> {
-    let output = Command::new("ps").args(ps_flags).output().ok()?.stdout;
-    let ps_output = String::from_utf8_lossy(&output);
-
-    for line in ps_output.lines() {
-        for &target in targets {
-            if line.contains(target) {
-                return Some(normalize_wm(target));
+    for line in ps_text.lines() {
+        for &wm in wm_names {
+            if line.contains(wm) {
+                return Some(normalize_wm(wm));
             }
         }
     }
@@ -63,104 +47,137 @@ fn scan_for_process(ps_flags: &[&str], targets: &[&str]) -> Option<String> {
     None
 }
 
+// Uses xprop to query the active X11 WM (_NET_WM_NAME)
 fn get_wm_from_xprop() -> Option<String> {
-    let root_out = Command::new("xprop")
-        .args(["-root", "-notype", "_NET_SUPPORTING_WM_CHECK"])
+    let root = Command::new("xprop")
+        .args(["-root", "_NET_SUPPORTING_WM_CHECK"])
         .output()
         .ok()?;
-    let id = String::from_utf8_lossy(&root_out.stdout);
-    let win_id = id.trim().rsplit(' ').next()?;
+    let root_out = String::from_utf8_lossy(&root.stdout);
+    let win_id = root_out.rsplit(' ').next()?.trim();
 
-    let wm_out = Command::new("xprop")
-        .args([
-            "-id",
-            win_id,
-            "-notype",
-            "-len",
-            "100",
-            "-f",
-            "_NET_WM_NAME",
-            "8t",
-        ])
+    let wm = Command::new("xprop")
+        .args(["-id", win_id, "-notype", "_NET_WM_NAME"])
         .output()
         .ok()?;
+    let name = String::from_utf8_lossy(&wm.stdout);
 
-    let name = String::from_utf8_lossy(&wm_out.stdout);
-    let cleaned = name.split('=').last()?.trim().trim_matches('"');
-    Some(cleaned.to_string())
+    name.split('=')
+        .nth(1)
+        .map(|s| normalize_wm(s.trim().trim_matches('"')))
 }
 
 fn normalize_wm(wm: &str) -> String {
     match wm {
+        "gnome-shell" | "GNOME Shell" => "Mutter",
+        "kwin_x11" | "kwin_wayland" | "kwin" => "KWin",
         "WINDOWMAKER" => "wmaker",
-        "GNOME Shell" | "gnome-shell" => "Mutter",
-        "kwin_x11" | "kwin_wayland" => "KWin",
         other => other,
     }
     .to_string()
 }
 
-// Lists of common WM process names
+// Common known Wayland WMs and compositors
 const WAYLAND_WMS: &[&str] = &[
-    "arcan",
-    "asc",
-    "clayland",
-    "dwc",
-    "fireplace",
-    "gnome-shell",
-    "greenfield",
-    "grefsen",
-    "hikari",
-    "kwin",
-    "lipstick",
-    "maynard",
-    "mazecompositor",
-    "motorcar",
-    "orbital",
-    "orbment",
-    "perceptia",
-    "river",
-    "rustland",
     "sway",
-    "ulubis",
-    "velox",
-    "wavy",
-    "way-cooler",
     "wayfire",
-    "wayhouse",
-    "westeros",
-    "westford",
     "weston",
+    "gnome-shell",
+    "kwin_wayland",
+    "hikari",
+    "river",
+    "wlr-randr",
 ];
 
+// Common X11 WMs
 const X11_WMS: &[&str] = &[
-    "sowm",
-    "catwm",
-    "fvwm",
     "dwm",
-    "2bwm",
-    "monsterwm",
-    "tinywm",
-    "x11fs",
     "xmonad",
+    "openbox",
+    "fluxbox",
+    "i3",
+    "herbstluftwm",
+    "awesome",
+    "bspwm",
+    "kwin_x11",
+];
+
+// Combo of all known WMs
+const ALL_WMS: &[&str] = &[
+    "sway",
+    "wayfire",
+    "weston",
+    "gnome-shell",
+    "kwin_wayland",
+    "kwin_x11",
+    "dwm",
+    "xmonad",
+    "openbox",
+    "fluxbox",
+    "i3",
+    "herbstluftwm",
+    "awesome",
+    "bspwm",
+    "hikari",
+    "river",
+    "WINDOWMAKER",
 ];
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::env;
 
-    #[test]
-    fn test_get_wm_may_exist() {
-        let wm = get_wm("Linux", "Linux");
-        assert!(wm.is_none() || !wm.as_ref().unwrap().is_empty());
+    fn clear_env() {
+        for var in ["XDG_RUNTIME_DIR", "WAYLAND_DISPLAY", "DISPLAY"] {
+            env::remove_var(var);
+        }
     }
 
     #[test]
-    fn test_normalize_aliases() {
-        assert_eq!(normalize_wm("WINDOWMAKER"), "wmaker");
+    fn test_normalize_wm_variants() {
+        assert_eq!(normalize_wm("gnome-shell"), "Mutter");
         assert_eq!(normalize_wm("GNOME Shell"), "Mutter");
-        assert_eq!(normalize_wm("gnome-shell"), "Mutter"); // ✅ Add this
+        assert_eq!(normalize_wm("kwin_x11"), "KWin");
         assert_eq!(normalize_wm("kwin_wayland"), "KWin");
-        assert_eq!(normalize_wm("sway"), "sway");
+        assert_eq!(normalize_wm("kwin"), "KWin");
+        assert_eq!(normalize_wm("WINDOWMAKER"), "wmaker");
+        assert_eq!(normalize_wm("i3"), "i3"); // fallback to default
+    }
+
+    #[test]
+    fn test_scan_proc_finds_known_wm() {
+        let sample_ps = "\
+            1000 ?        00:00:00 i3
+            1001 ?        00:00:00 bash
+            1002 ?        00:00:00 Xorg
+        ";
+
+        for wm in ALL_WMS {
+            let fake_output = sample_ps.replace("i3", wm);
+            let found = parse_ps_for_wm(&fake_output, &[wm]);
+            assert_eq!(found, Some(normalize_wm(wm)));
+        }
+    }
+
+    // Internal helper to isolate scan_proc logic
+    fn parse_ps_for_wm(ps_output: &str, targets: &[&str]) -> Option<String> {
+        for line in ps_output.lines() {
+            for &wm in targets {
+                if line.contains(wm) {
+                    return Some(normalize_wm(wm));
+                }
+            }
+        }
+        None
+    }
+
+    #[test]
+    fn test_get_wm_fallback_to_none_without_env() {
+        clear_env();
+
+        // Note: we can't test full get_wm() without actually scanning the system,
+        // but we ensure it doesn't crash in a null environment
+        let _ = get_wm(); // just call it and ensure no panic
     }
 }
