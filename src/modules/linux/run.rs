@@ -12,7 +12,7 @@ use super::info::uptime::{get_uptime, UptimeShorthand};
 use super::packages::{get_packages, PackageShorthand};
 use super::shell::get_shell;
 use super::song::get_song;
-use super::system::distro::{get_distro, DistroShorthand};
+use super::system::distro::{get_distro, DistroDisplay};
 use super::system::kernel::get_kernel;
 use super::system::model::get_model;
 use super::system::os::get_os;
@@ -20,7 +20,7 @@ use super::title::get_titles;
 use std::fs;
 use std::path::PathBuf;
 
-use crate::config::default::{Configs, ConfigsExt, DEFAULT_CONFIG};
+use crate::config::default::{Configs, ConfigsExt};
 use crate::modules::utils::{
     colorize_text, get_terminal_color, process_loop_block, process_single_block,
 };
@@ -57,13 +57,14 @@ impl ConfigsExt for Configs {
                     let key = key.trim().to_string();
                     let val = value.trim().trim_matches('"');
 
-                    // Store booleans and strings separately
                     match val {
                         "on" => {
-                            config.enabled.insert(key, true);
+                            config.enabled.insert(key.clone(), true);
+                            config.string_values.insert(key, val.to_string());
                         }
                         "off" => {
-                            config.enabled.insert(key, false);
+                            config.enabled.insert(key.clone(), false);
+                            config.string_values.insert(key, val.to_string());
                         }
                         _ => {
                             config.string_values.insert(key, val.to_string());
@@ -76,7 +77,7 @@ impl ConfigsExt for Configs {
         config
     }
 
-    fn ensure_config_exists() {
+    fn ensure_config_exists() -> bool {
         let path = dirs::home_dir()
             .map(|p| p.join(".config/leenfetch/config.conf"))
             .expect("Could not determine home directory");
@@ -92,6 +93,9 @@ impl ConfigsExt for Configs {
                 .expect("Failed to write default config file");
 
             println!("✅ Created default config at {}", path.display());
+            true
+        } else {
+            false
         }
     }
 
@@ -154,8 +158,8 @@ impl ConfigsExt for Configs {
         process_single_block(&mut output, "os", cfg.is_enabled("show_os"), os);
 
         let distro = if Self::should_render_tag(layout, cfg, "distro", "show_distro") {
-            let shorthand = cfg.get_enum("distro_shorthand", DistroShorthand::Tiny);
-            Some(get_distro(shorthand).unwrap_or("Unknown".into()))
+            let shorthand = cfg.get_enum("distro_display", DistroDisplay::NameModelVersionArch);
+            Some(get_distro(shorthand))
         } else {
             None
         };
@@ -184,7 +188,9 @@ impl ConfigsExt for Configs {
         process_single_block(&mut output, "uptime", cfg.is_enabled("show_uptime"), uptime);
 
         let packages = if Self::should_render_tag(layout, cfg, "packages", "show_packages") {
-            Some(get_packages(PackageShorthand::Tiny).unwrap_or("Unknown".into()))
+            let shorthand: PackageShorthand =
+                cfg.get_enum("package_managers", PackageShorthand::Tiny);
+            Some(get_packages(shorthand).unwrap_or("Unknown".into()))
         } else {
             None
         };
@@ -209,14 +215,14 @@ impl ConfigsExt for Configs {
         process_single_block(&mut output, "shell", cfg.is_enabled("show_shell"), shell);
 
         let wm = if Self::should_render_tag(layout, cfg, "wm", "show_wm") {
-            Some(get_wm("Linux", "Linux").unwrap_or("Unknown".into()))
+            Some(get_wm().unwrap_or("Unknown".into()))
         } else {
             None
         };
         process_single_block(&mut output, "wm", cfg.is_enabled("show_wm"), wm.clone());
 
         let de = if Self::should_render_tag(layout, cfg, "de", "show_de") {
-            Some(get_de("Linux", "Linux", wm.as_deref(), true).unwrap_or("Unknown".into()))
+            Some(get_de(cfg.is_enabled("de_version"), wm.as_deref()).unwrap_or("Unknown".into()))
         } else {
             None
         };
@@ -262,10 +268,8 @@ impl ConfigsExt for Configs {
         process_single_block(&mut output, "cpu", cfg.is_enabled("show_cpu"), cpu);
 
         let memory = if Self::should_render_tag(layout, cfg, "memory", "show_memory") {
-            Some(
-                get_memory(cfg.is_enabled("memory_percent"), MemoryUnit::MiB)
-                    .unwrap_or("Unknown".into()),
-            )
+            let mem_unit = cfg.get_enum("memory_unit", MemoryUnit::MiB);
+            Some(get_memory(cfg.is_enabled("memory_percent"), mem_unit).unwrap_or("Unknown".into()))
         } else {
             None
         };
@@ -281,22 +285,6 @@ impl ConfigsExt for Configs {
             "resolution",
             cfg.is_enabled("show_resolution"),
             resolution,
-        );
-
-        let battery = if Self::should_render_tag(layout, cfg, "battery", "show_battery") {
-            Some(
-                get_battery(BatteryDisplayMode::BarInfo)
-                    .map(|lines| lines.join("\n"))
-                    .unwrap_or_default(),
-            )
-        } else {
-            None
-        };
-        process_single_block(
-            &mut output,
-            "battery",
-            cfg.is_enabled("show_battery"),
-            battery,
         );
 
         let song = if Self::should_render_tag(layout, cfg, "song", "show_song") {
@@ -326,6 +314,34 @@ impl ConfigsExt for Configs {
             cfg.is_enabled("show_terminal_colors"),
             colors,
         );
+
+        // ----------------------------
+        // Battery loop
+        // ----------------------------
+
+        let battery_enabled = cfg.is_enabled("show_battery");
+        let battery_display = cfg.get_enum("battery_display", BatteryDisplayMode::InfoBar);
+
+        let batteries = if battery_enabled {
+            get_battery(battery_display)
+        } else {
+            vec![]
+        };
+
+        if layout.contains("[[battery]]") {
+            process_loop_block(
+                &mut output,
+                "battery",
+                &batteries,
+                battery_enabled,
+                |block, bat| {
+                    let index = batteries.iter().position(|b| b == bat).unwrap_or(0) + 1;
+                    block
+                        .replace("{battery}", bat)
+                        .replace("{battery_index}", &index.to_string())
+                },
+            );
+        }
 
         // ----------------------------
         // GPU loop
@@ -396,3 +412,194 @@ impl ConfigsExt for Configs {
         colorize_text(&mut output)
     }
 }
+
+pub const DEFAULT_CONFIG: &str = r#"
+# LeenFetch config file
+# https://github.com/drunkleen/leenfetch
+
+# To use this config, copy it to ~/.config/leenfetch/config.conf
+# For more info, see https://github.com/drunkleen/leenfetch
+
+
+
+#layout="""
+[[titles]]
+${bold.c5}{username}${fg.c8}@${bold.c5}{hostname}${fg.c8}
+[[/titles]]
+
+{underline}
+
+[[os]]
+${bold.c5}OS:${reset} {os_index}
+[[/os]]
+
+[[distro]]
+${bold.c5}Distro:${reset} {distro_index}
+[[/distro]]
+
+[[model]]
+${bold.c5}Host:${reset} {model_index}
+[[/model]]
+
+[[kernel]]
+${bold.c5}Kernel:${reset} {kernel_index}
+[[/kernel]]
+
+[[uptime]]
+${bold.c5}Uptime:${reset} {uptime_index}
+[[/uptime]]
+
+[[packages]]
+${bold.c5}Packages:${reset} {packages_index}
+[[/packages]]
+
+[[shell]]
+${bold.c5}Shell:${reset} {shell_index}
+[[/shell]]
+
+[[wm]]
+${bold.c5}WM:${reset} {wm_index}
+[[/wm]]
+
+[[de]]
+${bold.c5}DE:${reset} {de_index}
+[[/de]]
+
+[[wm_theme]]
+${bold.c5}WM Theme:${reset} {wm_theme_index}
+[[/wm_theme]]
+
+[[cpu]]
+${bold.c5}CPU:${reset} {cpu_index}
+[[/cpu]]
+
+[[gpu]]
+${bold.c5}GPU #{gpu_index}:${reset} {gpu}
+[[/gpu]]
+
+[[memory]]
+${bold.c5}Memory:${reset} {memory_index}
+[[/memory]]
+
+[[disk]]
+${bold.c5}Disk:${reset} {disk_index}
+[[/disk]]
+
+[[resolution]]
+${bold.c5}Resolution:${reset} {resolution_index}
+[[/resolution]]
+
+[[theme]]
+${bold.c5}Theme:${reset} {theme_index}
+[[/theme]]
+
+[[battery]]
+${bold.c5}Battery${reset} {battery}
+[[/battery]]
+
+[[song]]
+{song_index}
+[[/song]]
+
+{empty_line}
+
+[[colors]]
+{colors_index}
+[[/colors]]
+"""
+
+
+## 🎨 Colors
+## ____________________
+## 🖍️ Foreground Colors
+## | Token      | Color   |
+## | ---------- | ------- |
+## | `${fg.c1}` | Black   |
+## | `${fg.c2}` | Red     |
+## | `${fg.c3}` | Green   |
+## | `${fg.c4}` | Yellow  |
+## | `${fg.c5}` | Blue    |
+## | `${fg.c6}` | Magenta |
+## | `${fg.c7}` | Cyan    |
+## | `${fg.c8}` | White   |
+## _________________________
+## 🅱️ Bold Foreground Colors
+## | Token        | Color        |
+## | ------------ | ------------ |
+## | `${bold.c1}` | Bold Black   |
+## | `${bold.c2}` | Bold Red     |
+## | `${bold.c3}` | Bold Green   |
+## | `${bold.c4}` | Bold Yellow  |
+## | `${bold.c5}` | Bold Blue    |
+## | `${bold.c6}` | Bold Magenta |
+## | `${bold.c7}` | Bold Cyan    |
+## | `${bold.c8}` | Bold White   |
+## ____________________
+## 🖼️ Background Colors
+## | Token      | Background |
+## | ---------- | ---------- |
+## | `${bg.c1}` | Black BG   |
+## | `${bg.c2}` | Red BG     |
+## | `${bg.c3}` | Green BG   |
+## | `${bg.c4}` | Yellow BG  |
+## | `${bg.c5}` | Blue BG    |
+## | `${bg.c6}` | Magenta BG |
+## | `${bg.c7}` | Cyan BG    |
+## | `${bg.c8}` | White BG   |
+## _______________
+## 🔁 Reset Colors
+## Use `${reset}` to end a color block and return to default.
+
+
+# Display settings
+title_fqdn=on
+underline=on
+separator=":"
+
+# Output toggles
+show_ascii=on
+show_titles=on
+show_os=on
+show_distro=on
+show_model=on
+show_uptime=on
+show_packages=on
+show_shell=on
+show_wm=on
+show_de=on
+show_wm_theme=on
+show_kernel=on
+show_cpu=on
+show_gpu=on
+show_memory=on
+show_song=on
+show_resolution=on
+show_theme=on
+show_disks=on
+show_battery=on
+show_terminal_colors=on
+
+# Shorthands and flags
+distro_display=name_model_arch
+uptime_shorthand=on
+memory_percent=on
+memory_unit=mib
+package_managers=tiny
+shell_path=on
+shell_version=on
+cpu_brand=on
+cpu_speed=on
+cpu_cores=logical
+cpu_temp=C
+speed_shorthand=on
+refresh_rate=on
+gpu_type=all
+de_version=on
+disk_show=/
+disk_subtitle=dir
+disk_percent=on
+disk_display=barinfo
+battery_display=barinfo
+
+# Custom paths
+ascii_path="#;

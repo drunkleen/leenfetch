@@ -12,9 +12,9 @@
 
 ---
 
-<img src="./readme/TokyoNight.png" width="32%" />
-<img src="./readme/SandStorm.png" width="32%" />
-<img src="./readme/Aura.png" width="32%" />
+<img src="./readme/src/TokyoNight.png" width="30%" />
+<img src="./readme/src/SandStorm.png" width="30%" />
+<img src="./readme/src/Aura.png" width="30%" />
 
 
 ## 🚀 Features

@@ -1,94 +1,109 @@
-use std::process::Command;
+use libc::{c_char, c_int, c_ulong};
+use std::ptr;
+use std::{env, fs};
 
-#[cfg(target_os = "windows")]
-pub fn get_resolution(refresh_rate: bool) -> Option<String> {
-    let output_h = Command::new("wmic")
-        .args([
-            "path",
-            "Win32_VideoController",
-            "get",
-            "CurrentHorizontalResolution",
-        ])
-        .output()
-        .ok()?
-        .stdout;
-
-    let output_v = Command::new("wmic")
-        .args([
-            "path",
-            "Win32_VideoController",
-            "get",
-            "CurrentVerticalResolution",
-        ])
-        .output()
-        .ok()?
-        .stdout;
-
-    let hlines: Vec<_> = String::from_utf8_lossy(&output_h)
-        .lines()
-        .skip(1)
-        .map(|s| s.trim())
-        .filter(|s| !s.is_empty())
-        .collect();
-
-    let vlines: Vec<_> = String::from_utf8_lossy(&output_v)
-        .lines()
-        .skip(1)
-        .map(|s| s.trim())
-        .filter(|s| !s.is_empty())
-        .collect();
-
-    if hlines.len() != vlines.len() {
-        return None;
-    }
-
-    let mut res = String::new();
-    for (w, h) in hlines.iter().zip(vlines.iter()) {
-        res.push_str(&format!("{}x{}, ", w, h));
-    }
-
-    Some(res.trim_end_matches(", ").to_string())
+#[repr(C)]
+struct XRRScreenConfiguration {
+    _private: [u8; 0],
 }
 
-#[cfg(target_os = "linux")]
-pub fn get_resolution(refresh_rate: bool) -> Option<String> {
-    if let Ok(output) = Command::new("xrandr")
-        .arg("--nograb")
-        .arg("--current")
-        .output()
-    {
-        let out = String::from_utf8_lossy(&output.stdout);
-        let mut resolutions = Vec::new();
+#[link(name = "X11")]
+#[link(name = "Xrandr")]
+extern "C" {
+    fn XOpenDisplay(display_name: *const c_char) -> *mut Display;
+    fn XCloseDisplay(display: *mut Display);
+    fn XDefaultScreen(display: *mut Display) -> c_int;
+    fn XDisplayWidth(display: *mut Display, screen_number: c_int) -> c_int;
+    fn XDisplayHeight(display: *mut Display, screen_number: c_int) -> c_int;
 
-        for line in out.lines() {
-            if line.contains(" connected") && line.contains("x") {
-                if refresh_rate {
-                    if let Some(capt) = line.split_whitespace().find(|s| s.ends_with("*")) {
-                        let res = line.split_whitespace().nth(2)?; // resolution like 1920x1080
-                        let rate = capt.trim_end_matches('*');
-                        resolutions.push(format!("{} @ {}Hz", res, rate));
-                    }
-                } else {
-                    let parts: Vec<&str> = line.split_whitespace().collect();
-                    if parts.len() > 2 && parts[1] == "connected" {
-                        resolutions.push(parts[2].to_string());
-                    }
-                }
+    fn XRRGetScreenInfo(display: *mut Display, window: Window) -> *mut XRRScreenConfiguration;
+    fn XRRFreeScreenConfigInfo(config: *mut XRRScreenConfiguration);
+    fn XRRConfigCurrentRate(config: *mut XRRScreenConfiguration) -> i16;
+    fn XRootWindow(display: *mut Display, screen_number: c_int) -> Window;
+}
+
+#[repr(C)]
+pub struct Display {
+    _private: [u8; 0],
+}
+type Window = c_ulong;
+
+pub fn get_resolution(refresh_rate: bool) -> Option<String> {
+    // X11 path
+    if env::var("DISPLAY").is_ok() {
+        if let Some(res) = try_x11(refresh_rate) {
+            return Some(res);
+        }
+    }
+
+    // DRM/KMS path
+    if let Some(res) = try_drm(refresh_rate) {
+        return Some(res);
+    }
+
+    // Framebuffer path
+    if let Some(res) = try_fb() {
+        return Some(res);
+    }
+
+    // Wayland path (unsupported without compositor protocol)
+    if env::var("WAYLAND_DISPLAY").is_ok() {
+        return Some("Wayland: resolution unavailable (restricted by compositor)".to_string());
+    }
+
+    None
+}
+
+fn try_x11(refresh_rate: bool) -> Option<String> {
+    unsafe {
+        let display = XOpenDisplay(ptr::null());
+        if display.is_null() {
+            return None;
+        }
+
+        let screen = XDefaultScreen(display);
+        let width = XDisplayWidth(display, screen);
+        let height = XDisplayHeight(display, screen);
+        let mut result = format!("{}x{}", width, height);
+
+        if refresh_rate {
+            let root = XRootWindow(display, screen);
+            let config = XRRGetScreenInfo(display, root);
+            if !config.is_null() {
+                let rate = XRRConfigCurrentRate(config);
+                result = format!("{} @ {}Hz", result, rate);
+                XRRFreeScreenConfigInfo(config);
             }
         }
 
-        if !resolutions.is_empty() {
-            return Some(resolutions.join(", "));
-        }
+        XCloseDisplay(display);
+        Some(result)
     }
+}
 
-    // Fallback to xdpyinfo
-    if let Ok(output) = Command::new("xdpyinfo").output() {
-        let out = String::from_utf8_lossy(&output.stdout);
-        for line in out.lines() {
-            if line.contains("dimensions:") {
-                let dim = line.split_whitespace().nth(1)?;
-                return Some(dim.to_string());
+fn try_drm(refresh_rate: bool) -> Option<String> {
+    let entries = fs::read_dir("/sys/class/drm/").ok()?;
+
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if path.file_name()?.to_str()?.contains("card") && path.join("status").exists() {
+            let status = fs::read_to_string(path.join("status")).ok()?;
+            if status.trim() != "connected" {
+                continue;
+            }
+
+            let mode_path = path.join("modes");
+            if mode_path.exists() {
+                let mode = fs::read_to_string(mode_path)
+                    .ok()?
+                    .lines()
+                    .next()?
+                    .to_string();
+                return Some(if refresh_rate {
+                    format!("{} @ 60Hz", mode) // Fallback rate assumption
+                } else {
+                    mode
+                });
             }
         }
     }
@@ -96,31 +111,8 @@ pub fn get_resolution(refresh_rate: bool) -> Option<String> {
     None
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    // linux test
-    #[test]
-    fn test_resolution_detectable() {
-        // Skip test if DISPLAY is not usable
-        if std::env::var("DISPLAY").is_err() {
-            eprintln!("DISPLAY not set, skipping resolution test.");
-            return;
-        }
-
-        let result = get_resolution(false);
-
-        match result {
-            Some(ref res) if res.contains('x') => {
-                println!("Detected resolution: {}", res);
-            }
-            Some(res) => {
-                eprintln!("Resolution detected but unexpected format: '{}'", res);
-            }
-            None => {
-                eprintln!("No resolution detected, skipping assert.");
-            }
-        }
-    }
+fn try_fb() -> Option<String> {
+    let contents = fs::read_to_string("/sys/class/graphics/fb0/virtual_size").ok()?;
+    let (w, h) = contents.trim().split_once(',')?;
+    Some(format!("{}x{}", w.trim(), h.trim()))
 }

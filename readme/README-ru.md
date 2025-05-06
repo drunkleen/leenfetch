@@ -11,9 +11,9 @@
 
 ---
 
-<img src="./TokyoNight.png" width="32%" />
-<img src="./SandStorm.png" width="32%" />
-<img src="./Aura.png" width="32%" />
+<img src="./src/TokyoNight.png" width="30%" />
+<img src="./src/SandStorm.png" width="30%" />
+<img src="./src/Aura.png" width="30%" />
 
 ## 🚀 Возможности
 

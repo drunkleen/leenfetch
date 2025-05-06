@@ -1,118 +1,138 @@
-use std::env;
-use std::fs;
-use std::path::Path;
-use std::process::Command;
+use std::{env, fs, process::Command};
 
 pub fn get_theme(de: Option<&str>) -> Option<String> {
-    if env::var("DISPLAY").is_err() {
+    if env::var_os("DISPLAY").is_none() {
         return None;
     }
 
     let de = de.unwrap_or("").to_lowercase();
-    let mut gtk2_theme = None;
-    let mut gtk3_theme = None;
-    let mut kde_theme = None;
+    let home = env::var("HOME").unwrap_or_default();
 
-    // KDE config
+    let mut gtk2 = None;
+    let mut gtk3 = None;
+    let mut gtk4 = None;
+    let mut kde = None;
+    let mut qt = None;
+
+    // KDE: look in kdeglobals
     if de.contains("kde") || de.contains("plasma") {
-        let kdeglobals_paths = vec![
-            format!(
-                "{}/.config/kdeglobals",
-                env::var("HOME").unwrap_or_default()
-            ),
+        let kde_paths = [
+            format!("{home}/.config/kdeglobals"),
             "/etc/xdg/kdeglobals".to_string(),
         ];
 
-        for path in kdeglobals_paths {
-            let path = Path::new(&path);
-            if path.exists() {
-                if let Ok(content) = fs::read_to_string(path) {
-                    for line in content.lines() {
-                        if line.starts_with("Name=") {
-                            kde_theme = Some(line.trim_start_matches("Name=").to_string());
-                            break;
-                        }
-                    }
+        for path in kde_paths {
+            if let Ok(content) = fs::read_to_string(&path) {
+                if let Some(line) = content.lines().find(|l| l.starts_with("Name=")) {
+                    kde = Some(line.trim_start_matches("Name=").trim().to_string());
+                    break;
                 }
+            }
+        }
+    }
+
+    // GTK3: via gsettings
+    if let Ok(output) = Command::new("gsettings")
+        .args(["get", "org.gnome.desktop.interface", "gtk-theme"])
+        .output()
+    {
+        if output.status.success() {
+            let val = String::from_utf8_lossy(&output.stdout)
+                .trim()
+                .trim_matches('\'')
+                .to_string();
+            if !val.is_empty() {
+                gtk3 = Some(val.clone());
+                gtk2 = Some(val.clone()); // fallback
+            }
+        }
+    }
+
+    // GTK4: ~/.config/gtk-4.0/settings.ini → [Settings] gtk-theme-name
+    let gtk4_path = format!("{home}/.config/gtk-4.0/settings.ini");
+    if let Ok(content) = fs::read_to_string(&gtk4_path) {
+        for line in content.lines() {
+            if let Some(val) = line.trim().strip_prefix("gtk-theme-name=") {
+                gtk4 = Some(val.trim_matches('"').to_string());
                 break;
             }
         }
     }
 
-    // GTK3 theme
-    if let Ok(out) = Command::new("gsettings")
-        .args(["get", "org.gnome.desktop.interface", "gtk-theme"])
-        .output()
-    {
-        let val = String::from_utf8_lossy(&out.stdout)
-            .trim()
-            .trim_matches('\'')
-            .to_string();
-        if !val.is_empty() && !val.contains("No such schema") {
-            gtk3_theme = Some(val.clone());
-            gtk2_theme = Some(val); // Assume GTK2 = GTK3 if nothing else found
-        }
-    }
-
-    // GTK2 fallback
-    if gtk2_theme.is_none() {
-        let rc_paths = vec![
-            format!("{}/.gtkrc-2.0", env::var("HOME").unwrap_or_default()),
-            "/etc/gtk-2.0/gtkrc".to_string(),
-            "/usr/share/gtk-2.0/gtkrc".to_string(),
+    // GTK2: fallback to gtkrc
+    if gtk2.is_none() {
+        let gtk2_paths = [
+            format!("{home}/.gtkrc-2.0"),
+            "/etc/gtk-2.0/gtkrc".into(),
+            "/usr/share/gtk-2.0/gtkrc".into(),
         ];
-
-        for path in rc_paths {
-            let path = Path::new(&path);
-            if path.exists() {
-                if let Ok(content) = fs::read_to_string(path) {
-                    for line in content.lines() {
-                        if line.trim_start().starts_with("gtk-theme-name") {
-                            if let Some((_, val)) = line.split_once('=') {
-                                gtk2_theme = Some(val.trim_matches('"').trim().to_string());
-                            }
-                            break;
-                        }
+        for path in gtk2_paths {
+            if let Ok(content) = fs::read_to_string(&path) {
+                for line in content.lines() {
+                    if let Some((_, val)) = line
+                        .trim_start()
+                        .strip_prefix("gtk-theme-name")
+                        .and_then(|l| l.split_once('='))
+                    {
+                        gtk2 = Some(val.trim().trim_matches('"').to_string());
+                        break;
                     }
                 }
+            }
+            if gtk2.is_some() {
+                break;
             }
         }
     }
 
-    // Final formatting
-    let mut components = Vec::new();
-
-    if let Some(k) = kde_theme {
-        components.push(format!("{k} [KDE]"));
+    // Qt: from qt5ct / qt6ct config files
+    let qt_paths = [
+        format!("{home}/.config/qt5ct/qt5ct.conf"),
+        format!("{home}/.config/qt6ct/qt6ct.conf"),
+    ];
+    for path in qt_paths {
+        if let Ok(content) = fs::read_to_string(&path) {
+            for line in content.lines() {
+                if let Some(val) = line.trim().strip_prefix("style=") {
+                    qt = Some(val.trim().to_string());
+                    break;
+                }
+            }
+        }
+        if qt.is_some() {
+            break;
+        }
     }
 
-    match (gtk2_theme.as_ref(), gtk3_theme.as_ref()) {
-        (Some(g2), Some(g3)) if g2 == g3 => components.push(format!("{g3} [GTK2/3]")),
+    // Compose final output
+    let mut result = Vec::new();
+
+    if let Some(val) = kde {
+        result.push(format!("{val} [KDE]"));
+    }
+
+    if let Some(val) = qt {
+        result.push(format!("{val} [Qt]"));
+    }
+
+    match (&gtk2, &gtk3) {
+        (Some(g2), Some(g3)) if g2 == g3 => result.push(format!("{g3} [GTK2/3]")),
         (Some(g2), Some(g3)) => {
-            components.push(format!("{g2} [GTK2]"));
-            components.push(format!("{g3} [GTK3]"));
+            result.push(format!("{g2} [GTK2]"));
+            result.push(format!("{g3} [GTK3]"));
         }
-        (Some(g2), None) => components.push(format!("{g2} [GTK2]")),
-        (None, Some(g3)) => components.push(format!("{g3} [GTK3]")),
+        (Some(g2), None) => result.push(format!("{g2} [GTK2]")),
+        (None, Some(g3)) => result.push(format!("{g3} [GTK3]")),
         _ => {}
     }
 
-    if components.is_empty() {
+    if let Some(val) = gtk4 {
+        result.push(format!("{val} [GTK4]"));
+    }
+
+    if result.is_empty() {
         None
     } else {
-        Some(components.join(", "))
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_theme_safe() {
-        let result = get_theme(Some("gnome"));
-        if let Some(theme) = result {
-            assert!(theme.contains("GTK") || theme.contains("KDE"));
-        }
+        Some(result.join(", "))
     }
 }

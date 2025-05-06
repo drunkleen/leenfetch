@@ -1,6 +1,5 @@
 use crate::modules::utils::get_bar;
 use std::fs;
-use std::path::Path;
 use std::str::FromStr;
 
 #[derive(Debug, Clone, Copy)]
@@ -26,49 +25,54 @@ impl FromStr for BatteryDisplayMode {
     }
 }
 
-pub fn get_battery(display_mode: BatteryDisplayMode) -> Option<Vec<String>> {
-    let base_path = Path::new("/sys/class/power_supply/");
-    let entries = fs::read_dir(base_path).ok()?;
+pub fn get_battery(display_mode: BatteryDisplayMode) -> Vec<String> {
+    let entries = match fs::read_dir("/sys/class/power_supply/") {
+        Ok(e) => e,
+        Err(_) => return Vec::new(),
+    };
 
-    let mut batteries = Vec::new();
+    let mut results = Vec::with_capacity(2); // most systems have max 2 batteries
 
     for entry in entries.flatten() {
-        let name = entry.file_name().to_string_lossy().to_string();
+        let name = entry.file_name();
+        let name_str = name.to_string_lossy();
 
-        // Only consider batteries
-        if !(name.starts_with("BAT") || name == "axp288_fuel_gauge" || name.starts_with("CMB")) {
+        // Filter battery-like names
+        if !(name_str.starts_with("BAT")
+            || name_str == "axp288_fuel_gauge"
+            || name_str.starts_with("CMB"))
+        {
             continue;
         }
 
-        let bat_path = entry.path();
+        let path = entry.path();
 
-        let capacity_str = fs::read_to_string(bat_path.join("capacity")).ok()?;
-        let status_str = fs::read_to_string(bat_path.join("status")).unwrap_or_default();
+        let capacity = match fs::read_to_string(path.join("capacity")) {
+            Ok(v) => match v.trim().parse::<u8>() {
+                Ok(num) => num,
+                Err(_) => continue,
+            },
+            Err(_) => continue,
+        };
 
-        let capacity: u8 = capacity_str.trim().parse().ok()?;
-        let status = status_str.trim();
+        let status = fs::read_to_string(path.join("status"))
+            .ok()
+            .map(|s| s.trim().to_string())
+            .unwrap_or_else(|| "Unknown".to_string());
 
-        let mut line = format!("{}% [{}]", capacity, status);
-
-        match display_mode {
-            BatteryDisplayMode::Bar => {
-                line = get_bar(capacity);
-            }
+        let line = match display_mode {
+            BatteryDisplayMode::Bar => get_bar(capacity),
             BatteryDisplayMode::InfoBar => {
-                line = format!("{} {}", line, get_bar(capacity));
+                format!("{}% [{}] {}", capacity, status, get_bar(capacity))
             }
             BatteryDisplayMode::BarInfo => {
-                line = format!("{} {}", get_bar(capacity), line);
+                format!("{} {}% [{}]", get_bar(capacity), capacity, status)
             }
-            BatteryDisplayMode::Off => {}
-        }
+            BatteryDisplayMode::Off => format!("{}% [{}]", capacity, status),
+        };
 
-        batteries.push(format!("Battery ({}): {}", name, line));
+        results.push(format!("({}): {}", name_str, line));
     }
 
-    if batteries.is_empty() {
-        None
-    } else {
-        Some(batteries)
-    }
+    results
 }

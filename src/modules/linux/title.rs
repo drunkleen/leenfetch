@@ -1,99 +1,114 @@
 use std::env;
 use std::process::Command;
 
-/// Return the username and hostname (with fqdn if `fqdn` is true), and their combined length.
-/// fqdn [fully qualified hostname]
-///
-/// If the username or hostname cannot be determined, it is replaced with "unknown" or "localhost"
-/// respectively.
 pub fn get_titles(fqdn: bool) -> (String, String, usize) {
-    let user = get_user().unwrap_or_else(|| "unknown".to_string());
-    let hostname = get_hostname(fqdn).unwrap_or_else(|| "localhost".to_string());
+    let user = get_user();
+    let host = get_hostname(fqdn);
 
-    let length = user.len() + hostname.len() + 1;
-
-    (user, hostname, length)
+    let len = user.len() + host.len() + 1;
+    (user, host, len)
 }
 
-fn get_user() -> Option<String> {
-    // Try $USER
-    if let Ok(user) = env::var("USER") {
-        if !user.is_empty() {
-            return Some(user);
+fn get_user() -> String {
+    // 1. Try $USER
+    if let Some(u) = env::var_os("USER") {
+        let s = u.to_string_lossy();
+        if !s.is_empty() {
+            return s.into();
         }
     }
 
-    // Fallback: `id -un`
-    if let Ok(output) = Command::new("id").arg("-un").output() {
-        if output.status.success() {
-            let out = String::from_utf8_lossy(&output.stdout).trim().to_string();
-            if !out.is_empty() {
-                return Some(out);
+    if let Ok(out) = Command::new("id").arg("-un").output() {
+        if out.status.success() {
+            let s = String::from_utf8_lossy(&out.stdout).trim().to_string();
+            if !s.is_empty() {
+                return s;
             }
         }
     }
 
-    // Fallback: use last component of $HOME
     if let Ok(home) = env::var("HOME") {
-        if let Some(user) = home.rsplit('/').next() {
-            if !user.is_empty() {
-                return Some(user.to_string());
-            }
+        if let Some(name) = home.rsplit('/').find(|s| !s.is_empty()) {
+            return name.to_string();
         }
     }
 
-    None
+    // 4. Worst-case
+    "unknown".into()
 }
 
-fn get_hostname(fqdn: bool) -> Option<String> {
+fn get_hostname(fqdn: bool) -> String {
     if fqdn {
-        if let Ok(output) = Command::new("hostname").arg("-f").output() {
-            if output.status.success() {
-                return Some(String::from_utf8_lossy(&output.stdout).trim().to_string());
-            }
-        }
-    } else {
-        if let Ok(hostname) = env::var("HOSTNAME") {
-            if !hostname.is_empty() {
-                return Some(hostname);
-            }
-        }
-
-        if let Ok(output) = Command::new("hostname").output() {
-            if output.status.success() {
-                return Some(String::from_utf8_lossy(&output.stdout).trim().to_string());
+        if let Ok(out) = Command::new("hostname").arg("-f").output() {
+            if out.status.success() {
+                let s = String::from_utf8_lossy(&out.stdout).trim().to_string();
+                if !s.is_empty() {
+                    return s;
+                }
             }
         }
     }
 
-    None
+    if let Some(h) = env::var_os("HOSTNAME") {
+        let s = h.to_string_lossy();
+        if !s.is_empty() {
+            return s.into();
+        }
+    }
+
+    if let Ok(out) = Command::new("hostname").output() {
+        if out.status.success() {
+            let s = String::from_utf8_lossy(&out.stdout).trim().to_string();
+            if !s.is_empty() {
+                return s;
+            }
+        }
+    }
+
+    "localhost".into()
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::env;
 
     #[test]
-    fn test_get_title_fqdn_off() {
-        let (user, hostname, len) = get_titles(false);
-        assert_eq!(user.len() + hostname.len() + 1, len);
+    fn test_titles_length() {
+        let (user, host, len) = get_titles(false);
+        assert_eq!(len, user.len() + host.len() + 1);
     }
 
     #[test]
-    fn test_get_title_fqdn_on() {
-        let (user, hostname, len) = get_titles(true);
-        assert_eq!(user.len() + hostname.len() + 1, len);
+    fn test_titles_length_fqdn() {
+        let (user, host, len) = get_titles(true);
+        assert_eq!(len, user.len() + host.len() + 1);
     }
 
     #[test]
-    fn test_user_fallback() {
-        let user = get_user();
-        assert!(user.is_some());
+    fn test_get_user_from_env() {
+        env::set_var("USER", "testuser");
+        assert_eq!(get_user(), "testuser");
     }
 
     #[test]
-    fn test_hostname_fallback() {
-        let name = get_hostname(false);
-        assert!(name.is_some());
+    fn test_hostname_from_env() {
+        env::set_var("HOSTNAME", "testhost");
+        assert_eq!(get_hostname(false), "testhost");
+    }
+
+    #[test]
+    fn test_hostname_command_fallback() {
+        env::remove_var("HOSTNAME");
+        let result = get_hostname(false);
+        assert!(!result.is_empty(), "Hostname should not be empty");
+    }
+
+    #[test]
+    fn test_hostname_final_fallback() {
+        // This test can't force full fallback easily since `hostname` command always exists,
+        // but we can at least ensure it's non-empty
+        let result = get_hostname(false);
+        assert!(!result.is_empty());
     }
 }
