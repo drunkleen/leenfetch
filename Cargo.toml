@@ -1,0 +1,9 @@
+[package]
+name = "leenfetch"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+dirs = "6.0.0"
+libc = "0.2.172"
+rand = "0.9.1"
