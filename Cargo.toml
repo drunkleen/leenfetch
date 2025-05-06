@@ -7,7 +7,7 @@ license = "MIT"
 repository = "https://github.com/drunkleen/leenfetch"
 readme = "README.md"
 categories = ["command-line-utilities", "visualization", "system"]
-keywords = ["neofetch", "system", "terminal", "info", "rustfetch", "leenfetch"]
+keywords = ["neofetch", "system", "terminal", "info", "rustfetch"]
 authors = ["DrunkLeen <snape@drunkleen.com>"]
 
 [dependencies]
