@@ -177,6 +177,7 @@ cpu_speed=on
 cpu_cores=logical
 cpu_temp=C
 speed_shorthand=on
+refresh_rate=on
 gpu_type=all
 de_version=on
 disk_show=/
