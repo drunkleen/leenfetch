@@ -14,3 +14,4 @@ authors = ["DrunkLeen <snape@drunkleen.com>"]
 dirs = "6.0.0"
 libc = "0.2.172"
 rand = "0.9.1"
+winapi = { version = "0.3.9", features = ["winreg", "winuser", "winerror", "winbase", "winnt"] }

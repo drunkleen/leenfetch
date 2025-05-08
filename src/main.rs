@@ -50,32 +50,57 @@ fn main() {
 
 fn print_help() {
     println!(
-        r#"📦 leenfetch — Minimal, stylish system info for your terminal
+        r#"📦 leenfetch — Minimal, Stylish System Info for Your Terminal
 
 USAGE:
   leenfetch [OPTIONS]
 
-DESCRIPTION:
-  A fast and customizable alternative to neofetch, written in Rust.
-  It shows system information alongside optional ASCII art, with rich theming support.
-
 OPTIONS:
   -h, --help           Show this help message and exit
   -i, --init           Create a default config file at ~/.config/leenfetch/config.conf
-  -l, --list-options   Show all available config options and accepted values
+  -l, --list-options   Show all available config options and values
+
+DESCRIPTION:
+  leenfetch is a fast, modern, and minimal system info tool,
+  written in Rust, designed for terminal enthusiasts.
+
+  It fetches and prints system information like:
+    • OS, Kernel, Uptime
+    • CPU, GPU, Memory, Disks
+    • Shell, WM, DE, Theme
+    • Resolution, Battery, Current Song
+
+  It’s highly customizable through a config file with layout control,
+  theming, and modular display toggles.
 
 EXAMPLES:
-  leenfetch --init           🔧 Generate config file if it doesn't exist
-  leenfetch                  🚀 Run with current config
-  leenfetch --list-options   📜 See what you can tweak
+  leenfetch --init           🔧 Create the config file if it doesn’t exist
+  leenfetch                  🚀 Run normally with your config
+  leenfetch --list-options   📜 View all available configuration keys
 
 CUSTOMIZATION:
-✍️  Edit the config file to customize output:
-     ~/.config/leenfetch/config.conf
+🛠️  Config path:
+    • Linux:   ~/.config/leenfetch/config.conf
+    • Windows: %USERPROFILE%\.config\leenfetch\config.conf
 
-💡 Pro Tip:
-    Use `show_*` keys to toggle modules, and adjust layout using the `layout` string block!
+🎨 Output Layout:
+    The layout is controlled using a templated multi-line string:
+    
+    Example block:
+      [[cpu]]
+      ${{bold.c5}}CPU:${{reset}} {{cpu_index}}
+      [[/cpu]]
 
+    Use placeholders like {{cpu_index}}, {{gpu}}, {{uptime_index}}, etc.
+    Full layout templates can be found in the example config.
+
+💡 Tips:
+  • Toggle individual modules using keys like `show_cpu=on`
+  • Change themes using `disk_display=barinfo`, `battery_display=infobar`
+  • Combine with shell aliases for quick use!
+
+MORE:
+  Run with `--list-options` to see every supported config key.
 "#
     );
 }

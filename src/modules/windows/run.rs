@@ -29,7 +29,7 @@ impl ConfigsExt for Configs {
     fn load() -> Self {
         let mut config = Configs::default();
         let path = dirs::home_dir()
-            .map(|p| p.join(".config/leenfetch/config.conf"))
+            .map(|p| p.join(".config\\leenfetch\\config.conf"))
             .unwrap_or(PathBuf::from("/dev/null"));
 
         if let Ok(contents) = fs::read_to_string(path) {
@@ -146,15 +146,10 @@ impl ConfigsExt for Configs {
             );
         }
 
-        // ----------------------------
-        // Block replacements
-        // ----------------------------
-        let os = if Self::should_render_tag(layout, cfg, "os", "show_os") {
-            Some(get_os().unwrap_or("Unknown".into()))
-        } else {
-            None
-        };
-
+        // // ----------------------------
+        // // Block replacements
+        // // ----------------------------
+        let os = Some(get_os());
         process_single_block(&mut output, "os", cfg.is_enabled("show_os"), os);
 
         let distro = if Self::should_render_tag(layout, cfg, "distro", "show_distro") {
@@ -429,12 +424,8 @@ ${bold.c5}{username}${fg.c8}@${bold.c5}{hostname}${fg.c8}
 
 {underline}
 
-[[os]]
-${bold.c5}OS:${reset} {os_index}
-[[/os]]
-
 [[distro]]
-${bold.c5}Distro:${reset} {distro_index}
+${bold.c5}OS:${reset} {distro_index}
 [[/distro]]
 
 [[model]]
@@ -482,7 +473,7 @@ ${bold.c5}Memory:${reset} {memory_index}
 [[/memory]]
 
 [[disk]]
-${bold.c5}Disk {disk_label}:${reset} {disk_index}
+${bold.c5}Disk:${reset} {disk_label} => {disk_index}
 [[/disk]]
 
 [[resolution]]
@@ -580,7 +571,7 @@ show_battery=on
 show_terminal_colors=on
 
 # Shorthands and flags
-distro_display=name_model_arch
+distro_display=name_model_version_arch
 uptime_shorthand=on
 memory_percent=on
 memory_unit=mib
