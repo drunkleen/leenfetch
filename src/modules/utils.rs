@@ -69,22 +69,18 @@ pub fn get_bar(percent: u8) -> String {
     format!("[{}{}]", filled, empty)
 }
 
-pub fn get_terminal_color() -> Vec<String> {
-    let color_blocks: [u8; 8] = [30, 31, 32, 33, 34, 35, 36, 37]; // ANSI foreground colors
+pub fn get_terminal_color(color_blocks: &str) -> Vec<String> {
+    let color_codes: [u8; 8] = [30, 31, 32, 33, 34, 35, 36, 37]; // ANSI foreground colors
 
-    let mut terminal_colors = vec![];
+    let mut normal = Vec::with_capacity(8);
+    let mut bold = Vec::with_capacity(8);
 
-    for code in color_blocks.iter() {
-        terminal_colors.push(format!("\x1b[{}m{}", code, "███"));
+    for &code in &color_codes {
+        normal.push(format!("\x1b[{}m{}\x1b[0m", code, color_blocks)); // normal
+        bold.push(format!("\x1b[1;{}m{}\x1b[0m", code, color_blocks)); // bold
     }
 
-    let mut terminal_colors_bold = vec![];
-
-    for code in color_blocks.iter() {
-        terminal_colors_bold.push(format!("\x1b[1;{}m{}", code, "███")); // bright/bold version
-    }
-
-    vec![terminal_colors.join(""), terminal_colors_bold.join("")]
+    vec![normal.join(""), bold.join("")]
 }
 
 // ---------------------------------

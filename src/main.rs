@@ -1,12 +1,13 @@
 mod config;
 mod modules;
 
-use crate::config::default::ConfigsExt;
-use modules::ascii::get_ascii_art;
-use modules::helper::list_options;
-use modules::system::distro::{get_distro, DistroDisplay};
+use modules::{
+    ascii::get_ascii_art,
+    helper::list_options,
+    system::distro::{get_distro, DistroDisplay},
+};
 
-use config::default::Configs;
+use config::run::Run;
 
 use std::cmp;
 
@@ -21,7 +22,7 @@ fn main() {
             return;
         }
         Some("--init" | "-i") => {
-            if !Configs::ensure_config_exists() {
+            if !Run::ensure_config_exists() {
                 println!("⚠️ Config file already exists");
             }
             return;
@@ -29,12 +30,12 @@ fn main() {
         _ => {}
     }
 
-    Configs::ensure_config_exists();
+    Run::ensure_config_exists();
 
-    let cfg = Configs::load();
+    let cfg = Run::load();
 
     if let Some(layout) = cfg.get("layout") {
-        let filled = Configs::fill_layout(layout, &cfg);
+        let filled = Run::fill_layout(layout, &cfg);
         let ascii_path = cfg.get("ascii_path");
         let distro = get_distro(DistroDisplay::Name);
         let ascii = get_ascii_art(&distro, ascii_path);
@@ -110,10 +111,10 @@ fn print_ascii_and_info(ascii: &str, info_lines: &[String]) {
     let max_lines = cmp::max(ascii_lines.len(), info_lines.len());
 
     for i in 0..max_lines {
-        // let ascii_part = ascii_lines.get(i).unwrap_or(&"");
+        let ascii_part = ascii_lines.get(i).unwrap_or(&"");
         let info_part = info_lines.get(i).map(|s| s.as_str()).unwrap_or("");
 
-        // println!("{:<20} {}", ascii_part, info_part);
-        println!(" {}", info_part);
+        println!("{:<20} {}", ascii_part, info_part);
+        // println!(" {}", info_part);
     }
 }
