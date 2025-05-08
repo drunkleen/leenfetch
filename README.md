@@ -137,7 +137,7 @@ leenfetch --list-options
 | Theming / color profiles    | ✅ Basic      |
 | ASCII art support           | 🔄 Planned    |
 | Multi-Threading             | 🔄 Planned    |
-| Windows support             | 🔄 Planned    |
+| Windows support             | ✅ Planned    |
 | macOS support               | 🔄 Planned    |
 | OpenBSD support             | 🔄 Planned    |
 | Plugin/module system        | ❓ Maybe      |

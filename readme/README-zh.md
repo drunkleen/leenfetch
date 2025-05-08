@@ -131,7 +131,7 @@ leenfetch --list-options
 | 主题与颜色配置             | ✅ 基础实现 |
 | ASCII 艺术支持          | 🔄 计划中 |
 | 多线程处理               | 🔄 计划中 |
-| 支持 Windows          | 🔄 计划中 |
+| 支持 Windows          | ✅ 计划中 |
 | 支持 macOS            | 🔄 计划中 |
 | 支持 OpenBSD          | 🔄 计划中 |
 | 插件/模块系统             | ❓ 考虑中  |
