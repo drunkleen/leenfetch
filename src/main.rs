@@ -1,10 +1,10 @@
 mod config;
 mod modules;
-use regex::Regex;
 
 use modules::helper::list_options;
 
 use config::run::Run;
+use regex::Regex;
 use std::collections::HashMap;
 
 fn main() {
@@ -124,7 +124,6 @@ fn print_ascii_and_info(ascii: &str, info_lines: &[String]) {
     let ascii_lines: Vec<&str> = ascii.lines().collect();
     let info_lines = info_lines.iter().map(|s| s.as_str()).collect::<Vec<_>>();
 
-    // Regex to strip ANSI escape codes (matches \x1b[ ... m)
     let ansi_regex = Regex::new(r"\x1b\[[0-9;]*m").unwrap();
 
     let max_ascii_width = ascii_lines
@@ -133,17 +132,21 @@ fn print_ascii_and_info(ascii: &str, info_lines: &[String]) {
         .max()
         .unwrap_or(0);
 
-    let max_lines = std::cmp::max(ascii_lines.len(), info_lines.len());
+    let print_column = max_ascii_width + 4; // where to print info (you can tweak)
 
-    for i in 0..max_lines {
-        let ascii_part = *ascii_lines.get(i).unwrap_or(&"");
-        let info_part = info_lines.get(i).copied().unwrap_or("");
+    for line in &ascii_lines {
+        println!("{line}");
+    }
 
-        // Calculate visible padding
-        let visible_len = ansi_regex.replace_all(ascii_part, "").len();
-        let padding = " ".repeat(max_ascii_width.saturating_sub(visible_len) + 2); // +2 space
+    // Step 2: move cursor up to where ASCII started
+    let move_up = ascii_lines.len();
+    print!("\x1b[{}A", move_up); // ANSI escape to move up
+    std::io::Write::flush(&mut std::io::stdout()).unwrap();
 
-        print!("{ascii_part}{}", padding);
-        println!("{info_part}");
+    // Step 3: print info at fixed column
+    for (_, info_line) in info_lines.iter().enumerate() {
+        // move cursor to column
+        print!("\x1b[{}G", print_column); // move to column X
+        println!("{info_line}");
     }
 }

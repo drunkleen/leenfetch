@@ -444,8 +444,6 @@ impl Run {
             .map(|s| s.to_string())
             .unwrap_or_else(|| run.get_enum("ascii_size", AsciiSize::Large).to_string());
 
-        run.get_enum("ascii_size", AsciiSize::Large).to_string();
-
         let (raw_ascii_art, distro_colors) = get_ascii_and_colors(
             distro.as_deref().unwrap_or("unknown"),
             run.get("ascii_path"),
@@ -455,12 +453,11 @@ impl Run {
         // let distro_colors = get_distro_colors_order(&distro.unwrap_or("unknown".into()));
 
         output = output.replace("{empty_line}", "");
+        output = colorize_text(&mut output, &distro_colors);
 
-        let output = colorize_text(&mut output, &distro_colors);
-        let ascii_art = colorize_text(&raw_ascii_art, &distro_colors);
-
-        (output, ascii_art)
-        // colorize_text(&mut output)
+        let info_colored = colorize_text(&mut output, &distro_colors);
+        let ascii_colored = colorize_text(&raw_ascii_art, &distro_colors);
+        (info_colored, ascii_colored)
     }
 
     pub fn should_render_tag(layout: &str, cfg: &Run, tag: &str, key: &str) -> bool {

@@ -58,32 +58,31 @@ pub fn get_ascii_and_colors(
 
 fn get_builtin_ascii_art(distro: &str, ascii_size: &str) -> (&'static str, &'static [u8]) {
     let small_size = ascii_size == "small";
-    println!("ascii size small? {}", small_size);
 
-    let key = distro.to_ascii_lowercase();
+    let key = distro.split(" ").collect::<Vec<&str>>()[0].to_lowercase();
 
     match (key.as_str(), small_size) {
-        // ("arch", true) => ARCH_SMALL,
-        // ("arch", false) => ARCH,
-        // ("debian", true) => DEBIAN_SMALL,
-        // ("debian", false) => DEBIAN,
-        // ("endeavouros", true) => ENDEAVOUROS_SMALL,
-        // ("endeavouros", false) => ENDEAVOUROS,
-        // ("fedora", true) => FEDORA_SMALL,
-        // ("fedora", false) => FEDORA,
-        // ("manjaro", true) => MANJARO_SMALL,
-        // ("manjaro", false) => MANJARO,
-        // ("nixos", true) => NIXOS_SMALL,
-        // ("nixos", false) => NIXOS,
+        ("debian", true) => (DEBIAN_SMALL, DEBIAN_COLORS),
+        ("debian", false) => (DEBIAN, DEBIAN_COLORS),
+        ("endeavouros", true) => (ENDEAVOUROS_SMALL, ENDEAVOUROS_COLORS),
+        ("endeavouros", false) => (ENDEAVOUROS, ENDEAVOUROS_COLORS),
+        ("fedora", true) => (FEDORA_SMALL, FEDORA_COLORS),
+        ("fedora", false) => (FEDORA, FEDORA_COLORS),
+        ("manjaro", true) => (MANJARO_SMALL, MANJARO_COLORS),
+        ("manjaro", false) => (MANJARO, MANJARO_COLORS),
+        ("nixos", true) => (NIXOS_SMALL, NIXOS_COLORS),
+        ("nixos", false) => (NIXOS, NIXOS_COLORS),
         ("ubuntu", true) => (UBUNTU_SMALL, UBUNTU_COLORS),
         ("ubuntu", false) => (UBUNTU, UBUNTU_COLORS),
-        _ => (DEFAULT, &[0, 1, 2, 3, 4, 5, 6, 7]),
+        _ => (DEFAULT, &[1, 2, 3, 4, 5, 6, 7]),
     }
 }
 
 const DEFAULT: &str = r#"
 Default
 ${reset}"#;
+
+const DEBIAN_COLORS: &[u8] = &[1, 3, 7];
 
 const DEBIAN_SMALL: &str = r#"
 ${c1}  _____
@@ -114,6 +113,7 @@ ${c2}  `Y$$
               `"""
 ${reset}"#;
 
+const ENDEAVOUROS_COLORS: &[u8] = &[1, 5, 4];
 const ENDEAVOUROS_SMALL: &str = r#"
        /\       
       /  \      
@@ -124,23 +124,24 @@ const ENDEAVOUROS_SMALL: &str = r#"
 ${reset}"#;
 
 const ENDEAVOUROS: &str = r#"
-${bold.c2}                     ./${bold.c6}o${bold.c5}.
-${bold.c2}                   ./${bold.c6}sssso${bold.c5}-
-${bold.c2}                 `:${bold.c6}osssssss+${bold.c5}-
-${bold.c2}               `:+${bold.c6}sssssssssso${bold.c5}/.
-${bold.c2}             `-/o${bold.c6}ssssssssssssso${bold.c5}/.
-${bold.c2}           `-/+${bold.c6}sssssssssssssssso${bold.c5}+:`
-${bold.c2}         `-:/+${bold.c6}sssssssssssssssssso${bold.c5}+/.
-${bold.c2}       `.://o${bold.c6}sssssssssssssssssssso${bold.c5}++-
-${bold.c2}      .://+${bold.c6}ssssssssssssssssssssssso${bold.c5}++:
-${bold.c2}    .:///o${bold.c6}ssssssssssssssssssssssssso${bold.c5}++:
-${bold.c2}  `:////${bold.c6}ssssssssssssssssssssssssssso${bold.c5}+++.
-${bold.c2}`-////+${bold.c6}ssssssssssssssssssssssssssso${bold.c5}++++-
-${bold.c2} `..-+${bold.c6}oosssssssssssssssssssssssso${bold.c5}+++++/`
+${c1}                     ./${c2}o${c3}.
+${c1}                   ./${c2}sssso${c3}-
+${c1}                 `:${c2}osssssss+${c3}-
+${c1}               `:+${c2}sssssssssso${c3}/.
+${c1}             `-/o${c2}ssssssssssssso${c3}/.
+${c1}           `-/+${c2}sssssssssssssssso${c3}+:`
+${c1}         `-:/+${c2}sssssssssssssssssso${c3}+/.
+${c1}       `.://o${c2}sssssssssssssssssssso${c3}++-
+${c1}      .://+${c2}ssssssssssssssssssssssso${c3}++:
+${c1}    .:///o${c2}ssssssssssssssssssssssssso${c3}++:
+${c1}  `:////${c2}ssssssssssssssssssssssssssso${c3}+++.
+${c1}`-////+${c2}ssssssssssssssssssssssssssso${c3}++++-
+${c1} `..-+${c2}oosssssssssssssssssssssssso${c3}+++++/`
    ./++++++++++++++++++++++++++++++/:.
   `:::::::::::::::::::::::::------``
 ${reset}"#;
 
+const FEDORA_COLORS: &[u8] = &[4, 7, 1];
 const FEDORA_SMALL: &str = r#"
 ${c1}        ,'''''.
        |   ,.  |
@@ -175,6 +176,7 @@ cccccccc;${c2}.:odl:.${c1};cccccccccccccc:,.
   '::cccccccccccccc::;,.
 ${reset}"#;
 
+const MANJARO_COLORS: &[u8] = &[2, 7];
 const MANJARO_SMALL: &str = r#"
 ${c1}||||||||| ||||
 ||||||||| ||||
@@ -202,6 +204,7 @@ ${c1}██████████████████  ██████�
 ████████  ████████  ████████
 ${reset}"#;
 
+const NIXOS_COLORS: &[u8] = &[4, 6];
 const NIXOS_SMALL: &str = r#"
   ${c1}  \\\\  \\\\ //
  ==\\\\__\\\\/ //
@@ -247,23 +250,23 @@ ${reset}"#;
 
 const UBUNTU: &str = r#"
 ${c1}            .-/+oossssoo+\-.
-${c1}        ´:+ssssssssssssssssss+:`
-${c1}      -+ssssssssssssssssssyyssss+-
-${c1}    .ossssssssssssssssss${c2}dMMMNy${c1}sssso.
-${c1}   /sssssssssss${c2}hdmmNNmmyNMMMMh${c1}ssssss\
-${c1}  +sssssssss${c2}hm${c1}yd${c2}MMMMMMMNddddy${c1}ssssssss+
-${c1} /ssssssss${c2}hNMMM${c1}yh${c2}hyyyyhmNMMMNh${c1}ssssssss\
-${c1}.ssssssss${c2}dMMMNh${c1}ssssssssss${c2}hNMMMd${c1}ssssssss.
-${c1}+ssss${c2}hhhyNMMNy${c1}ssssssssssss${c2}yNMMMy${c1}sssssss+
-${c1}oss${c2}yNMMMNyMMh${c1}ssssssssssssss${c2}hmmmh${c1}ssssssso
-${c1}oss${c2}yNMMMNyMMh${c1}sssssssssssssshmmmh${c1}ssssssso
-${c1}+ssss${c2}hhhyNMMNy${c1}ssssssssssss${c2}yNMMMy${c1}sssssss+
-${c1}.ssssssss${c2}dMMMNh${c1}ssssssssss${c2}hNMMMd${c1}ssssssss.
-${c1} \ssssssss${c2}hNMMM${c1}yh${c2}hyyyyhdNMMMNh${c1}ssssssss/
-${c1}  +sssssssss${c2}dm${c1}yd${c2}MMMMMMMMddddy${c1}ssssssss+
-${c1}   \sssssssssss${c2}hdmNNNNmyNMMMMh${c1}ssssss/
-${c1}    .ossssssssssssssssss${c2}dMMMNy${c1}sssso.
-${c1}      -+sssssssssssssssss${c2}yyy${c1}ssss+-
-${c1}        `:+ssssssssssssssssss+:`
-${c1}            .-\+oossssoo+/-.
+        ´:+ssssssssssssssssss+:`
+      -+ssssssssssssssssssyyssss+-
+    .ossssssssssssssssss${c2}dMMMNy${c1}sssso.
+   /sssssssssss${c2}hdmmNNmmyNMMMMh${c1}ssssss\
+  +sssssssss${c2}hm${c1}yd${c2}MMMMMMMNddddy${c1}ssssssss+
+ /ssssssss${c2}hNMMM${c1}yh${c2}hyyyyhmNMMMNh${c1}ssssssss\
+.ssssssss${c2}dMMMNh${c1}ssssssssss${c2}hNMMMd${c1}ssssssss.
++ssss${c2}hhhyNMMNy${c1}ssssssssssss${c2}yNMMMy${c1}sssssss+
+oss${c2}yNMMMNyMMh${c1}ssssssssssssss${c2}hmmmh${c1}ssssssso
+oss${c2}yNMMMNyMMh${c1}sssssssssssssshmmmh${c1}ssssssso
++ssss${c2}hhhyNMMNy${c1}ssssssssssss${c2}yNMMMy${c1}sssssss+
+.ssssssss${c2}dMMMNh${c1}ssssssssss${c2}hNMMMd${c1}ssssssss.
+ \ssssssss${c2}hNMMM${c1}yh${c2}hyyyyhdNMMMNh${c1}ssssssss/
+  +sssssssss${c2}dm${c1}yd${c2}MMMMMMMMddddy${c1}ssssssss+
+   \sssssssssss${c2}hdmNNNNmyNMMMMh${c1}ssssss/
+    .ossssssssssssssssss${c2}dMMMNy${c1}sssso.
+      -+sssssssssssssssss${c2}yyy${c1}ssss+-
+        `:+ssssssssssssssssss+:`
+            .-\+oossssoo+/-.
 ${reset}"#;

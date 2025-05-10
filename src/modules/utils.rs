@@ -125,31 +125,17 @@ pub fn process_single_block(output: &mut String, tag: &str, enabled: bool, value
 //        Color Functions
 // ---------------------------------
 
-pub fn colorize_text(input: &str, colors_palette: &HashMap<&str, &str>) -> String {
+pub fn colorize_text(input: &str, colors: &HashMap<&str, &str>) -> String {
     let mut result = String::new();
 
     for line in input.lines() {
         let mut colored = line.to_owned();
-        let mut replaced = false;
-
-        for (key, code) in colors_palette {
+        for (key, code) in colors {
             let placeholder = format!("${{{}}}", key);
-            if colored.contains(&placeholder) {
-                colored = colored.replace(&placeholder, code);
-                replaced = true;
-            }
+            colored = colored.replace(&placeholder, code);
         }
-
-        if replaced {
-            colored.push_str(colors_palette["reset"]);
-        }
-
         result.push_str(&colored);
         result.push('\n');
-    }
-
-    if result.ends_with('\n') {
-        result.pop();
     }
 
     result
@@ -178,18 +164,6 @@ pub fn color_palette(
 }
 
 pub fn get_distro_colors_order(color_order: &[u8]) -> HashMap<&'static str, &'static str> {
-    // ANSI base codes (normal intensity)
-    // let ansi_base_colors: [&str; 8] = [
-    //     "\x1b[0;30m", // black
-    //     "\x1b[0;31m", // red
-    //     "\x1b[0;32m", // green
-    //     "\x1b[0;33m", // yellow
-    //     "\x1b[0;34m", // blue
-    //     "\x1b[0;35m", // magenta
-    //     "\x1b[0;36m", // cyan
-    //     "\x1b[0;37m", // white
-    // ];
-
     // Start with c0 = bold black
     let mut entries: Vec<(&'static str, &'static str)> = vec![("c0", "\x1b[1;30m")];
 
