@@ -10,113 +10,93 @@ pub const DEFAULT_CONFIG: &str = r#"
 # 🎨 Colors
 # ____________________
 # 🖍️ Foreground Colors
-# | Token        | Color        |
-# | ------------ | ------------ |
-# | `${fg.c1}`   | Black        |
-# | `${fg.c2}`   | Red          |
-# | `${fg.c3}`   | Green        |
-# | `${fg.c4}`   | Yellow       |
-# | `${fg.c5}`   | Blue         |
-# | `${fg.c6}`   | Magenta      |
-# | `${fg.c7}`   | Cyan         |
-# | `${fg.c8}`   | White        |
-# 🅱️ Bold Foreground Colors
-# | ------------ | ------------ |
-# | `${bold.c1}` | Bold Black   |
-# | `${bold.c2}` | Bold Red     |
-# | `${bold.c3}` | Bold Green   |
-# | `${bold.c4}` | Bold Yellow  |
-# | `${bold.c5}` | Bold Blue    |
-# | `${bold.c6}` | Bold Magenta |
-# | `${bold.c7}` | Bold Cyan    |
-# | `${bold.c8}` | Bold White   |
-# 🖼️ Background Colors
-# | ------------ | ------------ |
-# | `${bg.c1}`   | Black BG     |
-# | `${bg.c2}`   | Red BG       |
-# | `${bg.c3}`   | Green BG     |
-# | `${bg.c4}`   | Yellow BG    |
-# | `${bg.c5}`   | Blue BG      |
-# | `${bg.c6}`   | Magenta BG   |
-# | `${bg.c7}`   | Cyan BG      |
-# | `${bg.c8}`   | White BG     |
+# | Token   | Color        |
+# | ------- | ------------ |
+# | `${c1}` | Bold Black   |
+# | `${c2}` | Bold Red     |
+# | `${c3}` | Bold Green   |
+# | `${c4}` | Bold Yellow  |
+# | `${c5}` | Bold Blue    |
+# | `${c6}` | Bold Magenta |
+# | `${c7}` | Bold Cyan    |
+# | `${c8}` | Bold White   |
 # 🔁 Reset Colors
 # Use `${reset}` to end a color block and return to default.
 
 
 #layout="""
 [[titles]]
-${bold.c5}{username}${fg.c8}@${bold.c5}{hostname}${fg.c8}
+${c1}{username}${reset}@${c1}{hostname}${reset}
 [[/titles]]
 
 {underline}
 
 [[os]]
-${bold.c5}OS:${reset} {os_index}
+${c1}OS:${reset} {os_index}
 [[/os]]
 
 [[distro]]
-${bold.c5}Distro:${reset} {distro_index}
+${c1}Distro:${reset} {distro_index}
 [[/distro]]
 
 [[model]]
-${bold.c5}Host:${reset} {model_index}
+${c1}Host:${reset} {model_index}
 [[/model]]
 
 [[kernel]]
-${bold.c5}Kernel:${reset} {kernel_index}
+${c1}Kernel:${reset} {kernel_index}
 [[/kernel]]
 
 [[uptime]]
-${bold.c5}Uptime:${reset} {uptime_index}
+${c1}Uptime:${reset} {uptime_index}
 [[/uptime]]
 
 [[packages]]
-${bold.c5}Packages:${reset} {packages_index}
+${c1}Packages:${reset} {packages_index}
 [[/packages]]
 
 [[shell]]
-${bold.c5}Shell:${reset} {shell_index}
+${c1}Shell:${reset} {shell_index}
 [[/shell]]
 
 [[wm]]
-${bold.c5}WM:${reset} {wm_index}
+${c1}WM:${reset} {wm_index}
 [[/wm]]
 
 [[de]]
-${bold.c5}DE:${reset} {de_index}
+${c1}DE:${reset} {de_index}
 [[/de]]
 
 [[wm_theme]]
-${bold.c5}WM Theme:${reset} {wm_theme_index}
+${c1}WM Theme:${reset} {wm_theme_index}
 [[/wm_theme]]
 
 [[cpu]]
-${bold.c5}CPU:${reset} {cpu_index}
+${c1}CPU:${reset} {cpu_index}
 [[/cpu]]
 
 [[gpu]]
-${bold.c5}GPU #{gpu_index}:${reset} {gpu}
+${c1}GPU #{gpu_index}:${reset} {gpu}
 [[/gpu]]
 
 [[memory]]
-${bold.c5}Memory:${reset} {memory_index}
+${c1}Memory:${reset} {memory_index}
 [[/memory]]
 
 [[disk]]
-${bold.c5}Disk {disk_label}:${reset} {disk_index}
+${c1}Disk {disk_label}:${reset} {disk_index}
 [[/disk]]
 
 [[resolution]]
-${bold.c5}Resolution:${reset} {resolution_index}
+${c1}Resolution:${reset} {resolution_index}
 [[/resolution]]
 
 [[theme]]
-${bold.c5}Theme:${reset} {theme_index}
+${c1}Theme:${reset} {theme_index}
 [[/theme]]
 
 [[battery]]
-${bold.c5}Battery${reset} {battery}
+${c1}Battery${reset} {battery}
 [[/battery]]
 
 [[song]]
@@ -132,12 +112,8 @@ ${bold.c5}Battery${reset} {battery}
 
 
 # Display settings
-title_fqdn=on
-underline=on
-separator=":"
-
+ascii_size=small
 # Output toggles
-show_ascii=on
 show_titles=on
 show_os=on
 show_distro=on

@@ -1,63 +1,15 @@
 use std::collections::HashMap;
-use std::sync::LazyLock;
 
-#[allow(dead_code)]
-
-pub static COLORS: LazyLock<HashMap<&str, &'static str>> = LazyLock::new(|| {
-    HashMap::from([
-        // Foreground (normal)
-        ("fg.c1", "\x1b[30m"),
-        ("fg.c2", "\x1b[31m"),
-        ("fg.c3", "\x1b[32m"),
-        ("fg.c4", "\x1b[33m"),
-        ("fg.c5", "\x1b[34m"),
-        ("fg.c6", "\x1b[35m"),
-        ("fg.c7", "\x1b[36m"),
-        ("fg.c8", "\x1b[37m"),
-        // Foreground (bold)
-        ("bold.c1", "\x1b[1;30m"),
-        ("bold.c2", "\x1b[1;31m"),
-        ("bold.c3", "\x1b[1;32m"),
-        ("bold.c4", "\x1b[1;33m"),
-        ("bold.c5", "\x1b[1;34m"),
-        ("bold.c6", "\x1b[1;35m"),
-        ("bold.c7", "\x1b[1;36m"),
-        ("bold.c8", "\x1b[1;37m"),
-        // Background
-        ("bg.c1", "\x1b[40m"),
-        ("bg.c2", "\x1b[41m"),
-        ("bg.c3", "\x1b[42m"),
-        ("bg.c4", "\x1b[43m"),
-        ("bg.c5", "\x1b[44m"),
-        ("bg.c6", "\x1b[45m"),
-        ("bg.c7", "\x1b[46m"),
-        ("bg.c8", "\x1b[47m"),
-        // Reset
-        ("reset", "\x1b[0m"),
-    ])
-});
-
-pub fn colorize_text(input: &str) -> String {
-    let mut result = String::new();
-
-    for line in input.lines() {
-        let mut colored = line.to_owned();
-
-        for (key, code) in COLORS.iter() {
-            colored = colored.replace(&format!("${{{}}}", key), code);
-        }
-
-        colored.push_str(COLORS["reset"]);
-        result.push_str(&colored);
-        result.push('\n');
-    }
-
-    if result.ends_with('\n') {
-        result.pop();
-    }
-
-    result
-}
+pub const DEFAULT_ANSI_BASE_COLORS: [&str; 8] = [
+    "\x1b[0;30m", // black
+    "\x1b[0;31m", // red
+    "\x1b[0;32m", // green
+    "\x1b[0;33m", // yellow
+    "\x1b[0;34m", // blue
+    "\x1b[0;35m", // magenta
+    "\x1b[0;36m", // cyan
+    "\x1b[0;37m", // white
+];
 
 pub fn get_bar(percent: u8) -> String {
     let total_blocks = 14;
@@ -167,4 +119,107 @@ pub fn process_single_block(output: &mut String, tag: &str, enabled: bool, value
             *output = final_rendered;
         }
     }
+}
+
+// ---------------------------------
+//        Color Functions
+// ---------------------------------
+
+pub fn colorize_text(input: &str, colors_palette: &HashMap<&str, &str>) -> String {
+    let mut result = String::new();
+
+    for line in input.lines() {
+        let mut colored = line.to_owned();
+        let mut replaced = false;
+
+        for (key, code) in colors_palette {
+            let placeholder = format!("${{{}}}", key);
+            if colored.contains(&placeholder) {
+                colored = colored.replace(&placeholder, code);
+                replaced = true;
+            }
+        }
+
+        if replaced {
+            colored.push_str(colors_palette["reset"]);
+        }
+
+        result.push_str(&colored);
+        result.push('\n');
+    }
+
+    if result.ends_with('\n') {
+        result.pop();
+    }
+
+    result
+}
+
+pub fn color_palette(
+    entries: &[(&'static str, &'static str)],
+) -> HashMap<&'static str, &'static str> {
+    let mut map = HashMap::new();
+    for (k, v) in entries {
+        map.insert(*k, *v);
+
+        // Add bold variant: bold.c1 → \x1b[1;31m if c1 is \x1b[0;31m
+        if let Some(code) = v.strip_prefix("\x1b[0;") {
+            let bold_code = format!("\x1b[1;{}", code);
+            let bold_key = format!("bold.{}", k);
+            map.insert(
+                Box::leak(bold_key.into_boxed_str()),
+                Box::leak(bold_code.into_boxed_str()),
+            );
+        }
+    }
+
+    map.insert("reset", "\x1b[0m");
+    map
+}
+
+pub fn get_distro_colors_order(color_order: &[u8]) -> HashMap<&'static str, &'static str> {
+    // ANSI base codes (normal intensity)
+    // let ansi_base_colors: [&str; 8] = [
+    //     "\x1b[0;30m", // black
+    //     "\x1b[0;31m", // red
+    //     "\x1b[0;32m", // green
+    //     "\x1b[0;33m", // yellow
+    //     "\x1b[0;34m", // blue
+    //     "\x1b[0;35m", // magenta
+    //     "\x1b[0;36m", // cyan
+    //     "\x1b[0;37m", // white
+    // ];
+
+    // Start with c0 = bold black
+    let mut entries: Vec<(&'static str, &'static str)> = vec![("c0", "\x1b[1;30m")];
+
+    let mut used = vec![false; 8];
+
+    // Fill c1 to cX using given color_order
+    for (i, &idx) in color_order.iter().enumerate() {
+        if idx < 8 {
+            let key: &'static str = Box::leak(format!("c{}", i + 1).into_boxed_str());
+            entries.push((key, DEFAULT_ANSI_BASE_COLORS[idx as usize]));
+            used[idx as usize] = true;
+        }
+    }
+
+    // Fill remaining cX from unused colors
+    let mut next_index = color_order.len() + 1;
+    for (i, &color) in DEFAULT_ANSI_BASE_COLORS.iter().enumerate() {
+        if !used[i] {
+            let key: &'static str = Box::leak(format!("c{}", next_index).into_boxed_str());
+            entries.push((key, color));
+            next_index += 1;
+        }
+    }
+
+    // Generate HashMap with bold.* variants and reset
+    let mut map = color_palette(&entries);
+    map.insert("reset", "\x1b[0m");
+    map
+}
+
+pub fn get_default_colors() -> HashMap<&'static str, &'static str> {
+    get_distro_colors_order(&[0, 1, 2, 3, 4, 5, 6, 7])
 }

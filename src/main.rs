@@ -1,33 +1,49 @@
 mod config;
 mod modules;
+use regex::Regex;
 
-use modules::{
-    ascii::get_ascii_art,
-    helper::list_options,
-    system::distro::{get_distro, DistroDisplay},
-};
+use modules::helper::list_options;
 
 use config::run::Run;
-
-use std::cmp;
+use std::collections::HashMap;
 
 fn main() {
-    match std::env::args().nth(1).as_deref() {
-        Some("--help" | "-h") => {
-            print_help();
-            return;
-        }
-        Some("--list-options" | "-l") => {
-            list_options();
-            return;
-        }
-        Some("--init" | "-i") => {
-            if !Run::ensure_config_exists() {
-                println!("⚠️ Config file already exists");
+    let mut args = std::env::args().skip(1); // skip binary name
+
+    let mut override_map: HashMap<&'static str, String> = HashMap::new();
+
+    while let Some(arg) = args.next() {
+        match arg.as_str() {
+            "--help" | "-h" => {
+                print_help();
+                return;
             }
-            return;
+            "--list-options" | "-l" => {
+                list_options();
+                return;
+            }
+            "--init" | "-i" => {
+                if !Run::ensure_config_exists() {
+                    println!("⚠️ Config file already exists");
+                }
+                return;
+            }
+            "--distro" => {
+                if let Some(val) = args.next() {
+                    override_map.insert("distro", val);
+                }
+            }
+            "--ascii-size" => {
+                if let Some(val) = args.next() {
+                    override_map.insert("ascii-size", val);
+                }
+            }
+            _ => {
+                println!("❌ Unknown argument: {}", arg);
+                print_help();
+                return;
+            }
         }
-        _ => {}
     }
 
     Run::ensure_config_exists();
@@ -35,10 +51,8 @@ fn main() {
     let cfg = Run::load();
 
     if let Some(layout) = cfg.get("layout") {
-        let filled = Run::fill_layout(layout, &cfg);
-        let ascii_path = cfg.get("ascii_path");
-        let distro = get_distro(DistroDisplay::Name);
-        let ascii = get_ascii_art(&distro, ascii_path);
+        let (filled, ascii) = &Run::fill_layout(layout, &cfg, override_map);
+
         print_ascii_and_info(
             &ascii,
             &filled.lines().map(|l| l.to_string()).collect::<Vec<_>>(),
@@ -108,13 +122,28 @@ MORE:
 
 fn print_ascii_and_info(ascii: &str, info_lines: &[String]) {
     let ascii_lines: Vec<&str> = ascii.lines().collect();
-    let max_lines = cmp::max(ascii_lines.len(), info_lines.len());
+    let info_lines = info_lines.iter().map(|s| s.as_str()).collect::<Vec<_>>();
+
+    // Regex to strip ANSI escape codes (matches \x1b[ ... m)
+    let ansi_regex = Regex::new(r"\x1b\[[0-9;]*m").unwrap();
+
+    let max_ascii_width = ascii_lines
+        .iter()
+        .map(|line| ansi_regex.replace_all(line, "").len())
+        .max()
+        .unwrap_or(0);
+
+    let max_lines = std::cmp::max(ascii_lines.len(), info_lines.len());
 
     for i in 0..max_lines {
-        let ascii_part = ascii_lines.get(i).unwrap_or(&"");
-        let info_part = info_lines.get(i).map(|s| s.as_str()).unwrap_or("");
+        let ascii_part = *ascii_lines.get(i).unwrap_or(&"");
+        let info_part = info_lines.get(i).copied().unwrap_or("");
 
-        println!("{:<20} {}", ascii_part, info_part);
-        // println!(" {}", info_part);
+        // Calculate visible padding
+        let visible_len = ansi_regex.replace_all(ascii_part, "").len();
+        let padding = " ".repeat(max_ascii_width.saturating_sub(visible_len) + 2); // +2 space
+
+        print!("{ascii_part}{}", padding);
+        println!("{info_part}");
     }
 }

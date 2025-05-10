@@ -1,31 +1,34 @@
 use std::collections::HashMap;
-
-use crate::modules::utils::{
-    colorize_text, get_terminal_color, process_loop_block, process_single_block,
-};
-
-use crate::modules::config::CONFIG_PATH;
-use crate::modules::desktop::de::get_de;
-use crate::modules::desktop::resolution::get_resolution;
-use crate::modules::desktop::theme::get_theme;
-use crate::modules::desktop::wm::get_wm;
-use crate::modules::desktop::wm_theme::get_wm_theme;
-use crate::modules::info::battery::{get_battery, BatteryDisplayMode};
-use crate::modules::info::cpu::get_cpu;
-use crate::modules::info::disk::{get_disks, DiskDisplay, DiskSubtitle};
-use crate::modules::info::gpu::get_gpus;
-use crate::modules::info::memory::{get_memory, MemoryUnit};
-use crate::modules::info::uptime::{get_uptime, UptimeShorthand};
-use crate::modules::packages::{get_packages, PackageShorthand};
-use crate::modules::shell::get_shell;
-use crate::modules::song::get_song;
-use crate::modules::system::distro::{get_distro, DistroDisplay};
-use crate::modules::system::kernel::get_kernel;
-use crate::modules::system::model::get_model;
-use crate::modules::system::os::get_os;
-use crate::modules::title::get_titles;
 use std::fs;
 use std::path::PathBuf;
+
+use crate::modules::{
+    ascii::{get_ascii_and_colors, AsciiSize},
+    config::CONFIG_PATH,
+    desktop::{
+        de::get_de, resolution::get_resolution, theme::get_theme, wm::get_wm,
+        wm_theme::get_wm_theme,
+    },
+    info::{
+        battery::{get_battery, BatteryDisplayMode},
+        cpu::get_cpu,
+        disk::{get_disks, DiskDisplay, DiskSubtitle},
+        gpu::get_gpus,
+        memory::{get_memory, MemoryUnit},
+        uptime::{get_uptime, UptimeShorthand},
+    },
+    packages::{get_packages, PackageShorthand},
+    shell::get_shell,
+    song::get_song,
+    system::{
+        distro::{get_distro, DistroDisplay},
+        kernel::get_kernel,
+        model::get_model,
+        os::get_os,
+    },
+    title::get_titles,
+    utils::{colorize_text, get_terminal_color, process_loop_block, process_single_block},
+};
 
 #[derive(Debug, Default)]
 pub struct Run {
@@ -40,7 +43,6 @@ impl Run {
             .map(|p| p.join(CONFIG_PATH))
             .unwrap_or(PathBuf::from("/dev/null"));
 
-        println!("Loading config from {}", path.display());
         if let Ok(contents) = fs::read_to_string(path) {
             if let Some(layout_block) = contents.split("layout=").nth(1).and_then(|s| {
                 if s.starts_with("\"\"\"") {
@@ -108,7 +110,11 @@ impl Run {
         }
     }
 
-    pub fn fill_layout(layout: &str, run: &Run) -> String {
+    pub fn fill_layout(
+        layout: &str,
+        run: &Run,
+        override_map: HashMap<&'static str, String>,
+    ) -> (String, String) {
         let mut output = layout.to_string();
 
         // ----------------------------
@@ -163,16 +169,26 @@ impl Run {
         } else {
             None
         };
-
         process_single_block(&mut output, "os", run.is_enabled("show_os"), os);
 
-        let distro = if Self::should_render_tag(layout, run, "distro", "show_distro") {
-            let shorthand = run.get_enum("distro_display", DistroDisplay::NameModelVersionArch);
-            Some(get_distro(shorthand))
-        } else {
-            None
-        };
-        process_single_block(&mut output, "distro", run.is_enabled("show_distro"), distro);
+        let distro = override_map
+            .get("distro")
+            .map(|s| s.to_string())
+            .or_else(|| {
+                if Self::should_render_tag(layout, run, "distro", "show_distro") {
+                    let shorthand =
+                        run.get_enum("distro_display", DistroDisplay::NameModelVersionArch);
+                    Some(get_distro(shorthand))
+                } else {
+                    None
+                }
+            });
+        process_single_block(
+            &mut output,
+            "distro",
+            run.is_enabled("show_distro"),
+            distro.clone(),
+        );
 
         let model = if Self::should_render_tag(layout, run, "model", "show_model") {
             Some(get_model().unwrap_or("Unknown".into()))
@@ -419,8 +435,32 @@ impl Run {
             .collect::<Vec<_>>()
             .join("\n");
 
+        // ----------------------------
+        // ascii art
+        // ----------------------------
+
+        let ascii_art_size = override_map
+            .get("ascii-size")
+            .map(|s| s.to_string())
+            .unwrap_or_else(|| run.get_enum("ascii_size", AsciiSize::Large).to_string());
+
+        run.get_enum("ascii_size", AsciiSize::Large).to_string();
+
+        let (raw_ascii_art, distro_colors) = get_ascii_and_colors(
+            distro.as_deref().unwrap_or("unknown"),
+            run.get("ascii_path"),
+            ascii_art_size,
+        );
+
+        // let distro_colors = get_distro_colors_order(&distro.unwrap_or("unknown".into()));
+
         output = output.replace("{empty_line}", "");
-        colorize_text(&mut output)
+
+        let output = colorize_text(&mut output, &distro_colors);
+        let ascii_art = colorize_text(&raw_ascii_art, &distro_colors);
+
+        (output, ascii_art)
+        // colorize_text(&mut output)
     }
 
     pub fn should_render_tag(layout: &str, cfg: &Run, tag: &str, key: &str) -> bool {

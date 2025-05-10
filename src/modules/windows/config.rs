@@ -128,9 +128,7 @@ ${bold.c5}Battery${reset} {battery}
 
 
 # Display settings
-title_fqdn=on
-underline=on
-separator=":"
+ascii_size=small
 
 # Output toggles
 show_ascii=on
