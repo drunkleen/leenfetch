@@ -69,6 +69,8 @@ pub fn get_builtin_distro_colors(distro: &str) -> &'static [u8] {
         | ("opensuse tumbleweed", _)
         | ("opensuse_tumbleweed", _) => OPENSUSE,
 
+        ("parch", _) => PARCH,
+
         ("parrot", _) => PARROT,
 
         ("popos", _) | ("pop_os", _) | ("pop!_os", _) => POP_OS,
@@ -136,6 +138,8 @@ const MX: &[u8] = &[4, 6, 7];
 const NIXOS: &[u8] = &[4, 6];
 
 const OPENSUSE: &[u8] = &[2, 7];
+
+const PARCH: &[u8] = &[4, 7, 1];
 
 const PARROT: &[u8] = &[6, 7];
 

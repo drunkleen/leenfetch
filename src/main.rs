@@ -149,6 +149,10 @@ fn print_ascii_and_info(ascii: &str, info_lines: &[String]) {
     let ascii_lines: Vec<&str> = ascii.lines().collect();
     let info_lines = info_lines.iter().map(|s| s.as_str()).collect::<Vec<_>>();
 
+    let ascii_count = ascii_lines.len();
+    let info_count = info_lines.len();
+    let mut total_lines = ascii_count.max(info_count);
+
     // Strip ANSI escape codes for accurate display width calculation
     let ansi_regex = Regex::new(r"\x1b\[[0-9;]*m").unwrap();
 
@@ -173,9 +177,14 @@ fn print_ascii_and_info(ascii: &str, info_lines: &[String]) {
     print!("\x1b[{}A", move_up);
     std::io::Write::flush(&mut std::io::stdout()).unwrap();
 
+    total_lines -= info_lines.len();
     // Print each info line aligned to calculated column
     for (_, info_line) in info_lines.iter().enumerate() {
         print!("\x1b[{}G", print_column); // move to column
         println!("{info_line}");
+    }
+
+    for _ in 0..total_lines {
+        println!();
     }
 }

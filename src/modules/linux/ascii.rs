@@ -8,8 +8,6 @@ pub fn get_builtin_ascii_art(ascii_distro: &str) -> &'static str {
         ascii_distro.to_lowercase()
     };
 
-    println!("distro: {}", dist);
-
     match (dist.as_str(), small_size) {
         ("almalinux", false) | ("alma", false) => ALMALINUX,
 
@@ -77,6 +75,8 @@ pub fn get_builtin_ascii_art(ascii_distro: &str) -> &'static str {
         ("opensuse", false) | ("open suse", false) | ("suse", false) => OPENSUSE,
         ("opensuse leap", _) | ("opensuse_leap", _) => OPENSUSE_LEAP,
         ("opensuse tumbleweed", _) | ("opensuse_tumbleweed", _) => OPENSUSE_TUMBLEWEED,
+
+        ("parch", _) => PARCH,
 
         ("parrot", _) => PARROT,
 
@@ -755,6 +755,34 @@ ${c2}                                     ......
    oWMO:.    .;xNMMk,       NNNMKl.          .xWMx
      :ONMMNXMMMKx;          .  ,xNMWKkxllox0NMWk,
          .....                    .:dOOXXKOxl,"#;
+
+const PARCH: &str = r#"
+‌${c1}             ,:lodddd.
+           .:clooood.
+         ;clllooooc
+       ;cclllllloo
+      .cccccllllll
+    .   ,cccclllll
+   ':::;; ccccclll;
+  .:::cccccccccccll;
+  ;::::ccccllllllcll:
+ .;::::cccclllloool::;
+ ;;;::::cccclllolc::::;.
+ ;;;::::cccclllccc:::::;.
+ ;;;::::cccclccccc::::::;.
+ ;;;;::::::llcccccc:::::'
+ ;;;;:; ,clllccccccc::
+ .;;  .cllllllcccccc::;::::'
+     .'''''''''',:lddoooolll
+    '.....'''',cdddooooollll
+   ........':oddddoooolllllc
+    ....';ldddddooooolllllc:
+      ,cdddddddooooollllccc
+       :ddddddoooolllllccc
+         ;ddooooolllllcc.
+            :ooollllc.
+                c'
+"#;
 
 const PARROT: &str = r#"
 ${c1}  `:oho/-`
