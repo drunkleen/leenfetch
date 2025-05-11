@@ -98,17 +98,17 @@ cpu_temp=C
 memory_unit=mib
 ```
 
-Макет полностью настраивается с помощью `[[тегов]]`, например:
+Макет полностью настраивается с помощью `[тегов]`, например:
 
 ```ini
 layout="
-[[titles]]
+[titles]
 {username}@{hostname}
-[[/titles]]
+[/titles]
 
-[[cpu]]
+[cpu]
 CPU: {cpu_index}
-[[/cpu]]
+[/cpu]
 "
 ```
 

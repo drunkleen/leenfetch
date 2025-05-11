@@ -47,10 +47,8 @@ impl Run {
 
         if let Ok(contents) = fs::read_to_string(path) {
             if let Some(layout_block) = contents.split("layout=").nth(1).and_then(|s| {
-                if s.starts_with("\"\"\"") {
-                    s[3..].split("\"\"\"").next()
-                } else if s.starts_with('"') {
-                    s[1..].split('"').next()
+                if s.starts_with("(") {
+                    s[1..].split(")").next()
                 } else {
                     None
                 }
@@ -128,8 +126,8 @@ impl Run {
 
             let process_titles_block =
                 |output: &mut String, username: &str, hostname: &str, enabled: bool| {
-                    let start_tag = "[[titles]]";
-                    let end_tag = "[[/titles]]";
+                    let start_tag = "[titles]";
+                    let end_tag = "[/titles]";
 
                     if let Some(start_idx) = output.find(start_tag) {
                         if let Some(end_idx) = output[start_idx + start_tag.len()..].find(end_tag) {
@@ -352,7 +350,7 @@ impl Run {
             vec![]
         };
 
-        if layout.contains("[[battery]]") {
+        if layout.contains("[battery]") {
             process_loop_block(
                 &mut output,
                 "battery",
@@ -374,7 +372,7 @@ impl Run {
 
         let gpus = if gpu_enabled { get_gpus() } else { vec![] };
 
-        if layout.contains("[[gpu]]") {
+        if layout.contains("[gpu]") {
             process_loop_block(&mut output, "gpu", &gpus, gpu_enabled, |block, gpu| {
                 let index = gpus.iter().position(|g| g == gpu).unwrap_or(0) + 1;
                 block
@@ -388,7 +386,7 @@ impl Run {
         // ----------------------------
         let disk_enabled = run.is_enabled("show_disks");
 
-        if layout.contains("[[disk]]") {
+        if layout.contains("[disk]") {
             let mode = match run.get_from_cfg("disk_display") {
                 Some("bar") => DiskDisplay::Bar,
                 Some("infobar") => DiskDisplay::InfoBar,
@@ -499,7 +497,7 @@ impl Run {
     }
 
     pub fn should_render_tag(layout: &str, cfg: &Run, tag: &str, key: &str) -> bool {
-        layout.contains(&format!("[[{tag}]]")) && cfg.is_enabled(key)
+        layout.contains(&format!("[{tag}]")) && cfg.is_enabled(key)
     }
 
     pub fn get_enum<T>(&self, key: &str, default: T) -> T

@@ -7,108 +7,92 @@ pub const DEFAULT_CONFIG: &str = r#"
 # To use this config, copy it to ~/.config/leenfetch/config.conf
 # For more info, see https://github.com/drunkleen/leenfetch
 
-# 🎨 Colors
-# ____________________
-# 🖍️ Foreground Colors
-# | Token   | Color        |
-# | ------- | ------------ |
-# | `${c1}` | Bold Black   |
-# | `${c2}` | Bold Red     |
-# | `${c3}` | Bold Green   |
-# | `${c4}` | Bold Yellow  |
-# | `${c5}` | Bold Blue    |
-# | `${c6}` | Bold Magenta |
-# | `${c7}` | Bold Cyan    |
-# | `${c8}` | Bold White   |
-# 🔁 Reset Colors
-# Use `${reset}` to end a color block and return to default.
 
-
-#layout="""
-[[titles]]
+#layout=(
+[titles]
 ${c1}{username}${reset}@${c1}{hostname}${reset}
-[[/titles]]
+[/titles]
 
 {underline}
 
-[[os]]
+[os]
 ${c1}OS:${reset} {os_index}
-[[/os]]
+[/os]
 
-[[distro]]
+[distro]
 ${c1}Distro:${reset} {distro_index}
-[[/distro]]
+[/distro]
 
-[[model]]
+[model]
 ${c1}Host:${reset} {model_index}
-[[/model]]
+[/model]
 
-[[kernel]]
+[kernel]
 ${c1}Kernel:${reset} {kernel_index}
-[[/kernel]]
+[/kernel]
 
-[[uptime]]
+[uptime]
 ${c1}Uptime:${reset} {uptime_index}
-[[/uptime]]
+[/uptime]
 
-[[packages]]
+[packages]
 ${c1}Packages:${reset} {packages_index}
-[[/packages]]
+[/packages]
 
-[[shell]]
+[shell]
 ${c1}Shell:${reset} {shell_index}
-[[/shell]]
+[/shell]
 
-[[wm]]
+[wm]
 ${c1}WM:${reset} {wm_index}
-[[/wm]]
+[/wm]
 
-[[de]]
+[de]
 ${c1}DE:${reset} {de_index}
-[[/de]]
+[/de]
 
-[[wm_theme]]
+[wm_theme]
 ${c1}WM Theme:${reset} {wm_theme_index}
-[[/wm_theme]]
+[/wm_theme]
 
-[[cpu]]
+[cpu]
 ${c1}CPU:${reset} {cpu_index}
-[[/cpu]]
+[/cpu]
 
-[[gpu]]
+[gpu]
 ${c1}GPU #{gpu_index}:${reset} {gpu}
-[[/gpu]]
+[/gpu]
 
-[[memory]]
+[memory]
 ${c1}Memory:${reset} {memory_index}
-[[/memory]]
+[/memory]
 
-[[disk]]
+[disk]
 ${c1}Disk {disk_label}:${reset} {disk_index}
-[[/disk]]
+[/disk]
 
-[[resolution]]
+[resolution]
 ${c1}Resolution:${reset} {resolution_index}
-[[/resolution]]
+[/resolution]
 
-[[theme]]
+[theme]
 ${c1}Theme:${reset} {theme_index}
-[[/theme]]
+[/theme]
 
-[[battery]]
+[battery]
 ${c1}Battery${reset} {battery}
-[[/battery]]
+[/battery]
 
-[[song]]
+[song]
 {song_index}
-[[/song]]
+[/song]
 
 {empty_line}
 
-[[colors]]
+[colors]
 {colors_index}
-[[/colors]]
-"""
+[/colors]
+)
 
 
 # Display settings

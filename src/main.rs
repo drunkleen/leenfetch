@@ -126,9 +126,9 @@ CUSTOMIZATION:
     The layout is controlled using a templated multi-line string:
     
     Example block:
-      [[cpu]]
+      [cpu]
       ${{bold.c5}}CPU:${{reset}} {{cpu_index}}
-      [[/cpu]]
+      [/cpu]
 
     Use placeholders like {{cpu_index}}, {{gpu}}, {{uptime_index}}, etc.
     Full layout templates can be found in the example config.

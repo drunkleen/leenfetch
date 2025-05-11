@@ -45,85 +45,85 @@ pub const DEFAULT_CONFIG: &str = r#"
 
 
 #layout="""
-[[titles]]
+[titles]
 ${bold.c5}{username}${fg.c8}@${bold.c5}{hostname}${fg.c8}
-[[/titles]]
+[/titles]
 
 {underline}
 
-[[distro]]
+[distro]
 ${bold.c5}OS:${reset} {distro_index}
-[[/distro]]
+[/distro]
 
-[[model]]
+[model]
 ${bold.c5}Host:${reset} {model_index}
-[[/model]]
+[/model]
 
-[[kernel]]
+[kernel]
 ${bold.c5}Kernel:${reset} {kernel_index}
-[[/kernel]]
+[/kernel]
 
-[[uptime]]
+[uptime]
 ${bold.c5}Uptime:${reset} {uptime_index}
-[[/uptime]]
+[/uptime]
 
-[[packages]]
+[packages]
 ${bold.c5}Packages:${reset} {packages_index}
-[[/packages]]
+[/packages]
 
-[[shell]]
+[shell]
 ${bold.c5}Shell:${reset} {shell_index}
-[[/shell]]
+[/shell]
 
-[[wm]]
+[wm]
 ${bold.c5}WM:${reset} {wm_index}
-[[/wm]]
+[/wm]
 
-[[de]]
+[de]
 ${bold.c5}DE:${reset} {de_index}
-[[/de]]
+[/de]
 
-[[wm_theme]]
+[wm_theme]
 ${bold.c5}WM Theme:${reset} {wm_theme_index}
-[[/wm_theme]]
+[/wm_theme]
 
-[[cpu]]
+[cpu]
 ${bold.c5}CPU:${reset} {cpu_index}
-[[/cpu]]
+[/cpu]
 
-[[gpu]]
+[gpu]
 ${bold.c5}GPU #{gpu_index}:${reset} {gpu}
-[[/gpu]]
+[/gpu]
 
-[[memory]]
+[memory]
 ${bold.c5}Memory:${reset} {memory_index}
-[[/memory]]
+[/memory]
 
-[[disk]]
+[disk]
 ${bold.c5}Disk:${reset} {disk_label} => {disk_index}
-[[/disk]]
+[/disk]
 
-[[resolution]]
+[resolution]
 ${bold.c5}Resolution:${reset} {resolution_index}
-[[/resolution]]
+[/resolution]
 
-[[theme]]
+[theme]
 ${bold.c5}Theme:${reset} {theme_index}
-[[/theme]]
+[/theme]
 
-[[battery]]
+[battery]
 ${bold.c5}Battery${reset} {battery}
-[[/battery]]
+[/battery]
 
-[[song]]
+[song]
 {song_index}
-[[/song]]
+[/song]
 
 {empty_line}
 
-[[colors]]
+[colors]
 {colors_index}
-[[/colors]]
+[/colors]
 """
 
 

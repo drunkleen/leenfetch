@@ -98,17 +98,17 @@ cpu_temp=C
 memory_unit=mib
 ```
 
-布局完全支持自定义 `[[标签]]`，例如：
+布局完全支持自定义 `[标签]`，例如：
 
 ```ini
 layout="
-[[titles]]
+[titles]]
 {username}@{hostname}
-[[/titles]]
+[/titles]
 
-[[cpu]]
+[cpu]
 CPU: {cpu_index}
-[[/cpu]]
+[/cpu]
 "
 ```
 

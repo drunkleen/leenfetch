@@ -56,8 +56,8 @@ pub fn process_loop_block<T>(
     enabled: bool,
     render: impl Fn(&str, &T) -> String,
 ) {
-    let start_tag = format!("[[{tag}]]");
-    let end_tag = format!("[[/{tag}]]");
+    let start_tag = format!("[{tag}]");
+    let end_tag = format!("[/{tag}]");
 
     if let Some(start_idx) = output.find(&start_tag) {
         if let Some(end_rel) = output[start_idx + start_tag.len()..].find(&end_tag) {
@@ -81,8 +81,8 @@ pub fn process_loop_block<T>(
 }
 
 pub fn process_single_block(output: &mut String, tag: &str, enabled: bool, value: Option<String>) {
-    let start_tag = format!("[[{tag}]]");
-    let end_tag = format!("[[/{tag}]]");
+    let start_tag = format!("[{tag}]");
+    let end_tag = format!("[/{tag}]");
 
     if let Some(start_idx) = output.find(&start_tag) {
         if let Some(end_rel) = output[start_idx + start_tag.len()..].find(&end_tag) {

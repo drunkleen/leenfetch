@@ -106,13 +106,13 @@ memory_unit=mib
 
 ```ini
 layout="
-[[titles]]
+[titles]
 {username}@{hostname}
-[[/titles]]
+[/titles]
 
-[[cpu]]
+[cpu]
 CPU: {cpu_index}
-[[/cpu]]
+[/cpu]
 "
 ```
 

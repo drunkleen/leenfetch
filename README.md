@@ -104,17 +104,17 @@ cpu_temp=C
 memory_unit=mib
 ```
 
-The layout is fully customizable with `[[tags]]`, e.g.:
+The layout is fully customizable with `[tags]`, e.g.:
 
 ```ini
 layout="
-[[titles]]
+[titles]
 {username}@{hostname}
-[[/titles]]
+[/titles]
 
-[[cpu]]
+[cpu]
 CPU: {cpu_index}
-[[/cpu]]
+[/cpu]
 "
 ```
 
