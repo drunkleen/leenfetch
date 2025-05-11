@@ -112,7 +112,7 @@ ${c1}Battery${reset} {battery}
 
 
 # Display settings
-ascii_size=small
+ascii_size=large
 # Output toggles
 show_titles=on
 show_os=on
@@ -158,7 +158,9 @@ disk_display=barinfo
 battery_display=barinfo
 
 # Colors
-color_blocks=██
+color_blocks=███
 
-# Custom paths
-ascii_path="#;
+# Ascii Art
+ascii_distro=auto
+ascii_colors=distro
+custom_ascii_path="#;

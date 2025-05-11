@@ -1,14 +1,24 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, fs, path::Path};
 
-pub const DEFAULT_ANSI_BASE_COLORS: [&str; 8] = [
-    "\x1b[0;30m", // black
-    "\x1b[0;31m", // red
-    "\x1b[0;32m", // green
-    "\x1b[0;33m", // yellow
-    "\x1b[0;34m", // blue
-    "\x1b[0;35m", // magenta
-    "\x1b[0;36m", // cyan
-    "\x1b[0;37m", // white
+use super::{ascii::get_builtin_ascii_art, colors::get_builtin_distro_colors};
+
+pub const DEFAULT_ANSI_ALL_COLORS: [&str; 16] = [
+    "\x1b[1;30m", // Black
+    "\x1b[1;31m", // Red
+    "\x1b[1;32m", // Green
+    "\x1b[1;33m", // Yellow
+    "\x1b[1;34m", // Blue
+    "\x1b[1;35m", // Magenta
+    "\x1b[1;36m", // Cyan
+    "\x1b[1;37m", // White
+    "\x1b[1;90m", // Bright Black
+    "\x1b[1;91m", // Bright Red
+    "\x1b[1;92m", // Bright Green
+    "\x1b[1;93m", // Bright Yellow
+    "\x1b[1;94m", // Bright Blue
+    "\x1b[1;95m", // Bright Magenta
+    "\x1b[1;96m", // Bright Cyan
+    "\x1b[1;97m", // Bright White
 ];
 
 pub fn get_bar(percent: u8) -> String {
@@ -122,6 +132,29 @@ pub fn process_single_block(output: &mut String, tag: &str, enabled: bool, value
 }
 
 // ---------------------------------
+//        ASCII ART Functions
+// ---------------------------------
+
+pub fn get_custom_ascii(custom_path: &str) -> String {
+    if let Ok(content) = fs::read_to_string(Path::new(custom_path)) {
+        return content;
+    }
+
+    "\n".to_string()
+}
+
+pub fn get_ascii_and_colors(ascii_distro: &str) -> String {
+    if ascii_distro == "off" {
+        return "".to_string();
+    }
+
+    let ascii_art = get_builtin_ascii_art(ascii_distro);
+    // ascii_art.push_str("${reset}");
+
+    ascii_art.to_string()
+}
+
+// ---------------------------------
 //        Color Functions
 // ---------------------------------
 
@@ -163,24 +196,24 @@ pub fn color_palette(
     map
 }
 
-pub fn get_distro_colors_order(color_order: &[u8]) -> HashMap<&'static str, &'static str> {
+pub fn get_colors_in_order(color_order: &[u8]) -> HashMap<&'static str, &'static str> {
     // Start with c0 = bold black
     let mut entries: Vec<(&'static str, &'static str)> = vec![("c0", "\x1b[1;30m")];
 
-    let mut used = vec![false; 8];
+    let mut used = vec![false; 16]; // support 0–15
 
     // Fill c1 to cX using given color_order
     for (i, &idx) in color_order.iter().enumerate() {
-        if idx < 8 {
+        if idx < 16 {
             let key: &'static str = Box::leak(format!("c{}", i + 1).into_boxed_str());
-            entries.push((key, DEFAULT_ANSI_BASE_COLORS[idx as usize]));
+            entries.push((key, DEFAULT_ANSI_ALL_COLORS[idx as usize]));
             used[idx as usize] = true;
         }
     }
 
     // Fill remaining cX from unused colors
     let mut next_index = color_order.len() + 1;
-    for (i, &color) in DEFAULT_ANSI_BASE_COLORS.iter().enumerate() {
+    for (i, &color) in DEFAULT_ANSI_ALL_COLORS.iter().enumerate() {
         if !used[i] {
             let key: &'static str = Box::leak(format!("c{}", next_index).into_boxed_str());
             entries.push((key, color));
@@ -194,6 +227,28 @@ pub fn get_distro_colors_order(color_order: &[u8]) -> HashMap<&'static str, &'st
     map
 }
 
-pub fn get_default_colors() -> HashMap<&'static str, &'static str> {
-    get_distro_colors_order(&[0, 1, 2, 3, 4, 5, 6, 7])
+pub fn get_custom_colors_order(colors_str_order: &str) -> HashMap<&'static str, &'static str> {
+    let custom_color_str_list: Vec<&str> = colors_str_order.split(',').map(str::trim).collect();
+
+    // Try to parse all color indices
+    let all_parsed: Option<Vec<u8>> = custom_color_str_list
+        .iter()
+        .map(|s| s.parse::<u8>().ok())
+        .collect();
+
+    let color_list: Vec<u8> = if let Some(list) = all_parsed {
+        list
+    } else {
+        // Fallback: interpret the string as a distro name
+        get_builtin_distro_colors(colors_str_order).to_vec()
+    };
+
+    get_colors_in_order(&color_list)
+}
+
+pub fn get_distro_colors(distro: &str) -> HashMap<&'static str, &'static str> {
+    let dist_color = get_builtin_distro_colors(distro);
+    // ascii_art.push_str("${reset}");
+
+    get_colors_in_order(dist_color)
 }

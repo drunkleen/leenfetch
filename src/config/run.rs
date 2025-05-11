@@ -3,7 +3,6 @@ use std::fs;
 use std::path::PathBuf;
 
 use crate::modules::{
-    ascii::{get_ascii_and_colors, AsciiSize},
     config::CONFIG_PATH,
     desktop::{
         de::get_de, resolution::get_resolution, theme::get_theme, wm::get_wm,
@@ -27,7 +26,10 @@ use crate::modules::{
         os::get_os,
     },
     title::get_titles,
-    utils::{colorize_text, get_terminal_color, process_loop_block, process_single_block},
+    utils::{
+        colorize_text, get_ascii_and_colors, get_custom_ascii, get_custom_colors_order,
+        get_distro_colors, get_terminal_color, process_loop_block, process_single_block,
+    },
 };
 
 #[derive(Debug, Default)]
@@ -171,18 +173,12 @@ impl Run {
         };
         process_single_block(&mut output, "os", run.is_enabled("show_os"), os);
 
-        let distro = override_map
-            .get("distro")
-            .map(|s| s.to_string())
-            .or_else(|| {
-                if Self::should_render_tag(layout, run, "distro", "show_distro") {
-                    let shorthand =
-                        run.get_enum("distro_display", DistroDisplay::NameModelVersionArch);
-                    Some(get_distro(shorthand))
-                } else {
-                    None
-                }
-            });
+        let distro = if Self::should_render_tag(layout, run, "distro", "show_distro") {
+            let shorthand = run.get_enum("distro_display", DistroDisplay::NameModelVersionArch);
+            Some(get_distro(shorthand))
+        } else {
+            None
+        };
         process_single_block(
             &mut output,
             "distro",
@@ -280,10 +276,11 @@ impl Run {
                 get_cpu(
                     run.is_enabled("cpu_brand"),
                     run.is_enabled("cpu_speed"),
-                    run.get("cpu_cores") != Some("off"),
-                    run.get("cpu_temp").unwrap_or("off") != "off",
+                    run.get_from_cfg("cpu_cores") != Some("off"),
+                    run.get_from_cfg("cpu_temp").unwrap_or("off") != "off",
                     run.is_enabled("speed_shorthand"),
-                    run.get("cpu_temp").map(|s| s.chars().next().unwrap_or('C')),
+                    run.get_from_cfg("cpu_temp")
+                        .map(|s| s.chars().next().unwrap_or('C')),
                 )
                 .unwrap_or("Unknown".into()),
             )
@@ -329,7 +326,7 @@ impl Run {
         process_single_block(&mut output, "song", run.is_enabled("show_song"), song);
 
         let colors = if Self::should_render_tag(layout, run, "colors", "show_terminal_colors") {
-            let color_blocks = run.get("color_blocks").unwrap_or("███");
+            let color_blocks = run.get_from_cfg("color_blocks").unwrap_or("███");
 
             Some(get_terminal_color(color_blocks).join("\n"))
         } else {
@@ -392,7 +389,7 @@ impl Run {
         let disk_enabled = run.is_enabled("show_disks");
 
         if layout.contains("[[disk]]") {
-            let mode = match run.get("disk_display") {
+            let mode = match run.get_from_cfg("disk_display") {
                 Some("bar") => DiskDisplay::Bar,
                 Some("infobar") => DiskDisplay::InfoBar,
                 Some("barinfo") => DiskDisplay::BarInfo,
@@ -400,14 +397,14 @@ impl Run {
                 _ => DiskDisplay::Info,
             };
 
-            let subtitle = match run.get("disk_subtitle") {
+            let subtitle = match run.get_from_cfg("disk_subtitle") {
                 Some("name") => DiskSubtitle::Name,
                 Some("mount") => DiskSubtitle::Mount,
                 Some("none") => DiskSubtitle::None,
                 _ => DiskSubtitle::Dir,
             };
 
-            let paths = run.get("disk_show").map(|s| vec![s]);
+            let paths = run.get_from_cfg("disk_show").map(|s| vec![s]);
 
             let disks = if disk_enabled {
                 get_disks(subtitle, mode, paths).unwrap_or_default()
@@ -439,16 +436,57 @@ impl Run {
         // ascii art
         // ----------------------------
 
-        let ascii_art_size = override_map
-            .get("ascii-size")
-            .map(|s| s.to_string())
-            .unwrap_or_else(|| run.get_enum("ascii_size", AsciiSize::Large).to_string());
+        // let ascii_art_size = override_map
+        //     .get("ascii_size")
+        //     .map(|s| s.to_string())
+        //     .unwrap_or_else(|| run.get_enum("ascii_size", AsciiSize::Large).to_string());
 
-        let (raw_ascii_art, distro_colors) = get_ascii_and_colors(
-            distro.as_deref().unwrap_or("unknown"),
-            run.get("ascii_path"),
-            ascii_art_size,
-        );
+        // ---------------------------------------------------------------------------------------------------
+        // ---------------------------------------------------------------------------------------------------
+
+        let custom_ascii_path = override_map
+            .get("custom_ascii_path")
+            .map(String::as_str)
+            .or_else(|| {
+                run.get_from_cfg("custom_ascii_path")
+                    .filter(|s| !s.trim().is_empty())
+            });
+
+        let custom_ascii_colors = override_map
+            .get("ascii_colors")
+            .map(String::as_str)
+            .or_else(|| {
+                run.get_from_cfg("ascii_colors")
+                    .filter(|s| !s.trim().is_empty())
+            });
+
+        // Resolves "ascii_distro", defaults to "auto"
+        let ascii_distro = override_map
+            .get("ascii_distro")
+            .cloned()
+            .or_else(|| run.get_from_cfg("ascii_distro").map(|s| s.to_string()))
+            .unwrap_or_else(|| "auto".to_string());
+
+        let resolved_distro = match ascii_distro.as_str() {
+            "auto" => get_distro(DistroDisplay::Name),
+            "auto_small" => format!("{}_small", get_distro(DistroDisplay::Name)),
+            other => other.to_string(),
+        };
+
+        // Load ASCII Art
+        let raw_ascii_art = custom_ascii_path
+            .map(get_custom_ascii)
+            .unwrap_or_else(|| get_ascii_and_colors(&resolved_distro));
+
+        // Load Colors
+        let distro_colors = match custom_ascii_colors {
+            Some("distro") => get_distro_colors(&resolved_distro),
+            Some(other) => get_custom_colors_order(other),
+            None => get_distro_colors(&resolved_distro),
+        };
+
+        // ---------------------------------------------------------------------------------------------------
+        // ---------------------------------------------------------------------------------------------------
 
         // let distro_colors = get_distro_colors_order(&distro.unwrap_or("unknown".into()));
 
@@ -468,12 +506,12 @@ impl Run {
     where
         T: std::str::FromStr,
     {
-        self.get(key)
+        self.get_from_cfg(key)
             .and_then(|val| val.parse::<T>().ok())
             .unwrap_or(default)
     }
 
-    pub fn get(&self, key: &str) -> Option<&str> {
+    pub fn get_from_cfg(&self, key: &str) -> Option<&str> {
         self.string_values.get(key).map(|s| s.as_str())
     }
 

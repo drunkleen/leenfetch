@@ -1,11 +1,11 @@
 mod config;
 mod modules;
-
 use modules::helper::list_options;
 
 use config::run::Run;
 use regex::Regex;
 use std::collections::HashMap;
+use unicode_width::UnicodeWidthStr;
 
 fn main() {
     let mut args = std::env::args().skip(1); // skip binary name
@@ -28,14 +28,31 @@ fn main() {
                 }
                 return;
             }
-            "--distro" => {
+            "--ascii_distro" => {
                 if let Some(val) = args.next() {
-                    override_map.insert("distro", val);
+                    override_map.insert("ascii_distro", val);
+                } else {
+                    println!("❌ ascii_distro cannot be empty");
+                    println!("⚠️ use --help for more info");
+                    return;
                 }
             }
-            "--ascii-size" => {
+            "--ascii_colors" => {
                 if let Some(val) = args.next() {
-                    override_map.insert("ascii-size", val);
+                    override_map.insert("ascii_colors", val);
+                } else {
+                    println!("❌ ascii_colors cannot be empty");
+                    println!("⚠️ use --help for more info");
+                    return;
+                }
+            }
+            "--custom_ascii_path" => {
+                if let Some(val) = args.next() {
+                    override_map.insert("custom_ascii_path", val);
+                } else {
+                    println!("❌ custom_ascii_path cannot be empty");
+                    println!("⚠️ use --help for more info");
+                    return;
                 }
             }
             _ => {
@@ -50,7 +67,7 @@ fn main() {
 
     let cfg = Run::load();
 
-    if let Some(layout) = cfg.get("layout") {
+    if let Some(layout) = cfg.get_from_cfg("layout") {
         let (filled, ascii) = &Run::fill_layout(layout, &cfg, override_map);
 
         print_ascii_and_info(
@@ -71,9 +88,12 @@ USAGE:
   leenfetch [OPTIONS]
 
 OPTIONS:
-  -h, --help           Show this help message and exit
-  -i, --init           Create a default config file at ~/.config/leenfetch/config.conf
-  -l, --list-options   Show all available config options and values
+  -h, --help               Show this help message and exit
+  -i, --init               Create a default config file at ~/.config/leenfetch/config.conf
+  -l, --list-options       Show all available config options and values
+      --ascii_distro <s>   Override detected distro (e.g., ubuntu, fedora, arch)
+      --ascii_colors <i>   Override detected distro colors (e.g., 2,7,3)
+      --ascii-size   <s>   Override ASCII size (small, large, or off)
 
 DESCRIPTION:
   leenfetch is a fast, modern, and minimal system info tool,
@@ -89,9 +109,13 @@ DESCRIPTION:
   theming, and modular display toggles.
 
 EXAMPLES:
-  leenfetch --init           🔧 Create the config file if it doesn’t exist
-  leenfetch                  🚀 Run normally with your config
-  leenfetch --list-options   📜 View all available configuration keys
+leenfetch                         🚀 Run normally with your config
+  leenfetch --init                🔧 Create the config file if it doesn’t exist
+  leenfetch --ascii-size small    🖼 Force small ASCII size
+  leenfetch --ascii_distro arch   🎨 Use Arch logo manually
+  leenfetch --ascii_colors debian 🎨 Use Debian colors manually
+  leenfetch --ascii_colors 2,7,3  🎨 Manually set custom colors
+  leenfetch --list-options        📜 View all available configuration keys
 
 CUSTOMIZATION:
 🛠️  Config path:
@@ -121,32 +145,37 @@ MORE:
 }
 
 fn print_ascii_and_info(ascii: &str, info_lines: &[String]) {
+    println!();
     let ascii_lines: Vec<&str> = ascii.lines().collect();
     let info_lines = info_lines.iter().map(|s| s.as_str()).collect::<Vec<_>>();
 
+    // Strip ANSI escape codes for accurate display width calculation
     let ansi_regex = Regex::new(r"\x1b\[[0-9;]*m").unwrap();
 
+    // Calculate the max visible width of ASCII lines
     let max_ascii_width = ascii_lines
         .iter()
-        .map(|line| ansi_regex.replace_all(line, "").len())
+        .map(|line| {
+            let stripped = ansi_regex.replace_all(line, "");
+            UnicodeWidthStr::width(stripped.as_ref())
+        })
         .max()
         .unwrap_or(0);
 
-    let print_column = max_ascii_width + 4; // where to print info (you can tweak)
+    let print_column = max_ascii_width + 4; // info column start
 
     for line in &ascii_lines {
         println!("{line}");
     }
 
-    // Step 2: move cursor up to where ASCII started
+    // Move cursor back up to start of ASCII block
     let move_up = ascii_lines.len();
-    print!("\x1b[{}A", move_up); // ANSI escape to move up
+    print!("\x1b[{}A", move_up);
     std::io::Write::flush(&mut std::io::stdout()).unwrap();
 
-    // Step 3: print info at fixed column
+    // Print each info line aligned to calculated column
     for (_, info_line) in info_lines.iter().enumerate() {
-        // move cursor to column
-        print!("\x1b[{}G", print_column); // move to column X
+        print!("\x1b[{}G", print_column); // move to column
         println!("{info_line}");
     }
 }
