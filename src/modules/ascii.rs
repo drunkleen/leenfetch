@@ -8,6 +8,16 @@ pub fn get_builtin_ascii_art(ascii_distro: &str) -> &'static str {
         ascii_distro.to_lowercase()
     };
 
+    if dist.contains("windows") {
+        if dist.contains("11") {
+            return WINDOWS_11;
+        } else if dist.contains("10") || dist.contains("8") {
+            return WINDOWS_10;
+        } else {
+            return WINDOWS;
+        }
+    }
+
     match (dist.as_str(), small_size) {
         ("almalinux", false) | ("alma", false) => ALMALINUX,
 
