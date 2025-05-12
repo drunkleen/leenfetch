@@ -29,8 +29,8 @@ pub fn get_builtin_ascii_art(ascii_distro: &str) -> &'static str {
 
         ("antix", _) => ANTI_X,
 
-        ("arch", true) | ("archlinux", true) => ARCH_SMALL,
-        ("arch", false) | ("archlinux", false) => ARCH,
+        ("arch", true) | ("archlinux", true) | ("arch linux", true) => ARCH_SMALL,
+        ("arch", false) | ("archlinux", false) | ("arch linux", false) => ARCH,
 
         ("arcolinux", true) => ARCOLINUX_SMALL,
         ("arcolinux", false) => ARCOLINUX,
@@ -86,9 +86,9 @@ pub fn get_builtin_ascii_art(ascii_distro: &str) -> &'static str {
         ("opensuse leap", _) | ("opensuse_leap", _) => OPENSUSE_LEAP,
         ("opensuse tumbleweed", _) | ("opensuse_tumbleweed", _) => OPENSUSE_TUMBLEWEED,
 
-        ("parch", _) => PARCH,
+        ("parch", _) | ("parch linux", _) => PARCH,
 
-        ("parrot", _) => PARROT,
+        ("parrot", _) | ("parrot linux", _) => PARROT,
 
         ("popos", true) | ("pop_os", true) => POP_OS_SMALL,
         ("popos", false) | ("pop_os", false) | ("pop!_os", false) => POP_OS,

@@ -28,8 +28,8 @@ pub fn get_builtin_distro_colors(distro: &str) -> &'static [u8] {
 
         ("antix", false) => ANTI_X,
 
-        ("arch", true) | ("archlinux", true) => ARCH_SMALL,
-        ("arch", false) | ("archlinux", false) => ARCH,
+        ("arch", true) | ("archlinux", true) | ("arch linux", true) => ARCH_SMALL,
+        ("arch", false) | ("archlinux", false) | ("arch linux", false) => ARCH,
 
         ("arcolinux", _) => ARCOLINUX,
 
@@ -79,9 +79,9 @@ pub fn get_builtin_distro_colors(distro: &str) -> &'static [u8] {
         | ("opensuse tumbleweed", _)
         | ("opensuse_tumbleweed", _) => OPENSUSE,
 
-        ("parch", _) => PARCH,
+        ("parch", _) | ("parch linux", _) => PARCH,
 
-        ("parrot", _) => PARROT,
+        ("parrot", _) | ("parrot linux", _) => PARROT,
 
         ("popos", _) | ("pop_os", _) | ("pop!_os", _) => POP_OS,
 
