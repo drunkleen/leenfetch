@@ -17,4 +17,6 @@ pub use macos::*;
 #[cfg(target_os = "windows")]
 pub use windows::*;
 
+pub mod ascii;
+pub mod colors;
 pub mod utils;

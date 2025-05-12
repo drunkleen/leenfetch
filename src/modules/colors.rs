@@ -8,6 +8,16 @@ pub fn get_builtin_distro_colors(distro: &str) -> &'static [u8] {
         distro.to_lowercase()
     };
 
+    if dist.contains("windows") {
+        if dist.contains("11") {
+            return WINDOWS_11;
+        } else if dist.contains("10") || dist.contains("8") {
+            return WINDOWS_10;
+        } else {
+            return WINDOWS;
+        }
+    }
+
     match (dist.as_str(), small_size) {
         ("almalinux", false) | ("alma", false) => ALMALINUX,
 
@@ -154,3 +164,15 @@ const TAILS: &[u8] = &[5, 7];
 const UBUNTU: &[u8] = &[1, 7, 3];
 
 const ZORIN: &[u8] = &[4, 6];
+
+// =====================================================================
+// =====================================================================
+//                              WINDOWS
+// =====================================================================
+// =====================================================================
+
+const WINDOWS: &[u8] = &[1, 2, 4, 3];
+
+const WINDOWS_10: &[u8] = &[4, 7];
+
+const WINDOWS_11: &[u8] = &[4, 7];

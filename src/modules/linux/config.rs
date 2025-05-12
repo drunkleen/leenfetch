@@ -9,89 +9,89 @@ pub const DEFAULT_CONFIG: &str = r#"
 
 
 #layout=(
-[titles]
-${c1}{username}${reset}@${c1}{hostname}${reset}
-[/titles]
-
-{underline}
-
-[os]
-${c1}OS:${reset} {os_index}
-[/os]
-
-[distro]
-${c1}Distro:${reset} {distro_index}
-[/distro]
-
-[model]
-${c1}Host:${reset} {model_index}
-[/model]
-
-[kernel]
-${c1}Kernel:${reset} {kernel_index}
-[/kernel]
-
-[uptime]
-${c1}Uptime:${reset} {uptime_index}
-[/uptime]
-
-[packages]
-${c1}Packages:${reset} {packages_index}
-[/packages]
-
-[shell]
-${c1}Shell:${reset} {shell_index}
-[/shell]
-
-[wm]
-${c1}WM:${reset} {wm_index}
-[/wm]
-
-[de]
-${c1}DE:${reset} {de_index}
-[/de]
-
-[wm_theme]
-${c1}WM Theme:${reset} {wm_theme_index}
-[/wm_theme]
-
-[cpu]
-${c1}CPU:${reset} {cpu_index}
-[/cpu]
-
-[gpu]
-${c1}GPU #{gpu_index}:${reset} {gpu}
-[/gpu]
-
-[memory]
-${c1}Memory:${reset} {memory_index}
-[/memory]
-
-[disk]
-${c1}Disk {disk_label}:${reset} {disk_index}
-[/disk]
-
-[resolution]
-${c1}Resolution:${reset} {resolution_index}
-[/resolution]
-
-[theme]
-${c1}Theme:${reset} {theme_index}
-[/theme]
-
-[battery]
-${c1}Battery${reset} {battery}
-[/battery]
-
-[song]
-{song_index}
-[/song]
-
-{empty_line}
-
-[colors]
-{colors_index}
-[/colors]
+    [titles]
+    ${c1}{username}${reset}@${c1}{hostname}${reset}
+    [/titles]
+    
+    {underline}
+    
+    [os]
+    ${c1}OS:${reset} {os_index}
+    [/os]
+    
+    [distro]
+    ${c1}Distro:${reset} {distro_index}
+    [/distro]
+    
+    [model]
+    ${c1}Host:${reset} {model_index}
+    [/model]
+    
+    [kernel]
+    ${c1}Kernel:${reset} {kernel_index}
+    [/kernel]
+    
+    [uptime]
+    ${c1}Uptime:${reset} {uptime_index}
+    [/uptime]
+    
+    [packages]
+    ${c1}Packages:${reset} {packages_index}
+    [/packages]
+    
+    [shell]
+    ${c1}Shell:${reset} {shell_index}
+    [/shell]
+    
+    [wm]
+    ${c1}WM:${reset} {wm_index}
+    [/wm]
+    
+    [de]
+    ${c1}DE:${reset} {de_index}
+    [/de]
+    
+    [wm_theme]
+    ${c1}WM Theme:${reset} {wm_theme_index}
+    [/wm_theme]
+    
+    [cpu]
+    ${c1}CPU:${reset} {cpu_index}
+    [/cpu]
+    
+    [gpu]
+    ${c1}GPU #{gpu_index}:${reset} {gpu}
+    [/gpu]
+    
+    [memory]
+    ${c1}Memory:${reset} {memory_index}
+    [/memory]
+    
+    [disk]
+    ${c1}Disk {disk_label}:${reset} {disk_index}
+    [/disk]
+    
+    [resolution]
+    ${c1}Resolution:${reset} {resolution_index}
+    [/resolution]
+    
+    [theme]
+    ${c1}Theme:${reset} {theme_index}
+    [/theme]
+    
+    [battery]
+    ${c1}Battery${reset} {battery}
+    [/battery]
+    
+    [song]
+    {song_index}
+    [/song]
+    
+    {empty_line}
+    
+    [colors]
+    {colors_index}
+    [/colors]
 )
 
 

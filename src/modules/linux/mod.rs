@@ -1,5 +1,3 @@
-pub mod ascii;
-pub mod colors;
 pub mod config;
 pub mod desktop;
 pub mod helper;
