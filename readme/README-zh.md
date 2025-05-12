@@ -11,9 +11,13 @@
 
 ---
 
-<img src="./src/TokyoNight.png" width="30%" />
-<img src="./src/SandStorm.png" width="30%" />
-<img src="./src/Aura.png" width="30%" />
+<img src="./src/TokyoNight.png" width="32%" /><img src="./src/SandStorm.png" width="32%" /><img src="./src/Aura.png" width="32%" />
+
+
+<img src="./src/debian.jpg"/>
+<img src="./src/windows10.jpg"/>
+<img src="./src/ubuntu.jpg"/>
+<img src="./src/windows.jpg"/>
 
 ## 🚀 功能特点
 
@@ -129,9 +133,9 @@ leenfetch --list-options
 | 自定义布局标签             | ✅ 已完成  |
 | GPU/CPU/内存/DE/WM 检测 | ✅ 已完成  |
 | 主题与颜色配置             | ✅ 基础实现 |
-| ASCII 艺术支持          | 🔄 计划中 |
+| ASCII 艺术支持          | ✅ 基础实现 |
 | 多线程处理               | 🔄 计划中 |
-| 支持 Windows          | ✅ 计划中 |
+| 支持 Windows          | ✅ 已完成 |
 | 支持 macOS            | 🔄 计划中 |
 | 支持 OpenBSD          | 🔄 计划中 |
 | 插件/模块系统             | ❓ 考虑中  |

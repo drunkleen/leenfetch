@@ -12,9 +12,13 @@
 
 ---
 
-<img src="./readme/src/TokyoNight.png" width="30%" />
-<img src="./readme/src/SandStorm.png" width="30%" />
-<img src="./readme/src/Aura.png" width="30%" />
+<img src="./readme/src/TokyoNight.png" width="32%" /><img src="./readme/src/SandStorm.png" width="32%" /><img src="./readme/src/Aura.png" width="32%" />
+
+
+<img src="./readme/src/debian.jpg"/>
+<img src="./readme/src/windows10.jpg"/>
+<img src="./readme/src/ubuntu.jpg"/>
+<img src="./readme/src/windows.jpg"/>
 
 
 ## 🚀 Features
@@ -135,9 +139,9 @@ leenfetch --list-options
 | Custom layout tags          | ✅ Done       |
 | GPU/CPU/Mem/DE/WM detection | ✅ Done       |
 | Theming / color profiles    | ✅ Basic      |
-| ASCII art support           | 🔄 Planned    |
+| ASCII art support           | ✅ Basic      |
 | Multi-Threading             | 🔄 Planned    |
-| Windows support             | ✅ Planned    |
+| Windows support             | ✅ Done       |
 | macOS support               | 🔄 Planned    |
 | OpenBSD support             | 🔄 Planned    |
 | Plugin/module system        | ❓ Maybe      |

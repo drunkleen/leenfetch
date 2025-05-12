@@ -13,9 +13,13 @@
 ---
 
 <div dir="rtl">
-<img src="./src/TokyoNight.png" width="30%" />
-<img src="./src/SandStorm.png" width="30%" />
-<img src="./src/Aura.png" width="30%" />
+<img src="./src/TokyoNight.png" width="32%" /><img src="./src/SandStorm.png" width="32%" /><img src="./src/Aura.png" width="32%" />
+
+
+<img src="./src/debian.jpg"/>
+<img src="./src/windows10.jpg"/>
+<img src="./src/ubuntu.jpg"/>
+<img src="./src/windows.jpg"/>
 </div>
 
 ---
@@ -133,9 +137,9 @@ leenfetch --list-options
 | قالب‌سازی با تگ‌های سفارشی  | ✅ انجام شده     |
 | شناسایی GPU/CPU/MEM/DE/WM   | ✅ انجام شده     |
 | پروفایل رنگ / تم‌بندی       | ✅ اولیه         |
-| پشتیبانی از ASCII Art       | 🔄 در حال توسعه |
+| پشتیبانی از ASCII Art       | ✅ اولیه       |
 | چند-نخی‌سازی (multi-thread) | 🔄 در برنامه    |
-| پشتیبانی از Windows         | ✅ در برنامه    |
+| پشتیبانی از Windows         | ✅ انجام شده    |
 | پشتیبانی از macOS           | 🔄 در برنامه    |
 | پشتیبانی از OpenBSD         | 🔄 در برنامه    |
 | پشتیبانی از افزونه‌ها       | ❓ شاید          |
