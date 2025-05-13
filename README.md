@@ -1,16 +1,42 @@
 # 🧠 LeenFetch
 
+[![Crates.io](https://img.shields.io/crates/v/leenfetch)](https://crates.io/crates/leenfetch)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-<p align="center">
-    <a href="#">ENGLISH</a>
-    | <a href="./readme/README-fa.md">فارسی</a>
-    | <a href="./readme/README-ru.md">Русский </a>
-    | <a href="./readme/README-zh.md">中文</a>
-</p>
 
-### A fast, minimal, and customizable system information tool built in Rust — your alternative to Neofetch, for real power users.
+> 🌐 Available in: [English](#) | [فارسی](./readme/README-fa.md) | [Русский](./readme/README-ru.md) | [中文](./readme/README-zh.md)
 
----
+
+
+##### A fast, minimal, and customizable system information tool built in Rust — your alternative to Neofetch, for real power users.
+
+
+> ⚠️ **LeenFetch is under active development. Expect bugs and improvements regularly!**
+>
+> Want to help? Contributions, testing, and feedback are always welcome!
+
+
+## 💬 Feedback & Issues
+
+Found a bug? Got a feature idea?  
+Head over to the [issues](https://github.com/drunkleen/leenfetch/issues) or join the [discussions](https://github.com/drunkleen/leenfetch/discussions) page!
+
+## 📚 Table of Contents
+
+- [Screenshots](#-screenshots)
+- [Features](#-features)
+- [Installation](#-installation)
+- [Configuration](#️-configuration)
+- [Roadmap](#-roadmap)
+- [Contributing](#-contributing)
+- [Support LeenFetch](#-support-leenfetch)
+- [License](#-license)
+- [Inspiration](#-inspiration)
+
+
+
+## 📸 Screenshots
+
 
 <img src="./readme/src/TokyoNight.png" width="32%" /><img src="./readme/src/SandStorm.png" width="32%" /><img src="./readme/src/Aura.png" width="32%" />
 
@@ -28,10 +54,9 @@
 - 🧩 Modular design — enable or disable components via config
 - 💾 Smart defaults but easily extendable
 - 📦 Detects installed packages, shell, GPU, DE/WM, and more
+- 🖼️ Custom ASCII art support and override via config
+- 🎨 Supports theme-based color profiles (`ascii_colors=distro`, etc.)
 - 🔌 Simple config file: `~/.config/leenfetch/config.conf`
-<!-- - 🖼️ Supports custom ASCII art and dynamic themes -->
-
----
 
 
 
@@ -40,7 +65,7 @@
 
 ### ✅ Install from crates.io (recommended)
 
-make sure you have [cargo](https://rustup.rs/) installed
+Make sure you have [Rust & Cargo](https://rustup.rs/) installed:
 
 ```bash
 cargo install leenfetch
@@ -138,10 +163,11 @@ leenfetch --list-options
 | Config file loader          | ✅ Done       |
 | Custom layout tags          | ✅ Done       |
 | GPU/CPU/Mem/DE/WM detection | ✅ Done       |
-| Theming / color profiles    | ✅ Basic      |
-| ASCII art support           | ✅ Basic      |
-| Multi-Threading             | 🔄 Planned    |
+| Linux support               | ✅ Done       |
 | Windows support             | ✅ Done       |
+| CLI override options        | 🔁 Basic      |
+| ASCII art & theming         | 🔁 Basic      |
+| Multi-Threading             | 🔄 Planned    |
 | macOS support               | 🔄 Planned    |
 | OpenBSD support             | 🔄 Planned    |
 | Plugin/module system        | ❓ Maybe      |
@@ -161,7 +187,7 @@ We welcome clean PRs and documented modules! ✨
 
 ---
 
-## Donation
+## ☕ Support LeenFetch
 
 If you have found LeenFetch valuable and would like to contribute to its ongoing development, your support is greatly
 appreciated. You can show your appreciation by making a donation
@@ -189,5 +215,3 @@ Thank you for supporting the project! 🙏
 * [Neofetch](https://github.com/dylanaraps/neofetch)
 * [Fastfetch](https://github.com/fastfetch-cli/fastfetch)
 * [Rust](https://www.rust-lang.org/) — the foundation of LeenFetch
-
----
