@@ -8,7 +8,7 @@ pub const DEFAULT_CONFIG: &str = r#"
 # For more info, see https://github.com/drunkleen/leenfetch
 
 
-#layout="(
+#layout=(
     [titles]
     ${c1}{username}${reset}@${c1}{hostname}${reset}
     [/titles]

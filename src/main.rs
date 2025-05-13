@@ -81,8 +81,7 @@ fn main() {
             &filled.lines().map(|l| l.to_string()).collect::<Vec<_>>(),
         );
     } else {
-        print!("Ensures that config.conf exists in proper location\nUse --init to create it if needed.\n\n");
-        print_help();
+        print!("Ensures that config.conf exists in proper location\nUse --init to create it if needed.\nUse --help for more info\n");
     }
 }
 
