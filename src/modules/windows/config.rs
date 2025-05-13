@@ -8,16 +8,12 @@ pub const DEFAULT_CONFIG: &str = r#"
 # For more info, see https://github.com/drunkleen/leenfetch
 
 
-#layout=(
+#layout="(
     [titles]
     ${c1}{username}${reset}@${c1}{hostname}${reset}
     [/titles]
     
     {underline}
-    
-    [os]
-    ${c1}OS:${reset} {os_index}
-    [/os]
     
     [distro]
     ${c1}Distro:${reset} {distro_index}
@@ -93,58 +89,58 @@ pub const DEFAULT_CONFIG: &str = r#"
     {colors_index}
     [/colors]
 )
-    
-    
-# Display settings
-ascii_size=large
+
+
 # Output toggles
-show_titles=on
-show_os=on
-show_distro=on
-show_model=on
-show_uptime=on
-show_packages=on
-show_shell=on
-show_wm=on
-show_de=on
-show_wm_theme=on
-show_kernel=on
-show_cpu=on
-show_gpu=on
-show_memory=on
-show_song=on
-show_resolution=on
-show_theme=on
-show_disks=on
-show_battery=on
-show_terminal_colors=on
+show_titles="on"
+show_os="on"
+show_distro="on"
+show_model="on"
+show_uptime="on"
+show_packages="on"
+show_shell="on"
+show_wm="on"
+show_de="on"
+show_wm_theme="on"
+show_kernel="on"
+show_cpu="on"
+show_gpu="on"
+show_memory="on"
+show_song="on"
+show_resolution="on"
+show_theme="on"
+show_disks="on"
+show_battery="on"
+show_terminal_colors="on"
 
 # Shorthands and flags
-distro_display=name_model_arch
-uptime_shorthand=on
-memory_percent=on
-memory_unit=mib
-package_managers=tiny
-shell_path=off
-shell_version=on
-cpu_brand=on
-cpu_speed=on
-cpu_cores=logical
-cpu_temp=C
-speed_shorthand=on
-refresh_rate=on
-gpu_type=all
-de_version=on
-disk_show=/
-disk_subtitle=dir
-disk_percent=on
-disk_display=barinfo
-battery_display=barinfo
+distro_display="name_model_arch"
+uptime_shorthand="on"
+memory_percent="on"
+memory_unit="mib
+package_managers="tiny"
+shell_path="off"
+shell_version="on"
+cpu_brand="on"
+cpu_speed="on"
+cpu_cores="logical"
+cpu_temp="C"
+speed_shorthand="on"
+refresh_rate="on"
+gpu_type="all"
+de_version="on"
+disk_show="/"
+disk_subtitle="dir"
+disk_percent="on"
+disk_display="barinfo"
+battery_display="barinfo"
 
 # Colors
-color_blocks=███
+color_blocks="███"
 
 # Ascii Art
-ascii_distro=auto
-ascii_colors=distro
-custom_ascii_path="#;
+ascii_distro="auto"
+ascii_colors="distro"
+custom_ascii_path=""
+
+"#;

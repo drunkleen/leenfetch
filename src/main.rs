@@ -1,8 +1,9 @@
-mod config;
+mod core;
 mod modules;
+
 use modules::helper::list_options;
 
-use config::run::Run;
+use core::core::Core;
 use regex::Regex;
 use std::collections::HashMap;
 use unicode_width::UnicodeWidthStr;
@@ -23,9 +24,14 @@ fn main() {
                 return;
             }
             "--init" | "-i" => {
-                if !Run::ensure_config_exists() {
+                if !Core::ensure_config_exists() {
                     println!("⚠️ Config file already exists");
                 }
+                return;
+            }
+            "--reinit" | "-r" => {
+                Core::force_create_config();
+                println!("🔁 Reinitialized config file.");
                 return;
             }
             "--ascii_distro" => {
@@ -63,12 +69,12 @@ fn main() {
         }
     }
 
-    Run::ensure_config_exists();
+    Core::ensure_config_exists();
 
-    let cfg = Run::load();
+    let cfg = Core::load();
 
     if let Some(layout) = cfg.get_from_cfg("layout") {
-        let (filled, ascii) = &Run::fill_layout(layout, &cfg, override_map);
+        let (filled, ascii) = &Core::fill_layout(layout, &cfg, override_map);
 
         print_ascii_and_info(
             &ascii,
@@ -90,6 +96,7 @@ USAGE:
 OPTIONS:
   -h, --help               Show this help message and exit
   -i, --init               Create a default config file at ~/.config/leenfetch/config.conf
+  -r, --reinit             Reinitialize the config file
   -l, --list-options       Show all available config options and values
       --ascii_distro <s>   Override detected distro (e.g., ubuntu, fedora, arch)
       --ascii_colors <i>   Override detected distro colors (e.g., 2,7,3)

@@ -28,19 +28,21 @@ use crate::modules::{
     title::get_titles,
     utils::{
         colorize_text, get_ascii_and_colors, get_custom_ascii, get_custom_colors_order,
-        get_distro_colors, get_terminal_color, process_loop_block, process_single_block,
+        get_distro_colors, get_terminal_color,
     },
 };
 
+use super::parser::{load_layout_values, process_loop_block, process_single_block};
+
 #[derive(Debug, Default)]
-pub struct Run {
+pub struct Core {
     pub enabled: HashMap<String, bool>,
     pub string_values: HashMap<String, String>,
 }
 
-impl Run {
+impl Core {
     pub fn load() -> Self {
-        let mut config = Run::default();
+        let mut config = Core::default();
         let path = dirs::home_dir()
             .map(|p| p.join(CONFIG_PATH))
             .unwrap_or(PathBuf::from("/dev/null"));
@@ -55,7 +57,7 @@ impl Run {
             }) {
                 config
                     .string_values
-                    .insert("layout".into(), layout_block.trim().to_string());
+                    .insert("layout".into(), load_layout_values(layout_block));
             }
 
             for line in contents.lines() {
@@ -110,9 +112,37 @@ impl Run {
         }
     }
 
+    pub fn force_create_config() {
+        let path = dirs::home_dir()
+            .map(|p| p.join(CONFIG_PATH))
+            .expect("Could not determine home directory");
+
+        if path.exists() {
+            if let Err(e) = std::fs::remove_file(&path) {
+                eprintln!("❌ Failed to delete existing config: {e}");
+                return;
+            }
+        }
+
+        if let Some(parent) = path.parent() {
+            if !parent.exists() {
+                if let Err(e) = std::fs::create_dir_all(parent) {
+                    eprintln!("❌ Failed to create config directory: {e}");
+                    return;
+                }
+            }
+        }
+
+        if let Err(e) = std::fs::write(&path, crate::modules::config::DEFAULT_CONFIG) {
+            eprintln!("❌ Failed to write default config: {e}");
+        } else {
+            println!("✅ Created fresh config at {}", path.display());
+        }
+    }
+
     pub fn fill_layout(
         layout: &str,
-        run: &Run,
+        run: &Core,
         override_map: HashMap<&'static str, String>,
     ) -> (String, String) {
         let mut output = layout.to_string();
@@ -496,7 +526,7 @@ impl Run {
         (info_colored, ascii_colored)
     }
 
-    pub fn should_render_tag(layout: &str, cfg: &Run, tag: &str, key: &str) -> bool {
+    pub fn should_render_tag(layout: &str, cfg: &Core, tag: &str, key: &str) -> bool {
         layout.contains(&format!("[{tag}]")) && cfg.is_enabled(key)
     }
 
