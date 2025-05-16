@@ -25,7 +25,7 @@ impl FromStr for DistroDisplay {
             "name_model_version" => Ok(Self::NameModelVersion),
             "name_model_arch" => Ok(Self::NameModelArch),
             "name_model_version_arch" => Ok(Self::NameModelVersionArch),
-            _ => Err(()),
+            _ => Ok(Self::NameModelVersionArch),
         }
     }
 }

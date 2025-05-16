@@ -1,9 +1,11 @@
+mod config;
 mod core;
 mod modules;
 
 use modules::helper::list_options;
 
-use core::core::Core;
+// use core::core::Core;
+use core::Core;
 use regex::Regex;
 use std::collections::HashMap;
 use unicode_width::UnicodeWidthStr;
@@ -24,14 +26,45 @@ fn main() {
                 return;
             }
             "--init" | "-i" => {
-                if !Core::ensure_config_exists() {
-                    println!("⚠️ Config file already exists");
+                let results = config::ensure_config_files_exist();
+
+                for (file, created) in results {
+                    if created {
+                        println!("✅ Created missing config: {file}");
+                    } else {
+                        println!("✔️ Config already exists: {file}");
+                    }
                 }
+
                 return;
             }
             "--reinit" | "-r" => {
-                Core::force_create_config();
-                println!("🔁 Reinitialized config file.");
+                let result = config::delete_config_files();
+                for (file, ok) in result {
+                    println!(
+                        "{} {}",
+                        if ok {
+                            "🗑️ Deleted"
+                        } else {
+                            "⚠️ Failed to delete"
+                        },
+                        file
+                    );
+                }
+
+                let result = config::generate_config_files();
+                for (file, ok) in result {
+                    println!(
+                        "{} {}",
+                        if ok {
+                            "✅ Generated"
+                        } else {
+                            "⚠️ Failed to generate"
+                        },
+                        file
+                    );
+                }
+
                 return;
             }
             "--ascii_distro" => {
@@ -69,21 +102,34 @@ fn main() {
         }
     }
 
-    Core::ensure_config_exists();
-
-    let cfg = Core::load();
-
-    if let Some(layout) = cfg.get_from_cfg("layout") {
-        let (filled, ascii) = &Core::fill_layout(layout, &cfg, override_map);
-
-        print_ascii_and_info(
-            &ascii,
-            &filled.lines().map(|l| l.to_string()).collect::<Vec<_>>(),
-        );
-    } else {
-        print!("Ensures that config.conf exists in proper location\nUse --init to create it if needed.\n\n");
-        print_help();
+    let results = config::ensure_config_files_exist();
+    for (file, created) in results {
+        if created {
+            println!("✅ Created missing config: {file}");
+        }
     }
+
+    let mut core = Core::new();
+    let (info, ascii) = core.fill_layout(override_map);
+
+    print_ascii_and_info(
+        &ascii,
+        &info.lines().map(|l| l.to_string()).collect::<Vec<_>>(),
+    );
+
+    // let cfg = Core::load();
+
+    // if let Some(layout) = cfg.get_from_cfg("layout") {
+    //     let (filled, ascii) = &Core::fill_layout(layout, &cfg, override_map);
+
+    //     print_ascii_and_info(
+    //         &ascii,
+    //         &filled.lines().map(|l| l.to_string()).collect::<Vec<_>>(),
+    //     );
+    // } else {
+    //     print!("Ensures that config.conf exists in proper location\nUse --init to create it if needed.\n\n");
+    //     print_help();
+    // }
 }
 
 fn print_help() {

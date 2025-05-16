@@ -1,7 +1,8 @@
 use std::env;
 use std::process::Command;
 
-#[derive(Debug)]
+#[allow(dead_code)]
+#[derive(Debug, Default, Clone)]
 pub struct SongInfo {
     pub artist: String,
     pub album: String,

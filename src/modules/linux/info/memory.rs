@@ -17,7 +17,7 @@ impl FromStr for MemoryUnit {
             "mib" => Ok(MemoryUnit::MiB),
             "gib" => Ok(MemoryUnit::GiB),
             "kib" => Ok(MemoryUnit::KiB),
-            _ => Err(()),
+            _ => Ok(MemoryUnit::MiB),
         }
     }
 }

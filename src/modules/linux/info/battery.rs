@@ -20,7 +20,7 @@ impl FromStr for BatteryDisplayMode {
             "bar" => Ok(BatteryDisplayMode::Bar),
             "infobar" => Ok(BatteryDisplayMode::InfoBar),
             "barinfo" => Ok(BatteryDisplayMode::BarInfo),
-            _ => Err(()),
+            _ => Ok(BatteryDisplayMode::BarInfo), // default
         }
     }
 }

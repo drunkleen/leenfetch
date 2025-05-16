@@ -18,7 +18,7 @@ impl FromStr for PackageShorthand {
             "off" => Ok(PackageShorthand::Off),
             "on" => Ok(PackageShorthand::On),
             "tiny" => Ok(PackageShorthand::Tiny),
-            _ => Err(()),
+            _ => Ok(PackageShorthand::On), // default
         }
     }
 }

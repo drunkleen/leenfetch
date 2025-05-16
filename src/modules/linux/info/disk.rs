@@ -20,7 +20,7 @@ impl FromStr for DiskSubtitle {
             "dir" => Ok(DiskSubtitle::Dir),
             "none" => Ok(DiskSubtitle::None),
             "mount" => Ok(DiskSubtitle::Mount),
-            _ => Err(()),
+            _ => Ok(DiskSubtitle::Dir), // default
         }
     }
 }
@@ -44,7 +44,7 @@ impl FromStr for DiskDisplay {
             "infobar" => Ok(DiskDisplay::InfoBar),
             "barinfo" => Ok(DiskDisplay::BarInfo),
             "bar" => Ok(DiskDisplay::Bar),
-            _ => Err(()),
+            _ => Ok(DiskDisplay::InfoBar), // default
         }
     }
 }
