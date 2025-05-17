@@ -12,14 +12,11 @@ use crate::{
             wm_theme::get_wm_theme,
         },
         enums::{
-            DiskDisplay, DiskSubtitle, DistroDisplay, MemoryUnit, PackageShorthand, UptimeShorthand,
+            BatteryDisplayMode, DiskDisplay, DiskSubtitle, DistroDisplay, MemoryUnit,
+            PackageShorthand, UptimeShorthand,
         },
         info::{
-            battery::{get_battery, BatteryDisplayMode},
-            cpu::get_cpu,
-            disk::get_disks,
-            gpu::get_gpus,
-            memory::get_memory,
+            battery::get_battery, cpu::get_cpu, disk::get_disks, gpu::get_gpus, memory::get_memory,
             uptime::get_uptime,
         },
         packages::get_packages,
@@ -161,7 +158,7 @@ impl Core {
                     if self.data.wm.is_none() {
                         self.data.wm = get_wm();
                     }
-                    let de = get_de(self.toggles.show_wm, self.data.wm.as_deref());
+                    let de = get_de(self.flags.de_version, self.data.wm.as_deref());
                     Self::is_some_add_to_output(&info.label, &de, &mut self.output);
                     self.data.de = de;
                 }
@@ -191,7 +188,7 @@ impl Core {
                         self.flags.cpu_brand,
                         self.flags.cpu_frequency,
                         self.flags.cpu_cores,
-                        true,
+                        self.flags.cpu_show_temp,
                         self.flags.cpu_speed,
                         match self.flags.cpu_temp {
                             'f' | 'F' => Some('F'),

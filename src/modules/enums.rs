@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
-#[allow(dead_code)]
 #[derive(Debug, Default, Clone)]
+#[allow(dead_code)]
 pub struct SongInfo {
     pub artist: String,
     pub album: String,
@@ -77,7 +77,7 @@ impl FromStr for UptimeShorthand {
 }
 
 #[derive(Debug, Clone, Copy)]
-#[allow(dead_code)]
+
 pub enum MemoryUnit {
     MiB,
     GiB,
@@ -97,7 +97,6 @@ impl FromStr for MemoryUnit {
     }
 }
 
-#[allow(dead_code)]
 #[derive(Debug, Clone, Copy)]
 pub enum DiskSubtitle {
     Name,
@@ -120,7 +119,6 @@ impl FromStr for DiskSubtitle {
     }
 }
 
-#[allow(dead_code)]
 pub enum DiskDisplay {
     Info,
     Percentage,
@@ -140,6 +138,29 @@ impl FromStr for DiskDisplay {
             "barinfo" => Ok(DiskDisplay::BarInfo),
             "bar" => Ok(DiskDisplay::Bar),
             _ => Ok(DiskDisplay::InfoBar),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+
+pub enum BatteryDisplayMode {
+    Off,
+    Bar,
+    InfoBar,
+    BarInfo,
+}
+
+impl FromStr for BatteryDisplayMode {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, ()> {
+        match s.to_lowercase().as_str() {
+            "off" => Ok(BatteryDisplayMode::Off),
+            "bar" => Ok(BatteryDisplayMode::Bar),
+            "infobar" => Ok(BatteryDisplayMode::InfoBar),
+            "barinfo" => Ok(BatteryDisplayMode::BarInfo),
+            _ => Ok(BatteryDisplayMode::BarInfo),
         }
     }
 }

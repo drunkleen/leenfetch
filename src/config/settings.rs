@@ -7,7 +7,6 @@ pub struct Layout {
 }
 
 #[derive(Debug, Deserialize)]
-#[allow(dead_code)]
 pub struct Toggles {
     #[serde(default)]
     pub show_titles: bool,
@@ -52,7 +51,6 @@ pub struct Toggles {
 }
 
 #[derive(Debug, Deserialize)]
-#[allow(dead_code)]
 pub struct Flags {
     #[serde(default)]
     pub ascii_distro: String,
@@ -83,13 +81,7 @@ pub struct Flags {
     #[serde(default)]
     pub disk_display: String,
     #[serde(default)]
-    pub disk_percent: bool,
-    #[serde(default)]
-    pub disk_show: String,
-    #[serde(default)]
     pub disk_subtitle: String,
-    #[serde(default)]
-    pub gpu_type: String,
     #[serde(default)]
     pub memory_percent: bool,
     #[serde(default)]

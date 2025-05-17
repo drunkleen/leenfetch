@@ -1,27 +1,7 @@
 use std::fmt::Write;
 use std::fs;
-use std::str::FromStr;
 
-#[derive(Debug, Clone, Copy, PartialEq)]
-#[allow(dead_code)]
-pub enum UptimeShorthand {
-    Full,    // 1 day, 2 hours, 55 minutes
-    Tiny,    // 1d 2h 55m
-    Seconds, // 123456s
-}
-
-impl FromStr for UptimeShorthand {
-    type Err = ();
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s.to_lowercase().as_str() {
-            "full" => Ok(UptimeShorthand::Full),
-            "tiny" => Ok(UptimeShorthand::Tiny),
-            "seconds" => Ok(UptimeShorthand::Seconds),
-            _ => Ok(UptimeShorthand::Full),
-        }
-    }
-}
+use crate::modules::enums::UptimeShorthand;
 
 pub fn get_uptime(shorthand: UptimeShorthand) -> Option<String> {
     let seconds = read_uptime_seconds()?;
