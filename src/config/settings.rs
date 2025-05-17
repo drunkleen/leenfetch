@@ -60,7 +60,7 @@ pub struct Toggles {
 #[derive(Debug, Deserialize)]
 pub struct Flags {
     #[serde(default)]
-    pub ascii_distro: String,         // Which distro's ASCII art to use ("auto", "distro", or a specific name)
+    pub ascii_distro: String,         // Which distro's ASCII art to use ("auto" or a specific name)
     #[serde(default)]
     pub ascii_colors: String,         // Which color palette to use ("distro", or a comma-separated list of color indices)
     #[serde(default)]

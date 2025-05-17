@@ -140,7 +140,6 @@ This file lets you fine-tune how each block of information is displayed. You can
     // Select which distribution's ASCII art to display at the top.
     // Options:
     //   "auto"   - Automatically detect and use your current distribution's ASCII art.
-    //   "distro" - Use the detected distribution's art, but fallback to a generic one if not found.
     //   <name>   - Use a specific distro's art (e.g., "arch", "ubuntu", "debian").
     ascii_distro: "auto",
     ...

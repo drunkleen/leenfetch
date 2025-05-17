@@ -57,8 +57,6 @@ fn save_to_config_file(file_name: &str, content: &str) -> std::io::Result<()> {
         fs::create_dir_all(parent)?;
     }
 
-    println!("Creating config file: {}", path.display());
-
     let mut file = File::create(&path)?;
     file.write_all(content.as_bytes())?;
 
