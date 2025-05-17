@@ -1,4 +1,4 @@
-use crate::modules::song::SongInfo;
+use crate::modules::enums::SongInfo;
 
 pub struct Data {
     pub username: Option<String>,

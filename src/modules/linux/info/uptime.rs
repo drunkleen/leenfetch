@@ -18,7 +18,7 @@ impl FromStr for UptimeShorthand {
             "full" => Ok(UptimeShorthand::Full),
             "tiny" => Ok(UptimeShorthand::Tiny),
             "seconds" => Ok(UptimeShorthand::Seconds),
-            _ => Err(()),
+            _ => Ok(UptimeShorthand::Full),
         }
     }
 }

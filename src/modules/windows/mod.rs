@@ -1,4 +1,3 @@
-pub mod config;
 pub mod desktop;
 pub mod helper;
 pub mod info;

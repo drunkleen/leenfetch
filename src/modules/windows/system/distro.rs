@@ -1,32 +1,6 @@
 use std::{env, process::Command};
 
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum DistroDisplay {
-    Name,
-    NameVersion,
-    NameArch,
-    NameModel,
-    NameModelVersion,
-    NameModelArch,
-    NameModelVersionArch,
-}
-
-impl std::str::FromStr for DistroDisplay {
-    type Err = ();
-
-    fn from_str(s: &str) -> Result<Self, ()> {
-        match s.to_lowercase().as_str() {
-            "name" => Ok(DistroDisplay::Name),
-            "name_version" => Ok(DistroDisplay::NameVersion),
-            "name_arch" => Ok(DistroDisplay::NameArch),
-            "name_model" => Ok(DistroDisplay::NameModel),
-            "name_model_version" => Ok(DistroDisplay::NameModelVersion),
-            "name_model_arch" => Ok(DistroDisplay::NameModelArch),
-            "name_model_version_arch" => Ok(DistroDisplay::NameModelVersionArch),
-            _ => Err(()),
-        }
-    }
-}
+use crate::modules::enums::DistroDisplay;
 
 pub fn get_distro(display: DistroDisplay) -> String {
     let name = get_product_name();

@@ -11,23 +11,21 @@ use crate::{
             de::get_de, resolution::get_resolution, theme::get_theme, wm::get_wm,
             wm_theme::get_wm_theme,
         },
+        enums::{
+            DiskDisplay, DiskSubtitle, DistroDisplay, MemoryUnit, PackageShorthand, UptimeShorthand,
+        },
         info::{
             battery::{get_battery, BatteryDisplayMode},
             cpu::get_cpu,
-            disk::{get_disks, DiskDisplay, DiskSubtitle},
+            disk::get_disks,
             gpu::get_gpus,
-            memory::{get_memory, MemoryUnit},
-            uptime::{get_uptime, UptimeShorthand},
+            memory::get_memory,
+            uptime::get_uptime,
         },
-        packages::{get_packages, PackageShorthand},
+        packages::get_packages,
         shell::get_shell,
         song::get_song,
-        system::{
-            distro::{get_distro, DistroDisplay},
-            kernel::get_kernel,
-            model::get_model,
-            os::get_os,
-        },
+        system::{distro::get_distro, kernel::get_kernel, model::get_model, os::get_os},
         title::get_titles,
         utils::{
             colorize_text, get_ascii_and_colors, get_custom_ascii, get_custom_colors_order,
@@ -222,7 +220,7 @@ impl Core {
                     } else {
                         for (index, gpu) in gpus.iter().enumerate() {
                             self.output.push_str(
-                                format!("${{c1}}{} {}: ${{reset}}{}\n", &info.label, index, gpu)
+                                format!("${{c1}}{} #{}: ${{reset}}{}\n", &info.label, index, gpu)
                                     .as_str(),
                             );
                         }
