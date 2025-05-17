@@ -10,54 +10,80 @@ pub fn get_builtin_distro_colors(distro: &str) -> &'static [u8] {
 
     if dist.contains("windows") {
         if dist.contains("11") {
-            return WINDOWS_11;
+            return &[4, 7];
         } else if dist.contains("10") || dist.contains("8") {
-            return WINDOWS_10;
+            return &[4, 7];
         } else {
-            return WINDOWS;
+            return &[1, 2, 4, 3];
         }
     }
 
     match (dist.as_str(), small_size) {
-        ("almalinux", false) | ("alma", false) => ALMALINUX,
+        ("almalinux", false) | ("alma", false) => &[1, 3, 4, 2, 6],
 
-        ("alpine", true) => ALPINE_SMALL,
-        ("alpine", false) => ALPINE,
+        ("alpine", true) => &[4, 7],
+        ("alpine", false) => &[4, 5, 7, 6],
 
-        ("amazon", _) => AMAZON,
+        ("alter", _) => &[6, 6],
 
-        ("antix", false) => ANTI_X,
+        ("amazon", _) => &[3, 7],
 
-        ("arch", true) | ("archlinux", true) | ("arch linux", true) => ARCH_SMALL,
-        ("arch", false) | ("archlinux", false) | ("arch linux", false) => ARCH,
+        ("anarchy", _) => &[7],
 
-        ("archcraft", _) => ARCH_CRAFT,
+        ("instantos", _) => &[4, 6],
 
-        ("arcolinux", _) => ARCOLINUX,
+        ("android", _) => &[2, 7],
 
-        ("bodhi", _) => BODHI,
+        ("antix", false) => &[1, 7, 3],
 
-        ("calculate", false) | ("calculateos", false) => CALCULATE,
+        ("antergos", _) => &[4, 6],
 
-        ("clearos", false) => CLEAROS,
+        ("aosc os/retro", _) | ("aoscos/retro", _) | ("aosc os retro", _) => &[4, 7, 1, 3],
 
-        ("centos", _) => CENTOS,
+        ("aosc os", _) | ("aoscos", _) => &[4, 7, 1],
 
-        ("debian", _) => DEBIAN,
+        ("arch", true) | ("archlinux", true) | ("arch linux", true) => &[6, 7, 1],
+        ("arch", false) | ("archlinux", false) | ("arch linux", false) => &[6, 6, 7, 1],
 
-        ("elementary", _) => ELEMENTARY,
+        ("archbox", _) => &[2, 7, 1],
 
-        ("endeavouros", _) => ENDEAVOUROS,
+        ("archlabs", _) => &[6, 6, 7, 1],
 
-        ("fedora", _) => FEDORA,
+        ("archcraft", _) => &[6, 6, 7, 1],
 
-        ("garuda", _) => GARUDA,
+        ("arcolinux", _) => &[7, 4],
 
-        ("kali", _) => KALI,
+        ("apricity", _) => &[4, 7, 1],
 
-        ("kde", _) => KDE,
+        ("archstrike", _) => &[8, 6],
 
-        ("kubuntu", _) => KUBUNTU,
+        ("AIX", _) => &[2, 7],
+
+        ("bodhi", _) => &[7, 9, 2],
+
+        ("calculate", false) | ("calculateos", false) => &[7, 3],
+
+        ("clearos", false) => &[2],
+
+        ("centos", _) => &[3, 2, 4, 5, 7],
+
+        ("debian", _) => &[1, 3, 7],
+
+        ("elementary", _) => &[4, 7, 1],
+
+        ("endeavouros", _) => &[1, 5, 4],
+
+        ("fedora", _) => &[4, 7, 1],
+
+        ("hash", _) => &[1, 2, 3],
+
+        ("garuda", _) => &[7, 7, 3, 7, 2, 4],
+
+        ("kali", _) => &[4, 8],
+
+        ("kde", _) => &[2, 7],
+
+        ("kubuntu", _) => &[4, 7, 1],
 
         ("linuxmint", _)
         | ("linux mint", _)
@@ -65,13 +91,13 @@ pub fn get_builtin_distro_colors(distro: &str) -> &'static [u8] {
         | ("linuxmint_old", _)
         | ("mintold", _)
         | ("mint_old", _)
-        | ("mint", _) => LINUXMINT,
+        | ("mint", _) => &[2, 7],
 
-        ("manjaro", _) => MANJARO,
+        ("manjaro", _) => &[2, 7],
 
-        ("mx", _) => MX,
+        ("mx", _) => &[4, 6, 7],
 
-        ("nixos", _) => NIXOS,
+        ("nixos", _) => &[4, 6],
 
         ("suse", _)
         | ("opensuse", _)
@@ -79,104 +105,24 @@ pub fn get_builtin_distro_colors(distro: &str) -> &'static [u8] {
         | ("opensuse leap", _)
         | ("opensuse_leap", _)
         | ("opensuse tumbleweed", _)
-        | ("opensuse_tumbleweed", _) => OPENSUSE,
+        | ("opensuse_tumbleweed", _) => &[2, 7],
 
-        ("parch", _) | ("parch linux", _) => PARCH,
+        ("parch", _) | ("parch linux", _) => &[4, 7, 1],
 
-        ("parrot", _) | ("parrot linux", _) => PARROT,
+        ("parrot", _) | ("parrot linux", _) => &[6, 7],
 
-        ("popos", _) | ("pop_os", _) | ("pop!_os", _) => POP_OS,
+        ("popos", _) | ("pop_os", _) | ("pop!_os", _) => &[6, 7],
 
-        ("redhat", _) | ("red hat", _) | ("rhel", _) => REDHAT,
+        ("redhat", _) | ("red hat", _) | ("rhel", _) => &[1],
 
-        ("rocky", _) => ROCKY,
+        ("rocky", _) => &[2],
 
-        ("tails", _) => TAILS,
+        ("tails", _) => &[5, 7],
 
-        ("ubuntu", _) => UBUNTU,
+        ("ubuntu", _) => &[1, 7, 3],
 
-        ("zorin", _) => ZORIN,
+        ("zorin", _) => &[4, 6],
 
-        _ => DEFAULT,
+        _ => &[7, 0, 3],
     }
 }
-
-const DEFAULT: &[u8] = &[7, 0, 3];
-
-const ALMALINUX: &[u8] = &[1, 3, 4, 2, 6];
-
-const ALPINE: &[u8] = &[4, 5, 7, 6];
-const ALPINE_SMALL: &[u8] = &[4, 7];
-
-const AMAZON: &[u8] = &[3, 7];
-
-const ANTI_X: &[u8] = &[1, 7, 3];
-
-const ARCH: &[u8] = &[6, 6, 7, 1];
-const ARCH_SMALL: &[u8] = &[6, 7, 1];
-
-const ARCH_CRAFT: &[u8] = &[6, 6, 7, 1];
-
-const ARCOLINUX: &[u8] = &[7, 4];
-
-const BODHI: &[u8] = &[7, 9, 2];
-
-const CALCULATE: &[u8] = &[7, 3];
-
-const CENTOS: &[u8] = &[3, 2, 4, 5, 7];
-
-const CLEAROS: &[u8] = &[2];
-
-const DEBIAN: &[u8] = &[1, 3, 7];
-
-const ELEMENTARY: &[u8] = &[4, 7, 1];
-
-const ENDEAVOUROS: &[u8] = &[1, 5, 4];
-
-const FEDORA: &[u8] = &[4, 7, 1];
-
-const GARUDA: &[u8] = &[7, 7, 3, 7, 2, 4];
-
-const KALI: &[u8] = &[4, 8];
-
-const KDE: &[u8] = &[2, 7];
-
-const KUBUNTU: &[u8] = &[4, 7, 1];
-
-const LINUXMINT: &[u8] = &[2, 7];
-
-const MANJARO: &[u8] = &[2, 7];
-
-const MX: &[u8] = &[4, 6, 7];
-
-const NIXOS: &[u8] = &[4, 6];
-
-const OPENSUSE: &[u8] = &[2, 7];
-
-const PARCH: &[u8] = &[4, 7, 1];
-
-const PARROT: &[u8] = &[6, 7];
-
-const POP_OS: &[u8] = &[6, 7];
-
-const REDHAT: &[u8] = &[1];
-
-const ROCKY: &[u8] = &[2];
-
-const TAILS: &[u8] = &[5, 7];
-
-const UBUNTU: &[u8] = &[1, 7, 3];
-
-const ZORIN: &[u8] = &[4, 6];
-
-// =====================================================================
-// =====================================================================
-//                              WINDOWS
-// =====================================================================
-// =====================================================================
-
-const WINDOWS: &[u8] = &[1, 2, 4, 3];
-
-const WINDOWS_10: &[u8] = &[4, 7];
-
-const WINDOWS_11: &[u8] = &[4, 7];
