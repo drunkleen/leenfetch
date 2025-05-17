@@ -74,6 +74,18 @@ export PATH="$HOME/.cargo/bin:$PATH"
 
 ---
 
+### 🐧 在 Arch Linux 上安装（通过 AUR）
+
+如果你使用的是 Arch Linux 或基于 Arch 的发行版（例如 Manjaro），可以通过 [`yay`](https://github.com/Jguer/yay) 等 AUR 助手从 AUR 安装 LeenFetch：
+
+```bash
+yay -S leenfetch
+```
+
+> 安装过程中可能需要输入你的密码并确认构建操作。
+
+---
+
 ### 🛠️ 手动安装（从源码构建）
 
 ```bash

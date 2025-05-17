@@ -82,6 +82,19 @@ If you hit issues with `PATH`, try adding `~/.cargo/bin` to your shell:
 ```bash
 export PATH="$HOME/.cargo/bin:$PATH"
 ```
+---
+
+
+### 🐧 Install on Arch Linux (via AUR)
+
+If you're on Arch Linux or an Arch-based distribution (like Manjaro), you can install LeenFetch from the AUR using an AUR helper like [`yay`](https://github.com/Jguer/yay):
+
+```bash
+yay -S leenfetch
+```
+
+> You may need to enter your password and confirm the build during the process.
+
 
 ---
 
