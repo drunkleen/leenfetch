@@ -1,34 +1,7 @@
 use std::fs;
 use std::path::Path;
-use std::str::FromStr;
 
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum DistroDisplay {
-    Name,
-    NameVersion,
-    NameArch,
-    NameModel,
-    NameModelVersion,
-    NameModelArch,
-    NameModelVersionArch,
-}
-
-impl FromStr for DistroDisplay {
-    type Err = ();
-
-    fn from_str(s: &str) -> Result<Self, ()> {
-        match s.to_lowercase().as_str() {
-            "name" => Ok(Self::Name),
-            "name_version" => Ok(Self::NameVersion),
-            "name_arch" => Ok(Self::NameArch),
-            "name_model" => Ok(Self::NameModel),
-            "name_model_version" => Ok(Self::NameModelVersion),
-            "name_model_arch" => Ok(Self::NameModelArch),
-            "name_model_version_arch" => Ok(Self::NameModelVersionArch),
-            _ => Err(()),
-        }
-    }
-}
+use crate::modules::enums::DistroDisplay;
 
 pub fn get_distro(format: DistroDisplay) -> String {
     let release_files = [

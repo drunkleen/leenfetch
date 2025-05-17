@@ -1,53 +1,9 @@
 use std::process::Command;
 
-use crate::modules::utils::get_bar;
-use std::str::FromStr;
-
-#[allow(dead_code)]
-pub enum DiskSubtitle {
-    Name,
-    Dir,
-    None,
-    Mount,
-}
-
-impl FromStr for DiskSubtitle {
-    type Err = ();
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s.to_lowercase().as_str() {
-            "name" => Ok(DiskSubtitle::Name),
-            "dir" => Ok(DiskSubtitle::Dir),
-            "none" => Ok(DiskSubtitle::None),
-            "mount" => Ok(DiskSubtitle::Mount),
-            _ => Err(()),
-        }
-    }
-}
-
-#[allow(dead_code)]
-pub enum DiskDisplay {
-    Info,       // e.g. "40G / 80G"
-    Percentage, // "50% [====      ]"
-    InfoBar,    // "40G / 80G [====      ]"
-    BarInfo,    // "[====      ] 40G / 80G"
-    Bar,
-}
-
-impl FromStr for DiskDisplay {
-    type Err = ();
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s.to_lowercase().as_str() {
-            "info" => Ok(DiskDisplay::Info),
-            "percentage" => Ok(DiskDisplay::Percentage),
-            "infobar" => Ok(DiskDisplay::InfoBar),
-            "barinfo" => Ok(DiskDisplay::BarInfo),
-            "bar" => Ok(DiskDisplay::Bar),
-            _ => Err(()),
-        }
-    }
-}
+use crate::modules::{
+    enums::{DiskDisplay, DiskSubtitle},
+    utils::get_bar,
+};
 
 pub fn get_disks(
     subtitle_mode: DiskSubtitle,

@@ -17,7 +17,7 @@ use std::path::Path;
 /// Celsius.
 pub fn get_cpu(
     cpu_brand: bool,
-    show_speed: bool,
+    show_freq: bool,
     show_cores: bool,
     show_temp: bool,
     speed_shorthand: bool,
@@ -30,7 +30,7 @@ pub fn get_cpu(
     } else {
         None
     };
-    let speed = if show_speed {
+    let speed = if show_freq {
         extract_speed(&cpuinfo)
     } else {
         None

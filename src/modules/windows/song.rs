@@ -1,11 +1,6 @@
 use std::process::Command;
 
-#[derive(Debug)]
-pub struct SongInfo {
-    pub artist: String,
-    pub album: String,
-    pub title: String,
-}
+use crate::modules::enums::SongInfo;
 
 pub fn get_song() -> Option<SongInfo> {
     let player = detect_player()?;

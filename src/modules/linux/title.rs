@@ -1,6 +1,12 @@
 use std::env;
 use std::process::Command;
 
+/// Return (username, hostname, combined length) as a tuple.
+///
+/// FQDN is passed to `get_hostname` to determine whether to include the domain.
+///
+/// The length is the sum of the lengths of the username and hostname,
+/// plus one for the '@' separator.
 pub fn get_titles(fqdn: bool) -> (String, String, usize) {
     let user = get_user();
     let host = get_hostname(fqdn);

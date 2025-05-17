@@ -1,33 +1,9 @@
+use crate::modules::enums::BatteryDisplayMode;
 use crate::modules::utils::get_bar;
-
-use std::str::FromStr;
 
 use std::mem::MaybeUninit;
 use winapi::um::winbase::GetSystemPowerStatus;
 use winapi::um::winbase::SYSTEM_POWER_STATUS;
-
-#[derive(Debug, Clone, Copy)]
-#[allow(dead_code)]
-pub enum BatteryDisplayMode {
-    Off,
-    Bar,
-    InfoBar,
-    BarInfo,
-}
-
-impl FromStr for BatteryDisplayMode {
-    type Err = ();
-
-    fn from_str(s: &str) -> Result<Self, ()> {
-        match s.to_lowercase().as_str() {
-            "off" => Ok(BatteryDisplayMode::Off),
-            "bar" => Ok(BatteryDisplayMode::Bar),
-            "infobar" => Ok(BatteryDisplayMode::InfoBar),
-            "barinfo" => Ok(BatteryDisplayMode::BarInfo),
-            _ => Err(()),
-        }
-    }
-}
 
 pub fn get_battery(display_mode: BatteryDisplayMode) -> Vec<String> {
     let mut status = MaybeUninit::<SYSTEM_POWER_STATUS>::uninit();

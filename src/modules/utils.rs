@@ -72,7 +72,7 @@ pub fn get_ascii_and_colors(ascii_distro: &str) -> String {
 //        Color Functions
 // ---------------------------------
 
-pub fn colorize_text(input: &str, colors: &HashMap<&str, &str>) -> String {
+pub fn colorize_text(input: String, colors: &HashMap<&str, &str>) -> String {
     let mut result = String::new();
 
     for line in input.lines() {

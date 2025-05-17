@@ -1,9 +1,11 @@
+mod config;
 mod core;
 mod modules;
 
-use modules::helper::list_options;
+use modules::helper::{list_options, print_help};
 
-use core::core::Core;
+// use core::core::Core;
+use core::Core;
 use regex::Regex;
 use std::collections::HashMap;
 use unicode_width::UnicodeWidthStr;
@@ -24,14 +26,45 @@ fn main() {
                 return;
             }
             "--init" | "-i" => {
-                if !Core::ensure_config_exists() {
-                    println!("⚠️ Config file already exists");
+                let results = config::ensure_config_files_exist();
+
+                for (file, created) in results {
+                    if created {
+                        println!("✅ Created missing config: {file}");
+                    } else {
+                        println!("✔️ Config already exists: {file}");
+                    }
                 }
+
                 return;
             }
             "--reinit" | "-r" => {
-                Core::force_create_config();
-                println!("🔁 Reinitialized config file.");
+                let result = config::delete_config_files();
+                for (file, ok) in result {
+                    println!(
+                        "{} {}\n use --help for more info",
+                        if ok {
+                            "🗑️ Deleted"
+                        } else {
+                            "⚠️ Failed to delete"
+                        },
+                        file
+                    );
+                }
+
+                let result = config::generate_config_files();
+                for (file, ok) in result {
+                    println!(
+                        "{} {}\n use --help for more info",
+                        if ok {
+                            "✅ Generated"
+                        } else {
+                            "⚠️ Failed to generate"
+                        },
+                        file
+                    );
+                }
+
                 return;
             }
             "--ascii_distro" => {
@@ -69,84 +102,19 @@ fn main() {
         }
     }
 
-    Core::ensure_config_exists();
-
-    let cfg = Core::load();
-
-    if let Some(layout) = cfg.get_from_cfg("layout") {
-        let (filled, ascii) = &Core::fill_layout(layout, &cfg, override_map);
-
-        print_ascii_and_info(
-            &ascii,
-            &filled.lines().map(|l| l.to_string()).collect::<Vec<_>>(),
-        );
-    } else {
-        print!("Ensures that config.conf exists in proper location\nUse --init to create it if needed.\nUse --help for more info\n");
+    let results = config::ensure_config_files_exist();
+    for (file, created) in results {
+        if created {
+            println!("✅ Created missing config: {file}");
+        }
     }
-}
 
-fn print_help() {
-    println!(
-        r#"📦 leenfetch — Minimal, Stylish System Info for Your Terminal
+    let mut core = Core::new();
+    let (info, ascii) = core.fill_layout(override_map);
 
-USAGE:
-  leenfetch [OPTIONS]
-
-OPTIONS:
-  -h, --help               Show this help message and exit
-  -i, --init               Create a default config file at ~/.config/leenfetch/config.conf
-  -r, --reinit             Reinitialize the config file
-  -l, --list-options       Show all available config options and values
-      --ascii_distro <s>   Override detected distro (e.g., ubuntu, fedora, arch)
-      --ascii_colors <i>   Override detected distro colors (e.g., 2,7,3)
-      --ascii-size   <s>   Override ASCII size (small, large, or off)
-
-DESCRIPTION:
-  leenfetch is a fast, modern, and minimal system info tool,
-  written in Rust, designed for terminal enthusiasts.
-
-  It fetches and prints system information like:
-    • OS, Kernel, Uptime
-    • CPU, GPU, Memory, Disks
-    • Shell, WM, DE, Theme
-    • Resolution, Battery, Current Song
-
-  It’s highly customizable through a config file with layout control,
-  theming, and modular display toggles.
-
-EXAMPLES:
-leenfetch                         🚀 Run normally with your config
-  leenfetch --init                🔧 Create the config file if it doesn’t exist
-  leenfetch --ascii-size small    🖼 Force small ASCII size
-  leenfetch --ascii_distro arch   🎨 Use Arch logo manually
-  leenfetch --ascii_colors debian 🎨 Use Debian colors manually
-  leenfetch --ascii_colors 2,7,3  🎨 Manually set custom colors
-  leenfetch --list-options        📜 View all available configuration keys
-
-CUSTOMIZATION:
-🛠️  Config path:
-    • Linux:   ~/.config/leenfetch/config.conf
-    • Windows: %USERPROFILE%\.config\leenfetch\config.conf
-
-🎨 Output Layout:
-    The layout is controlled using a templated multi-line string:
-    
-    Example block:
-      [cpu]
-      ${{bold.c5}}CPU:${{reset}} {{cpu_index}}
-      [/cpu]
-
-    Use placeholders like {{cpu_index}}, {{gpu}}, {{uptime_index}}, etc.
-    Full layout templates can be found in the example config.
-
-💡 Tips:
-  • Toggle individual modules using keys like `show_cpu=on`
-  • Change themes using `disk_display=barinfo`, `battery_display=infobar`
-  • Combine with shell aliases for quick use!
-
-MORE:
-  Run with `--list-options` to see every supported config key.
-"#
+    print_ascii_and_info(
+        &ascii,
+        &info.lines().map(|l| l.to_string()).collect::<Vec<_>>(),
     );
 }
 

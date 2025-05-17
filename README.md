@@ -110,50 +110,81 @@ leenfetch
 
 ## ⚙️ Configuration
 
-On first run, LeenFetch will generate:
+On first run, LeenFetch will generate three config files in:
 
 ```bash
-~/.config/leenfetch/config.conf
+# Linux
+~/.config/leenfetch/
+
+# Windows
+C:\Users\<username>\AppData\Roaming\leenfetch\
 ```
 
-Edit it to enable/disable modules, change layout, or tweak shorthand formats.
+- `flags.ron` — Controls display and formatting options for each block.
+- `toggles.ron` — Controls which information blocks are shown or hidden.
+- `print_layout.ron` — Controls the order and labels of blocks in the output.
 
-### Example Options:
+Each file is heavily commented, so you can read the file itself for a full explanation of every option.
 
-```ini
-# Output toggles
-show_os=on
-show_kernel=on
-show_gpu=on
-show_packages=off
+### flags.ron
 
-# Shorthands and formatting
-distro_shorthand=tiny
-cpu_temp=C
-memory_unit=mib
+This file lets you fine-tune how each block of information is displayed. You can:
+- Choose which ASCII art and color palette to use.
+- Select how battery, disk, memory, and package info are shown.
+- Pick units, detail level, and formatting for each section.
+- Enable or disable features like CPU brand, temperature, shell version, etc.
+
+**Example:**
+```ron
+(
+    // Select which distribution's ASCII art to display at the top.
+    // Options:
+    //   "auto"   - Automatically detect and use your current distribution's ASCII art.
+    //   <name>   - Use a specific distro's art (e.g., "arch", "ubuntu", "debian").
+    ascii_distro: "auto",
+    ...
+)
 ```
 
-The layout is fully customizable with `[tags]`, e.g.:
+### toggles.ron
 
-```ini
-layout="
-[titles]
-{username}@{hostname}
-[/titles]
+This file controls which blocks of information are shown in the output. Set each option to `true` to show that block, or `false` to hide it.
 
-[cpu]
-CPU: {cpu_index}
-[/cpu]
-"
+**Example:**
+```ron
+(
+    // Show the user@host title at the top of the output.
+    // true  - Display the title block (e.g., "snape@archbox").
+    // false - Hide the title block.
+    show_titles: true,
+    ...
+)
 ```
 
-For a full list of options:
+### print_layout.ron
 
-```bash
-leenfetch --list-options
+This file controls the order and labels of each block in the output. You can rearrange, remove, or relabel any section to customize your output.
+
+**Example:**
+```
+[
+    // The user@host title block (e.g., "snape@archbox").
+    (label: "Titles", field: "titles"),
+    // The distribution (distro) information (e.g., "Arch Linux").
+    (label: "Distro", field: "distro"),
+    ...
+]
 ```
 
 ---
+
+### How to Edit
+
+- Open any of the `.ron` files in your favorite text editor.
+- Read the comments above each option for a full explanation.
+- Change values as you like, save, and re-run `leenfetch` to see your changes.
+
+For advanced details, see the comments in each config file or check the [wiki](https://github.com/drunkleen/leenfetch/wiki) (if available).
 
 ## 🎯 Roadmap
 

@@ -1,29 +1,5 @@
-use crate::modules::utils::get_bar;
+use crate::modules::{enums::BatteryDisplayMode, utils::get_bar};
 use std::fs;
-use std::str::FromStr;
-
-#[derive(Debug, Clone, Copy)]
-#[allow(dead_code)]
-pub enum BatteryDisplayMode {
-    Off,
-    Bar,
-    InfoBar,
-    BarInfo,
-}
-
-impl FromStr for BatteryDisplayMode {
-    type Err = ();
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s.to_lowercase().as_str() {
-            "off" => Ok(BatteryDisplayMode::Off),
-            "bar" => Ok(BatteryDisplayMode::Bar),
-            "infobar" => Ok(BatteryDisplayMode::InfoBar),
-            "barinfo" => Ok(BatteryDisplayMode::BarInfo),
-            _ => Err(()),
-        }
-    }
-}
 
 pub fn get_battery(display_mode: BatteryDisplayMode) -> Vec<String> {
     let entries = match fs::read_dir("/sys/class/power_supply/") {

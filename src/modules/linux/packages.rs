@@ -1,27 +1,6 @@
 use std::process::Command;
 
-use std::str::FromStr;
-
-#[derive(Debug, Clone, Copy, PartialEq)]
-#[allow(dead_code)]
-pub enum PackageShorthand {
-    Off,
-    On,
-    Tiny,
-}
-
-impl FromStr for PackageShorthand {
-    type Err = ();
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s.to_lowercase().as_str() {
-            "off" => Ok(PackageShorthand::Off),
-            "on" => Ok(PackageShorthand::On),
-            "tiny" => Ok(PackageShorthand::Tiny),
-            _ => Err(()),
-        }
-    }
-}
+use crate::modules::enums::PackageShorthand;
 
 pub fn get_packages(shorthand: PackageShorthand) -> Option<String> {
     let mut packages = 0u64;

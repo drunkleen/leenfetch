@@ -1,26 +1,6 @@
 use std::fs;
-use std::str::FromStr;
 
-#[derive(Debug, Clone, Copy)]
-#[allow(dead_code)]
-pub enum MemoryUnit {
-    MiB,
-    GiB,
-    KiB,
-}
-
-impl FromStr for MemoryUnit {
-    type Err = ();
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s.to_lowercase().as_str() {
-            "mib" => Ok(MemoryUnit::MiB),
-            "gib" => Ok(MemoryUnit::GiB),
-            "kib" => Ok(MemoryUnit::KiB),
-            _ => Err(()),
-        }
-    }
-}
+use crate::modules::enums::MemoryUnit;
 
 pub fn get_memory(memory_percent: bool, memory_unit: MemoryUnit) -> Option<String> {
     let contents = fs::read_to_string("/proc/meminfo").ok()?;

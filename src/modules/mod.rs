@@ -19,4 +19,7 @@ pub use windows::*;
 
 pub mod ascii;
 pub mod colors;
+pub mod enums;
 pub mod utils;
+pub mod helper;
+
