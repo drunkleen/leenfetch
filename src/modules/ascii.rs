@@ -32,10 +32,12 @@ pub fn get_builtin_ascii_art(ascii_distro: &str) -> &'static str {
         ("arch", true) | ("archlinux", true) | ("arch linux", true) => ARCH_SMALL,
         ("arch", false) | ("archlinux", false) | ("arch linux", false) => ARCH,
 
+        ("archcraft", _) => ARCH_CRAFT,
+
         ("arcolinux", true) => ARCOLINUX_SMALL,
         ("arcolinux", false) => ARCOLINUX,
 
-        ("bodhi", false) => BODHI,
+        ("bodhi", _) => BODHI,
 
         ("calculate", _) | ("calculateos", _) => CALCULATE,
 
@@ -254,6 +256,26 @@ ${c2}        .oossssso-````/ossssss+`
   `+sso+:-`                 `.-/+oso:
  `++:.                           `-/+/
  .`                                 `/"#;
+
+const ARCH_CRAFT: &str = r#"
+${c1}                   -m:
+                  :NMM+      .+
+                 +MMMMMo    -NMy
+                sMMMMMMMy  -MMMMh`
+               yMMMMMMMMMd` oMMMMd`
+             `dMMMMMMMMMMMm. /MMMMm-
+            .mMMMMMm-dMMMMMN- :NMMMN:
+           -NMMMMMd`  yMMMMMN: .mMMMM/
+          :NMMMMMy     sMMMMMM+ `dMMMMo
+         +MMMMMMs       +MMMMMMs `hMMMMy
+        oMMMMMMMds-      :NMMMMMy  sMMMMh`
+       yMMMMMNoydMMmo`    -NMMMMMd` +MMMMd.
+     `dMMMMMN-   `:yNNs`   .mMMMMMm. /MMMMm-
+    .mMMMMMm.        :hN/   `dMMMMMN- -NMMMN:
+   -NMMMMMd`           -hh`  `yMMMMMN: .mMMMM/
+  :NMMMMMy         `s`   :h.   oMMMMMM+ `-----
+ +MMMMMMo         .dMm.   `o.   +MMMMMMo
+sMMMMMM+         .mMMMN:    :`   :NMMMMMy"#;
 
 const ARCOLINUX_SMALL: &str = r#"
 ${c2}          A

@@ -18,7 +18,8 @@ fn main() {
     while let Some(arg) = args.next() {
         match arg.as_str() {
             "--version" | "-v" => {
-                println!("{} {}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"))
+                println!("{} {}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"));
+                return;
             }
             "--help" | "-h" => {
                 print_help();

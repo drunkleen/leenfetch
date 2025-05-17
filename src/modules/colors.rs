@@ -31,9 +31,11 @@ pub fn get_builtin_distro_colors(distro: &str) -> &'static [u8] {
         ("arch", true) | ("archlinux", true) | ("arch linux", true) => ARCH_SMALL,
         ("arch", false) | ("archlinux", false) | ("arch linux", false) => ARCH,
 
+        ("archcraft", _) => ARCH_CRAFT,
+
         ("arcolinux", _) => ARCOLINUX,
 
-        ("bodhi", false) => BODHI,
+        ("bodhi", _) => BODHI,
 
         ("calculate", false) | ("calculateos", false) => CALCULATE,
 
@@ -112,6 +114,8 @@ const ANTI_X: &[u8] = &[1, 7, 3];
 
 const ARCH: &[u8] = &[6, 6, 7, 1];
 const ARCH_SMALL: &[u8] = &[6, 7, 1];
+
+const ARCH_CRAFT: &[u8] = &[6, 6, 7, 1];
 
 const ARCOLINUX: &[u8] = &[7, 4];
 
