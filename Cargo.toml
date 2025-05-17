@@ -1,13 +1,13 @@
 [package]
 name = "leenfetch"
-version = "0.1.3"
+version = "0.2.0"
 edition = "2021"
 description = "Fast, minimal, customizable system info tool in Rust (Neofetch alternative)"
 license = "MIT"
 repository = "https://github.com/drunkleen/leenfetch"
 readme = "README.md"
 categories = ["command-line-utilities", "visualization", "os"]
-keywords = ["neofetch", "system", "terminal", "info", "rustfetch"]
+keywords = ["neofetch", "system", "terminal", "info", "leenfetch"]
 authors = ["DrunkLeen <snape@drunkleen.com>"]
 
 [dependencies]
