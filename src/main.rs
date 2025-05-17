@@ -116,10 +116,7 @@ fn main() {
         &ascii,
         &info.lines().map(|l| l.to_string()).collect::<Vec<_>>(),
     );
-
 }
-
-
 
 fn print_ascii_and_info(ascii: &str, info_lines: &[String]) {
     println!();
