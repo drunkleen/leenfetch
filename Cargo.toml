@@ -26,3 +26,13 @@ winapi = { version = "0.3.9", features = [
     "winbase",
     "winnt",
 ] }
+
+
+[package.metadata.deb]
+name = "leenfetch"
+maintainer = "DrunkLeen <snape@drunkleen.com>"
+extended-description = "Fast, minimal, customizable system info tool in Rust (Neofetch alternative)"
+license-file = "LICENSE"
+depends = "libc6 (>= 2.27), libgcc1 (>= 1:3.0), libx11-6 (>= 2:1.6.4), libxrandr2 (>= 2:1.5.0), libxext6 (>= 2:1.3.3), libxrender1 (>= 1:0.9.10), libxcb1 (>= 1.13), libxau6 (>= 1:1.0.8), libxdmcp6 (>= 1:1.1.2)"
+section = "utils"
+priority = "optional"

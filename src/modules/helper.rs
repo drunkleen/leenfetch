@@ -6,6 +6,7 @@ USAGE:
   leenfetch [OPTIONS]
 
 OPTIONS:
+  -V, --version            Print version information and exit
   -h, --help               Show this help message and exit
   -i, --init               Create default config files in ~/.config/leenfetch/
   -r, --reinit             Reinitialize all config files to defaults
@@ -170,6 +171,3 @@ You can rearrange, remove, or relabel any section to customize your output.
         "#
     );
 }
-
-
-
