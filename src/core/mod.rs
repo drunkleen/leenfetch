@@ -291,7 +291,7 @@ impl Core {
                     let battery_display_mode =
                         BatteryDisplayMode::from_str(&self.flags.battery_display);
                     let batteries =
-                        get_battery(battery_display_mode.unwrap_or(BatteryDisplayMode::InfoBar));
+                        get_battery(battery_display_mode.unwrap_or(BatteryDisplayMode::BarInfo));
 
                     if batteries.is_empty() {
                         self.output.push_str(
