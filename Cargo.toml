@@ -27,6 +27,11 @@ winapi = { version = "0.3.9", features = [
     "winnt",
 ] }
 
+# The profile that 'dist' will build with
+[profile.dist]
+inherits = "release"
+lto = "thin"
+
 
 [package.metadata.deb]
 name = "leenfetch"
