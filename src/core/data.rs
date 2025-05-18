@@ -2,6 +2,7 @@ use crate::modules::enums::SongInfo;
 
 /// Holds all the collected system information for display.
 /// Each field corresponds to a block or value in the output.
+#[derive(Default)]
 pub struct Data {
     /// Username of the current user (e.g., "snape")
     pub username: Option<String>,
@@ -45,32 +46,4 @@ pub struct Data {
     pub song: Option<SongInfo>,
     /// Terminal color palette string
     pub colors: Option<String>,
-}
-
-impl Default for Data {
-    fn default() -> Self {
-        Self {
-            username: None,
-            hostname: None,
-            os: None,
-            distro: None,
-            model: None,
-            kernel: None,
-            uptime: None,
-            packages: None,
-            shell: None,
-            wm: None,
-            de: None,
-            wm_theme: None,
-            cpu: None,
-            gpu: None,
-            memory: None,
-            disk: None,
-            resolution: None,
-            theme: None,
-            battery: None,
-            song: None,
-            colors: None,
-        }
-    }
 }

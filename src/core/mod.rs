@@ -366,7 +366,7 @@ impl Core {
         let custom_ascii_colors = override_map
             .get("ascii_colors")
             .map(String::as_str)
-            .or_else(|| Some(self.flags.ascii_colors.as_str()));
+            .or(Some(self.flags.ascii_colors.as_str()));
 
         let ascii_distro = override_map
             .get("ascii_distro")

@@ -157,7 +157,7 @@ fn print_ascii_and_info(ascii: &str, info_lines: &[String]) {
 
     total_lines -= info_lines.len();
     // Print each info line aligned to calculated column
-    for (_, info_line) in info_lines.iter().enumerate() {
+    for info_line in info_lines.iter() {
         print!("\x1b[{}G", print_column); // move to column
         println!("{info_line}");
     }
