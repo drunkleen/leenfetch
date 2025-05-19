@@ -27,7 +27,7 @@ jobs:
             aarch64-unknown-linux-gnu
 
       - name: Install system dependencies
-        run: sudo apt-get update && sudo apt-get install -y libx11-dev libxrandr-dev zip rpm
+        run: sudo apt-get update && sudo apt-get install -y libx11-dev libxrandr-dev zip rpm gcc-aarch64-linux-gnu
 
       - name: Install packaging tools
         run: |
@@ -35,35 +35,47 @@ jobs:
           cargo install cargo-rpm
           cargo install cross
 
-      - name: Build for Linux x86_64
+      - name: Build for Linux [x86_64]
         run: |
           cargo build --release --target-dir target/linux
           mkdir -p dist
           cp target/linux/release/leenfetch dist/leenfetch
-          tar -czvf dist/leenfetch-linux.tar.gz -C dist leenfetch
+          tar -czvf dist/leenfetch-${{ env.VERSION }}-linux-x86_64.tar.gz -C dist leenfetch
           rm dist/leenfetch
 
-      - name: Create .deb package
-        run: |
-          cargo deb
-          cp target/debian/*.deb dist/
-
-      - name: Create .rpm package
-        run: |
-          cargo rpm build
-          cp target/release/rpmbuild/RPMS/x86_64/*.rpm dist/
-
-      - name: Build for Windows
-        run: |
-          cross build --release --target x86_64-pc-windows-gnu --target-dir target/windows
-          cp target/windows/x86_64-pc-windows-gnu/release/leenfetch.exe dist/
-          cd dist && zip leenfetch-win.zip leenfetch.exe && rm leenfetch.exe && cd ..
-
-      - name: Build for ARM (aarch64)
+      - name: Build for Linux [aarch64]
         run: |
           cross build --release --target aarch64-unknown-linux-gnu --target-dir target/aarch64
-          cp target/aarch64/aarch64-unknown-linux-gnu/release/leenfetch dist/leenfetch-arm64
-          cd dist && tar -czvf leenfetch-arm64.tar.gz leenfetch-arm64 && rm leenfetch-arm64 && cd ..
+          cp target/aarch64/aarch64-unknown-linux-gnu/release/leenfetch dist/leenfetch
+          cd dist && tar -czvf leenfetch-${{ env.VERSION }}-linux-aarch64.tar.gz leenfetch && rm leenfetch && cd ..
+
+      - name: Build .deb package [x86_64]
+        run: |
+          cargo deb
+          mv target/debian/*.deb dist/leenfetch-${{ env.VERSION }}-debian-x86_64.deb
+
+      - name: Build .deb package [aarch64]
+        run: |
+          cross build --release --target aarch64-unknown-linux-gnu
+          cargo deb --no-build --no-strip --target aarch64-unknown-linux-gnu
+          cp target/aarch64-unknown-linux-gnu/debian/*.deb dist/leenfetch-${{ env.VERSION }}-debian-aarch64.deb
+
+      - name: Build .rpm package [x86_64]
+        run: |
+          cargo rpm init && cargo rpm build
+          cp target/release/rpmbuild/RPMS/x86_64/*.rpm dist/leenfetch-${{ env.VERSION }}-REHL-x86_64.rpm
+
+      # - name: Build .rpm package [aarch64]
+      #   run: |
+      #     cross build --release --target aarch64-unknown-linux-gnu
+      #     cargo rpm build --target aarch64-unknown-linux-gnu --no-build
+      #     cp target/aarch64-unknown-linux-gnu/release/rpmbuild/RPMS/aarch64/*.rpm dist/leenfetch-${{ env.VERSION }}-rhel-aarch64.rpm
+
+      - name: Build for Windows [x86_64]
+        run: |
+          cross build --release --target x86_64-pc-windows-gnu --target-dir target/windows
+          cp target/windows/x86_64-pc-windows-gnu/release/leenfetch.exe dist/leenfetch-${{ env.VERSION }}-windows-x86_64.exe
+          cd dist && zip leenfetch-${{ env.VERSION }}-windows-x86_64.zip leenfetch-${{ env.VERSION }}-windows-x86_64.exe && cd ..
 
       - name: Generate checksums
         run: |
@@ -71,9 +83,38 @@ jobs:
           sha256sum * > SHA256SUMS.txt
           cd ..
 
+      - name: Generate Release Notes
+        run: |
+          VERSION=${{ env.VERSION }}
+          echo "# 🐧 LeenFetch ${VERSION}" > dist/RELEASE-NOTES.md
+          echo "" >> dist/RELEASE-NOTES.md
+          echo "## 📦 Available Downloads" >> dist/RELEASE-NOTES.md
+          echo "" >> dist/RELEASE-NOTES.md
+          echo "| File | Platform | Format | Install Instructions |" >> dist/RELEASE-NOTES.md
+          echo "|------|----------|--------|----------------------|" >> dist/RELEASE-NOTES.md
+          echo "| leenfetch-${VERSION}-linux-x86_64.tar.gz | Linux (x86_64) | tar.gz | \`tar -xzvf\` and run \`./leenfetch\` |" >> dist/RELEASE-NOTES.md
+          echo "| leenfetch-${VERSION}-linux-aarch64.tar.gz | Linux (ARM64) | tar.gz | \`tar -xzvf\` and run \`./leenfetch\` |" >> dist/RELEASE-NOTES.md
+          echo "| leenfetch-${VERSION}-debian-x86_64.deb | Debian/Ubuntu (x86_64) | .deb | \`sudo dpkg -i\` |" >> dist/RELEASE-NOTES.md
+          echo "| leenfetch-${VERSION}-debian-aarch64.deb | Debian/Ubuntu (ARM64) | .deb | \`sudo dpkg -i\` |" >> dist/RELEASE-NOTES.md
+          echo "| leenfetch-${VERSION}-REHL-x86_64.rpm | RHEL/CentOS/Fedora (x86_64) | .rpm | \`sudo rpm -i\` |" >> dist/RELEASE-NOTES.md
+          echo "| leenfetch-${VERSION}-windows-x86_64.zip | Windows (x86_64) | .zip | Extract and run \`leenfetch.exe\` |" >> dist/RELEASE-NOTES.md
+          echo "" >> dist/RELEASE-NOTES.md
+          echo "## 🔐 Checksums" >> dist/RELEASE-NOTES.md
+          echo '```' >> dist/RELEASE-NOTES.md
+          cat dist/SHA256SUMS.txt >> dist/RELEASE-NOTES.md
+          echo '```' >> dist/RELEASE-NOTES.md
+
+      - name: Generate CHANGELOG.md
+        run: |
+          echo "## Changes in ${{ env.VERSION }}" > dist/CHANGELOG.md
+          echo "" >> dist/CHANGELOG.md
+          git log --pretty=format:"- %s (%h)" $(git describe --tags --abbrev=0)..HEAD >> dist/CHANGELOG.md
+
       - name: Upload Release Assets
         uses: softprops/action-gh-release@v2
         with:
           files: dist/*
+          generate_release_notes: true
+          body_path: dist/RELEASE-NOTES.md
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}

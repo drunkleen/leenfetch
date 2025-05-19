@@ -57,3 +57,9 @@ buildflags = ["--release"]
 
 [package.metadata.rpm.targets]
 leenfetch = { path = "/usr/bin/leenfetch" }
+
+[package.metadata.rpm.target.x86_64-unknown-linux-gnu]
+arch = "x86_64"
+
+[package.metadata.rpm.target.aarch64-unknown-linux-gnu]
+arch = "aarch64"

@@ -2,6 +2,8 @@
 
 [![Crates.io](https://img.shields.io/crates/v/leenfetch)](https://crates.io/crates/leenfetch)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Build and Release](https://github.com/drunkleen/leenfetch/actions/workflows/release.yml/badge.svg)](https://github.com/drunkleen/leenfetch/actions/workflows/release.yml)
+
 
 
 > 🌐 Available in: [English](#) | [فارسی](./readme/README-fa.md) | [Русский](./readme/README-ru.md) | [中文](./readme/README-zh.md)
@@ -94,6 +96,46 @@ yay -S leenfetch
 ```
 
 > You may need to enter your password and confirm the build during the process.
+
+
+
+### 📦 Install on Debian / Ubuntu (via .deb)
+
+If you're on Debian, Ubuntu, or a Debian-based distribution, you can download and install the `.deb` package from the [GitHub Releases](https://github.com/drunkleen/leenfetch/releases):
+
+```bash
+wget https://github.com/drunkleen/leenfetch/releases/latest/download/leenfetch_0.2.1-1_amd64.deb
+sudo dpkg -i leenfetch_0.2.1-1_amd64.deb
+```
+
+> You may need to enter your password and confirm the installation.
+
+---
+
+### 📦 Install on Fedora / RHEL (via .rpm)
+
+If you're using Fedora, RHEL, or another RPM-based distro, you can install LeenFetch using the `.rpm` file from [GitHub Releases](https://github.com/drunkleen/leenfetch/releases):
+
+```bash
+wget https://github.com/drunkleen/leenfetch/releases/latest/download/leenfetch-0.2.1-1.x86_64.rpm
+sudo rpm -i leenfetch-0.2.1-1.x86_64.rpm
+```
+
+> You may be prompted to enter your password and approve the installation.
+
+---
+
+### 🪟 Install on Windows (via .zip)
+
+If you're on Windows, download the latest `.zip` from the [GitHub Releases](https://github.com/drunkleen/leenfetch/releases):
+
+```powershell
+Invoke-WebRequest -Uri "https://github.com/drunkleen/leenfetch/releases/latest/download/leenfetch-win.zip" -OutFile "leenfetch-win.zip"
+Expand-Archive .\leenfetch-win.zip -DestinationPath .
+.\leenfetch.exe
+```
+
+> Make sure you're in the same directory as `leenfetch.exe` when running the command.
 
 
 ---
