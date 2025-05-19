@@ -6,8 +6,9 @@
 
 
 
-> 🌐 Available in: [English](#) | [فارسی](./readme/README-fa.md) | [Русский](./readme/README-ru.md) | [中文](./readme/README-zh.md)
 
+<!-- > 🌐 Available in: [English](#) | [فارسی](./readme/README-fa.md) | [Русский](./readme/README-ru.md) | [中文](./readme/README-zh.md)
+**** -->
 
 
 ##### A fast, minimal, and customizable system information tool built in Rust — your alternative to Neofetch, for real power users.
@@ -25,28 +26,38 @@ Head over to the [issues](https://github.com/drunkleen/leenfetch/issues) or join
 
 ## 📚 Table of Contents
 
-- [Screenshots](#-screenshots)
-- [Features](#-features)
-- [Installation](#-installation)
-- [Configuration](#️-configuration)
-- [Roadmap](#-roadmap)
-- [Contributing](#-contributing)
-- [Support LeenFetch](#-support-leenfetch)
-- [License](#-license)
-- [Inspiration](#-inspiration)
+- [📸 Screenshots](#-screenshots)
+- [🚀 Features](#-features)
+- [📦 Installation](#-installation)
+  - [Install on Arch Linux (via AUR)](#install-on-arch-linux-via-aur)
+  - [Install on Debian / Ubuntu (via .deb)](#install-on-debian--ubuntu-via-deb)
+  - [Install on Fedora / RHEL (via .rpm)](#install-on-fedora--rhel-via-rpm)
+  - [Install on Windows (via .zip)](#install-on-windows-via-zip)
+  - [Install from crates.io](#install-from-cratesio)
+  - [🛠️ Manual Installation (Build from Source)](#️-manual-installation-build-from-source)
+- [⚙️ Configuration](#️-configuration)
+  - [flags.ron](#flagsron)
+  - [toggles.ron](#togglesron)
+  - [print\_layout.ron](#print_layoutron)
+  - [How to Edit](#how-to-edit)
+- [🎯 Roadmap](#-roadmap)
+- [🤝 Contributing](#-contributing)
+- [☕ Support LeenFetch](#-support-leenfetch)
+- [📄 License](#-license)
+- [💡 Inspiration](#-inspiration)
 
 
 
 ## 📸 Screenshots
 
 
-<img src="./readme/src/TokyoNight.png" width="32%" /><img src="./readme/src/SandStorm.png" width="32%" /><img src="./readme/src/Aura.png" width="32%" />
+<img src="./assets/TokyoNight.png" width="32%" /><img src="./assets/SandStorm.png" width="32%" /><img src="./assets/Aura.png" width="32%" />
 
 
-<img src="./readme/src/debian.jpg"/>
-<img src="./readme/src/windows10.jpg"/>
-<img src="./readme/src/ubuntu.jpg"/>
-<img src="./readme/src/windows.jpg"/>
+<img src="./assets/debian.jpg"/>
+<img src="./assets/windows10.jpg"/>
+<img src="./assets/ubuntu.jpg"/>
+<img src="./assets/windows.jpg"/>
 
 
 ## 🚀 Features
@@ -65,7 +76,74 @@ Head over to the [issues](https://github.com/drunkleen/leenfetch/issues) or join
 
 ## 📦 Installation
 
-### ✅ Install from crates.io (recommended)
+
+### Install on Arch Linux (via AUR)
+
+If you're on Arch Linux or an Arch-based distribution (like Manjaro), you can install LeenFetch from the AUR using an AUR helper like [`yay`](https://github.com/Jguer/yay):
+
+```bash
+yay -S leenfetch
+```
+or
+
+```bash
+git clone https://aur.archlinux.org/leenfetch.git
+cd leenfetch
+makepkg -si
+```
+
+
+
+### Install on Debian / Ubuntu (via .deb)
+
+If you're on Debian, Ubuntu, or a Debian-based distribution, you can download and install the `.deb` package from the [GitHub Releases](https://github.com/drunkleen/leenfetch/releases):
+
+- AMD64 (x86_64)
+```bash
+wget https://github.com/drunkleen/leenfetch/releases/download/v0.2.1/leenfetch-v0.2.1-debian-x86_64.deb
+sudo dpkg -i leenfetch-*.deb
+```
+
+
+- AArch64 (ARM64)
+```bash
+wget https://github.com/drunkleen/leenfetch/releases/download/v0.2.1/leenfetch-v0.2.1-debian-aarch64.deb
+sudo dpkg -i leenfetch-*.deb
+```
+
+---
+
+### Install on Fedora / RHEL (via .rpm)
+
+If you're using Fedora, RHEL, or another RPM-based distro, you can install LeenFetch using the `.rpm` file from [GitHub Releases](https://github.com/drunkleen/leenfetch/releases):
+
+- AMD64 (x86_64)
+```bash
+wget https://github.com/drunkleen/leenfetch/releases/download/v0.2.1/leenfetch-v0.2.1-REHL-x86_64.rpm
+sudo rpm -i leenfetch-*.rpm
+```
+
+---
+
+### Install on Windows (via .zip)
+
+If you're on Windows, download the latest `.zip` from the [GitHub Releases](https://github.com/drunkleen/leenfetch/releases):
+
+powershell:
+
+- AMD64 (x86_64)
+```powershell
+Invoke-WebRequest -Uri "https://github.com/drunkleen/leenfetch/releases/download/v0.2.1/leenfetch-v0.2.1-windows-x86_64.zip" -OutFile "leenfetch-win.zip"
+Expand-Archive .\leenfetch-win.zip -DestinationPath .
+
+.\leenfetch-v0.2.1-windows-x86_64.exe
+```
+
+> Make sure you're in the same directory as `leenfetch.exe` when running the command.
+
+---
+
+### Install from crates.io
 
 Make sure you have [Rust & Cargo](https://rustup.rs/) installed:
 
@@ -84,59 +162,6 @@ If you hit issues with `PATH`, try adding `~/.cargo/bin` to your shell:
 ```bash
 export PATH="$HOME/.cargo/bin:$PATH"
 ```
----
-
-
-### 🐧 Install on Arch Linux (via AUR)
-
-If you're on Arch Linux or an Arch-based distribution (like Manjaro), you can install LeenFetch from the AUR using an AUR helper like [`yay`](https://github.com/Jguer/yay):
-
-```bash
-yay -S leenfetch
-```
-
-> You may need to enter your password and confirm the build during the process.
-
-
-
-### 📦 Install on Debian / Ubuntu (via .deb)
-
-If you're on Debian, Ubuntu, or a Debian-based distribution, you can download and install the `.deb` package from the [GitHub Releases](https://github.com/drunkleen/leenfetch/releases):
-
-```bash
-wget https://github.com/drunkleen/leenfetch/releases/latest/download/leenfetch_0.2.1-1_amd64.deb
-sudo dpkg -i leenfetch_0.2.1-1_amd64.deb
-```
-
-> You may need to enter your password and confirm the installation.
-
----
-
-### 📦 Install on Fedora / RHEL (via .rpm)
-
-If you're using Fedora, RHEL, or another RPM-based distro, you can install LeenFetch using the `.rpm` file from [GitHub Releases](https://github.com/drunkleen/leenfetch/releases):
-
-```bash
-wget https://github.com/drunkleen/leenfetch/releases/latest/download/leenfetch-0.2.1-1.x86_64.rpm
-sudo rpm -i leenfetch-0.2.1-1.x86_64.rpm
-```
-
-> You may be prompted to enter your password and approve the installation.
-
----
-
-### 🪟 Install on Windows (via .zip)
-
-If you're on Windows, download the latest `.zip` from the [GitHub Releases](https://github.com/drunkleen/leenfetch/releases):
-
-```powershell
-Invoke-WebRequest -Uri "https://github.com/drunkleen/leenfetch/releases/latest/download/leenfetch-win.zip" -OutFile "leenfetch-win.zip"
-Expand-Archive .\leenfetch-win.zip -DestinationPath .
-.\leenfetch.exe
-```
-
-> Make sure you're in the same directory as `leenfetch.exe` when running the command.
-
 
 ---
 

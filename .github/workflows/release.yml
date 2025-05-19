@@ -99,12 +99,18 @@ jobs:
           echo "" >> dist/RELEASE-NOTES.md
           echo "| File | Platform | Format | Install Instructions |" >> dist/RELEASE-NOTES.md
           echo "|------|----------|--------|----------------------|" >> dist/RELEASE-NOTES.md
-          echo "| leenfetch-${VERSION}-linux-x86_64.tar.gz | Linux (x86_64) | tar.gz | \`tar -xzvf\` and run \`./leenfetch\` |" >> dist/RELEASE-NOTES.md
-          echo "| leenfetch-${VERSION}-linux-aarch64.tar.gz | Linux (ARM64) | tar.gz | \`tar -xzvf\` and run \`./leenfetch\` |" >> dist/RELEASE-NOTES.md
-          echo "| leenfetch-${VERSION}-debian-x86_64.deb | Debian/Ubuntu (x86_64) | .deb | \`sudo dpkg -i\` |" >> dist/RELEASE-NOTES.md
-          echo "| leenfetch-${VERSION}-debian-aarch64.deb | Debian/Ubuntu (ARM64) | .deb | \`sudo dpkg -i\` |" >> dist/RELEASE-NOTES.md
-          echo "| leenfetch-${VERSION}-REHL-x86_64.rpm | RHEL/CentOS/Fedora (x86_64) | .rpm | \`sudo rpm -i\` |" >> dist/RELEASE-NOTES.md
-          echo "| leenfetch-${VERSION}-windows-x86_64.zip | Windows (x86_64) | .zip | Extract and run \`leenfetch.exe\` |" >> dist/RELEASE-NOTES.md
+
+          echo "| [leenfetch-${VERSION}-linux-x86_64.tar.gz](https://github.com/drunkleen/leenfetch/releases/download/${VERSION}/leenfetch-${VERSION}-linux-x86_64.tar.gz) | Linux (x86_64) | tar.gz | \`tar -xzvf\` and run \`./leenfetch\` |" >> dist/RELEASE-NOTES.md
+          echo "| [leenfetch-${VERSION}-linux-aarch64.tar.gz](https://github.com/drunkleen/leenfetch/releases/download/${VERSION}/leenfetch-${VERSION}-linux-aarch64.tar.gz) | Linux (ARM64) | tar.gz | \`tar -xzvf\` and run \`./leenfetch\` |" >> dist/RELEASE-NOTES.md
+
+          echo "| [leenfetch-${VERSION}-debian-x86_64.deb](https://github.com/drunkleen/leenfetch/releases/download/${VERSION}/leenfetch-${VERSION}-debian-x86_64.deb) | Debian/Ubuntu (x86_64) | .deb | \`sudo dpkg -i\` |" >> dist/RELEASE-NOTES.md
+          echo "| [leenfetch-${VERSION}-debian-aarch64.deb](https://github.com/drunkleen/leenfetch/releases/download/${VERSION}/leenfetch-${VERSION}-debian-aarch64.deb) | Debian/Ubuntu (ARM64) | .deb | \`sudo dpkg -i\` |" >> dist/RELEASE-NOTES.md
+
+          echo "| [leenfetch-${VERSION}-REHL-x86_64.rpm](https://github.com/drunkleen/leenfetch/releases/download/${VERSION}/leenfetch-${VERSION}-REHL-x86_64.rpm) | RHEL/CentOS/Fedora (x86_64) | .rpm | \`sudo rpm -i\` |" >> dist/RELEASE-NOTES.md
+
+          echo "| [leenfetch-${VERSION}-windows-x86_64.zip](https://github.com/drunkleen/leenfetch/releases/download/${VERSION}/leenfetch-${VERSION}-windows-x86_64.zip) | Windows (x86_64) | .zip | Extract and run \`leenfetch-${VERSION}-windows-x86_64.exe\` |" >> dist/RELEASE-NOTES.md
+          echo "| [leenfetch-${VERSION}-windows-x86_64.exe](https://github.com/drunkleen/leenfetch/releases/download/${VERSION}/leenfetch-${VERSION}-windows-x86_64.exe) | Windows (x86_64) | .exe | run \`leenfetch-${VERSION}-windows-x86_64.exe\` |" >> dist/RELEASE-NOTES.md
+
           echo "" >> dist/RELEASE-NOTES.md
           echo "## 🔐 Checksums" >> dist/RELEASE-NOTES.md
           echo '```' >> dist/RELEASE-NOTES.md
