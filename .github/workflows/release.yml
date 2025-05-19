@@ -19,6 +19,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Extract tag name
+        run: echo "VERSION=${GITHUB_REF##*/}" >> $GITHUB_ENV
+
+      - name: Debug Environment
+        run: |
+          echo "GITHUB_REF=$GITHUB_REF"
+          echo "VERSION=$VERSION"
+
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -85,7 +93,6 @@ jobs:
 
       - name: Generate Release Notes
         run: |
-          VERSION=${{ env.VERSION }}
           echo "# 🐧 LeenFetch ${VERSION}" > dist/RELEASE-NOTES.md
           echo "" >> dist/RELEASE-NOTES.md
           echo "## 📦 Available Downloads" >> dist/RELEASE-NOTES.md
