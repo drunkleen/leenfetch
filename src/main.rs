@@ -2,109 +2,21 @@ mod config;
 mod core;
 mod modules;
 
-use modules::helper::{list_options, print_help};
+use modules::helper::handle_args;
 
 // use core::core::Core;
 use core::Core;
 use regex::Regex;
-use std::collections::HashMap;
 use unicode_width::UnicodeWidthStr;
 
 fn main() {
-    let mut args = std::env::args().skip(1); // skip binary name
+    let mut args = std::env::args();
+    args.next(); // skip binary name
 
-    let mut override_map: HashMap<&'static str, String> = HashMap::new();
-
-    while let Some(arg) = args.next() {
-        match arg.as_str() {
-            "--version" | "-v" => {
-                println!("{} {}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"));
-                return;
-            }
-            "--help" | "-h" => {
-                print_help();
-                return;
-            }
-            "--list-options" | "-l" => {
-                list_options();
-                return;
-            }
-            "--init" | "-i" => {
-                let results = config::ensure_config_files_exist();
-
-                for (file, created) in results {
-                    if created {
-                        println!("✅ Created missing config: {file}");
-                    } else {
-                        println!("✔️ Config already exists: {file}");
-                    }
-                }
-
-                return;
-            }
-            "--reinit" | "-r" => {
-                let result = config::delete_config_files();
-                for (file, ok) in result {
-                    println!(
-                        "{} {}\n use --help for more info",
-                        if ok {
-                            "🗑️ Deleted"
-                        } else {
-                            "⚠️ Failed to delete"
-                        },
-                        file
-                    );
-                }
-
-                let result = config::generate_config_files();
-                for (file, ok) in result {
-                    println!(
-                        "{} {}\n use --help for more info",
-                        if ok {
-                            "✅ Generated"
-                        } else {
-                            "⚠️ Failed to generate"
-                        },
-                        file
-                    );
-                }
-
-                return;
-            }
-            "--ascii_distro" => {
-                if let Some(val) = args.next() {
-                    override_map.insert("ascii_distro", val);
-                } else {
-                    println!("❌ ascii_distro cannot be empty");
-                    println!("⚠️ use --help for more info");
-                    return;
-                }
-            }
-            "--ascii_colors" => {
-                if let Some(val) = args.next() {
-                    override_map.insert("ascii_colors", val);
-                } else {
-                    println!("❌ ascii_colors cannot be empty");
-                    println!("⚠️ use --help for more info");
-                    return;
-                }
-            }
-            "--custom_ascii_path" => {
-                if let Some(val) = args.next() {
-                    override_map.insert("custom_ascii_path", val);
-                } else {
-                    println!("❌ custom_ascii_path cannot be empty");
-                    println!("⚠️ use --help for more info");
-                    return;
-                }
-            }
-            _ => {
-                println!("❌ Unknown argument: {}", arg);
-                print_help();
-                return;
-            }
-        }
-    }
+    let override_map = match handle_args(&mut args) {
+        Ok(map) => map,
+        Err(_) => return,
+    };
 
     let results = config::ensure_config_files_exist();
     for (file, created) in results {
@@ -122,6 +34,20 @@ fn main() {
     );
 }
 
+/// Prints the ASCII art block and info lines side-by-side.
+///
+/// This function is responsible for rendering the ASCII art block and
+/// the info lines side-by-side. If the ASCII art block is taller than
+/// the info block, the remaining lines are filled with whitespace.
+/// Otherwise, the info lines are printed below the ASCII art block.
+///
+/// The function takes two arguments: `ascii` is the ASCII art block as
+/// a string, and `info_lines` is a vector of strings representing the
+/// info lines. The function will split the ASCII art block into lines
+/// and calculate the maximum visible width of the lines. It will then
+/// print the ASCII art block and info lines side-by-side, with the
+/// info lines starting at a column determined by the maximum visible
+/// width of the ASCII art block.
 fn print_ascii_and_info(ascii: &str, info_lines: &[String]) {
     println!();
     let ascii_lines: Vec<&str> = ascii.lines().collect();
@@ -144,7 +70,11 @@ fn print_ascii_and_info(ascii: &str, info_lines: &[String]) {
         .max()
         .unwrap_or(0);
 
-    let print_column = max_ascii_width + 4; // info column start
+    let print_column = if max_ascii_width > 0 {
+        max_ascii_width + 4 // info column start
+    } else {
+        0
+    };
 
     for line in &ascii_lines {
         println!("{line}");
@@ -156,9 +86,9 @@ fn print_ascii_and_info(ascii: &str, info_lines: &[String]) {
     std::io::Write::flush(&mut std::io::stdout()).unwrap();
 
     total_lines -= info_lines.len();
-    // Print each info line aligned to calculated column
+
     for info_line in info_lines.iter() {
-        print!("\x1b[{}G", print_column); // move to column
+        print!("\x1b[{}G", print_column);
         println!("{info_line}");
     }
 

@@ -1,3 +1,120 @@
+use std::collections::HashMap;
+
+use crate::config;
+
+/// Parses command-line arguments and returns a map of configuration overrides.
+///
+/// This function processes a set of command-line arguments and performs actions
+/// based on the provided flags. It supports the following flags:
+///
+/// - `--version` or `-v`: Prints the package name and version, then exits.
+/// - `--help` or `-h`: Displays help information and exits.
+/// - `--list-options` or `-l`: Lists available options and exits.
+/// - `--init` or `-i`: Ensures configuration files exist, creating them if necessary, and exits.
+/// - `--reinit` or `-r`: Deletes and regenerates configuration files, then exits.
+/// - `--ascii_distro`: Sets the ASCII distribution to the specified value.
+/// - `--ascii_colors`: Sets the ASCII colors to the specified value.
+/// - `--custom_ascii_path`: Sets the custom ASCII path to the specified value.
+///
+/// Arguments:
+/// - `args`: Mutable reference to the command-line arguments iterator.
+///
+/// Returns:
+/// - `Ok(HashMap<&'static str, String>)`: A map of configuration overrides if successful.
+/// - `Err(())`: If any flag requires an immediate exit after processing.
+pub fn handle_args(args: &mut std::env::Args) -> Result<HashMap<&'static str, String>, ()> {
+    let mut override_map: HashMap<&'static str, String> = HashMap::new();
+
+    while let Some(arg) = args.next() {
+        match arg.as_str() {
+            "--version" | "-v" => {
+                println!("{} {}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"));
+                return Err(());
+            }
+            "--help" | "-h" => {
+                print_help();
+                return Err(());
+            }
+            "--list-options" | "-l" => {
+                list_options();
+                return Err(());
+            }
+            "--init" | "-i" => {
+                let results = config::ensure_config_files_exist();
+                for (file, created) in results {
+                    if created {
+                        println!("✅ Created missing config: {file}");
+                    } else {
+                        println!("✔️ Config already exists: {file}");
+                    }
+                }
+                return Err(());
+            }
+            "--reinit" | "-r" => {
+                let result = config::delete_config_files();
+                for (file, ok) in result {
+                    println!(
+                        "{} {}\n use --help for more info",
+                        if ok {
+                            "🗑️ Deleted"
+                        } else {
+                            "⚠️ Failed to delete"
+                        },
+                        file
+                    );
+                }
+
+                let result = config::generate_config_files();
+                for (file, ok) in result {
+                    println!(
+                        "{} {}\n use --help for more info",
+                        if ok {
+                            "✅ Generated"
+                        } else {
+                            "⚠️ Failed to generate"
+                        },
+                        file
+                    );
+                }
+                return Err(());
+            }
+            "--ascii_distro" => {
+                if let Some(val) = args.next() {
+                    override_map.insert("ascii_distro", val);
+                } else {
+                    println!("❌ ascii_distro cannot be empty");
+                    println!("⚠️ use --help for more info");
+                    return Err(());
+                }
+            }
+            "--ascii_colors" => {
+                if let Some(val) = args.next() {
+                    override_map.insert("ascii_colors", val);
+                } else {
+                    println!("❌ ascii_colors cannot be empty");
+                    println!("⚠️ use --help for more info");
+                    return Err(());
+                }
+            }
+            "--custom_ascii_path" => {
+                if let Some(val) = args.next() {
+                    override_map.insert("custom_ascii_path", val);
+                } else {
+                    println!("❌ custom_ascii_path cannot be empty");
+                    println!("⚠️ use --help for more info");
+                    return Err(());
+                }
+            }
+            _ => {
+                println!("❌ Unknown argument: {}", arg);
+                print_help();
+                return Err(());
+            }
+        }
+    }
+    Ok(override_map)
+}
+
 pub fn print_help() {
     println!(
         r#"🧠 leenfetch — Minimal, Stylish System Info for Your Terminal

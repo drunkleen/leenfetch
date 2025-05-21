@@ -40,6 +40,10 @@ pub struct Core {
 }
 
 impl Core {
+    /// Creates a new instance of the `Core` struct.
+    ///
+    /// This function reads the configuration files and populates the `Core` struct with
+    /// the configuration and default system information.
     pub fn new() -> Self {
         let toggles = config::load_toggles();
         let flags = config::load_flags();
@@ -52,6 +56,28 @@ impl Core {
             data: Data::default(),
         }
     }
+
+    /// Fills the layout with system information based on the configuration and overrides.
+    ///
+    /// This function iterates over the configured layout and gathers system information
+    /// according to the toggles and flags set. It builds the output string by appending
+    /// the formatted information for each section, including user@host titles, OS, distro,
+    /// model, kernel, uptime, packages, shell, window manager, desktop environment, CPU, GPU,
+    /// memory, disk, resolution, theme, battery, currently playing song, and terminal colors.
+    /// The gathered data is stored in the `data` field, and the formatted output is stored in
+    /// the `output` string. Additionally, the function handles custom ASCII art and colors,
+    /// applying any overrides provided in the `override_map`.
+    ///
+    /// # Arguments
+    ///
+    /// * `override_map` - A `HashMap` that allows overriding certain configuration values
+    ///   such as custom ASCII path, ASCII colors, and ASCII distro.
+    ///
+    /// # Returns
+    ///
+    /// A tuple containing two `String` values:
+    /// * The first `String` is the colorized system information output.
+    /// * The second `String` is the colorized ASCII art.
 
     pub fn fill_layout(&mut self, override_map: HashMap<&'static str, String>) -> (String, String) {
         for info in &self.layout {
@@ -390,10 +416,14 @@ impl Core {
             .unwrap_or_else(|| get_ascii_and_colors(&resolved_distro));
 
         // Load Colors
-        let distro_colors = match custom_ascii_colors {
-            Some("distro") => get_distro_colors(&resolved_distro),
-            Some(other) => get_custom_colors_order(other),
-            None => get_distro_colors(&resolved_distro),
+        let distro_colors = if &resolved_distro == "off" {
+            get_distro_colors(&get_distro(DistroDisplay::Name))
+        } else {
+            match custom_ascii_colors {
+                Some("distro") => get_distro_colors(&resolved_distro),
+                Some(other) => get_custom_colors_order(other),
+                None => get_distro_colors(&resolved_distro),
+            }
         };
 
         let info_colored = colorize_text(self.output.clone(), &distro_colors);
@@ -401,6 +431,8 @@ impl Core {
         (info_colored, ascii_colored)
     }
 
+    /// If the given `data` is `Some`, it will be added to `output` with the given `label`.
+    /// If `data` is `None`, it will add a line to `output` with the label and the value "Unknown".
     fn is_some_add_to_output(label: &str, data: &Option<String>, output: &mut String) {
         match data {
             Some(d) => {
