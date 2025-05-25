@@ -343,5 +343,10 @@ pub const DEFAULT_PRINT_LAYOUT: &str = r#"
     // Terminal color palette preview (color blocks at the bottom).
     // The label is left empty to avoid clutter, but you can set a custom label if you wish.
     (label: "", field: "colors"),
+
+
+    
+    // You can add more custom entries as needed.
+    // (label: "- Custom Field", field: "custom text"),
 ]
 "#;

@@ -380,7 +380,11 @@ impl Core {
                     self.output.push_str(format!("\n{}", colors).as_str());
                     self.data.colors = Some(colors);
                 }
-                _ => {}
+                other => {
+                    self.output.push_str(
+                        format!("${{c1}}{}: ${{reset}}{}\n", &info.label, other).as_str(),
+                    );
+                }
             }
         }
 
