@@ -2,11 +2,10 @@ mod config;
 mod core;
 mod modules;
 
-use modules::helper::handle_args;
-
-// use core::core::Core;
 use core::Core;
+use modules::helper::handle_args;
 use regex::Regex;
+use std::io::{self, Read};
 use unicode_width::UnicodeWidthStr;
 
 fn main() {
@@ -25,13 +24,25 @@ fn main() {
         }
     }
 
+    let mut pipe_input = String::new();
+    io::stdin()
+        .read_to_string(&mut pipe_input)
+        .expect("Failed to read from stdin");
+
     let mut core = Core::new();
     let (info, ascii) = core.fill_layout(override_map);
 
-    print_ascii_and_info(
-        &ascii,
-        &info.lines().map(|l| l.to_string()).collect::<Vec<_>>(),
-    );
+    if !pipe_input.is_empty() {
+        print_ascii_and_info(
+            &pipe_input,
+            &info.lines().map(|l| l.to_string()).collect::<Vec<_>>(),
+        );
+    } else {
+        print_ascii_and_info(
+            &ascii,
+            &info.lines().map(|l| l.to_string()).collect::<Vec<_>>(),
+        );
+    }
 }
 
 /// Prints the ASCII art block and info lines side-by-side.
