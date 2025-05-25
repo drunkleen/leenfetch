@@ -2,6 +2,7 @@ mod config;
 mod core;
 mod modules;
 
+use atty::Stream;
 use core::Core;
 use modules::helper::handle_args;
 use regex::Regex;
@@ -25,9 +26,11 @@ fn main() {
     }
 
     let mut pipe_input = String::new();
-    io::stdin()
-        .read_to_string(&mut pipe_input)
-        .expect("Failed to read from stdin");
+    if !atty::is(Stream::Stdin) {
+        io::stdin()
+            .read_to_string(&mut pipe_input)
+            .expect("Failed to read from stdin");
+    }
 
     let mut core = Core::new();
     let (info, ascii) = core.fill_layout(override_map);

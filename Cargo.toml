@@ -11,6 +11,7 @@ keywords = ["neofetch", "system", "terminal", "info", "leenfetch"]
 authors = ["DrunkLeen <snape@drunkleen.com>"]
 
 [dependencies]
+atty = "0.2.14"
 dirs = "6.0.0"
 libc = "0.2.172"
 rand = "0.9.1"
