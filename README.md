@@ -35,6 +35,7 @@ Head over to the [issues](https://github.com/drunkleen/leenfetch/issues) or join
   - [Install on Windows (via .zip)](#install-on-windows-via-zip)
   - [Install from crates.io](#install-from-cratesio)
   - [🛠️ Manual Installation (Build from Source)](#️-manual-installation-build-from-source)
+- [📥 Using Piped Input](#-using-piped-input)
 - [⚙️ Configuration](#️-configuration)
   - [flags.ron](#flagsron)
   - [toggles.ron](#togglesron)
@@ -47,17 +48,13 @@ Head over to the [issues](https://github.com/drunkleen/leenfetch/issues) or join
 - [💡 Inspiration](#-inspiration)
 
 
-
 ## 📸 Screenshots
-
 
 <img src="./assets/TokyoNight.png" width="32%" /><img src="./assets/SandStorm.png" width="32%" /><img src="./assets/Aura.png" width="32%" />
 
-
-<img src="./assets/debian.jpg"/>
-<img src="./assets/windows10.jpg"/>
-<img src="./assets/ubuntu.jpg"/>
-<img src="./assets/windows.jpg"/>
+<img src="./assets/debian.jpg" width="50%" /><img src="./assets/windows.jpg" width="50%" />
+<!-- <img src="./assets/ubuntu.jpg" width="50%" /><img src="./assets/windows10.jpg" width="50%" /> -->
+<img src="./assets/cowsay.jpg" width="50%" /><img src="./assets/custom.jpg" width="50%" />
 
 
 ## 🚀 Features
@@ -70,8 +67,7 @@ Head over to the [issues](https://github.com/drunkleen/leenfetch/issues) or join
 - 🖼️ Custom ASCII art support and override via config
 - 🎨 Supports theme-based color profiles (`ascii_colors=distro`, etc.)
 - 🔌 Simple config file: `~/.config/leenfetch/config.conf`
-
-
+- 🧵 Accepts piped ASCII input — use `fortune | cowsay | leenfetch` for dynamic text logos
 
 
 ## 📦 Installation
@@ -185,6 +181,28 @@ Then run:
 leenfetch
 ```
 
+---
+
+## 📥 Using Piped Input
+
+LeenFetch can accept piped input to use as the ASCII logo.
+
+This allows you to create dynamic, fun logos on the fly using other command-line tools.
+
+**Examples:**
+
+```bash
+echo "Rustacean" | leenfetch
+```
+
+```bash
+fortune | cowsay | leenfetch
+```
+
+LeenFetch will detect piped input via `stdin` and render the ASCII art above your system information.
+
+If no piped input is provided, it will fall back to your configured or auto-detected ASCII art.
+
 
 ---
 
@@ -213,6 +231,8 @@ This file lets you fine-tune how each block of information is displayed. You can
 - Select how battery, disk, memory, and package info are shown.
 - Pick units, detail level, and formatting for each section.
 - Enable or disable features like CPU brand, temperature, shell version, etc.
+
+> If input is piped into `leenfetch`, the ASCII logo from `ascii_distro` or `custom_ascii_path` is ignored and the piped content is used instead.
 
 **Example:**
 ```ron

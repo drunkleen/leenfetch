@@ -1,4 +1,4 @@
-# LeenFetch Documentation
+# leenfetch Documentation
 
 ## Table of Contents
 - [Overview](#overview)
@@ -10,6 +10,7 @@
   - [print_layout.ron](#print_layoutron)
 - [Usage](#usage)
 - [Customization](#customization)
+  - [Dynamic Logos via Piping](#dynamic-logos-via-piping)
 - [Troubleshooting](#troubleshooting)
 - [Advanced Tips](#advanced-tips)
 - [Contributing](#contributing)
@@ -99,6 +100,8 @@ This file lets you fine-tune how each block of information is displayed. You can
 - Select how battery, disk, memory, and package info are shown
 - Pick units, detail level, and formatting for each section
 - Enable or disable features like CPU brand, temperature, shell version, etc.
+- Accepts piped ASCII input for dynamic text or art (`echo "Hello" | leenfetch`)
+
 
 **Example:**
 ```ron
@@ -223,6 +226,22 @@ The output will reflect your current configuration. Edit the `.ron` files and re
 - `leenfetch --list-options` — List all available config options
 - `leenfetch --help` — Show help and usage
 
+### Piped Input
+
+LeenFetch can accept piped text or ASCII art via `stdin`. If data is piped into LeenFetch, that input will be displayed as the ASCII logo instead of the configured or auto-detected one.
+
+**Examples:**
+
+```bash
+echo "Rustacean" | leenfetch
+```
+
+```bash
+fortune | cowsay | leenfetch
+```
+
+This is great for fun dynamic banners or scriptable ASCII output.
+
 ---
 
 ## Customization
@@ -232,6 +251,23 @@ The output will reflect your current configuration. Edit the `.ron` files and re
 - **Hide/Show Blocks:** Use `toggles.ron` to control visibility.
 - **Order/Labels:** Edit `print_layout.ron` to rearrange or rename blocks.
 - **Advanced:** Combine config changes for a unique look!
+
+> If input is piped into leenfetch via `stdin`, the `ascii_distro` and `custom_ascii_path` settings are ignored, and the piped content is used as the ASCII logo.
+
+### Dynamic Logos via Piping
+
+Want to use real-time ASCII art or dynamic text as your logo? LeenFetch supports piped input!
+
+**Examples:**
+
+```bash
+echo "Hack the Planet" | leenfetch
+fortune | figlet | leenfetch
+```
+
+This lets you combine other CLI tools with LeenFetch for expressive, interactive output. No need to touch your config — just pipe text in!
+
+
 
 ---
 

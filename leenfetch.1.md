@@ -13,6 +13,8 @@ leenfetch [OPTIONS]
 
 Configuration is handled via human-friendly RON files, with detailed comments to guide users through all available options.
 
+leenfetch can also accept **piped input** to render as ASCII art. This allows users to display custom text logos via standard input.
+
 ## OPTIONS
 - `-v`, `--version`  
   Print version information and exit.
@@ -30,6 +32,9 @@ Configuration is handled via human-friendly RON files, with detailed comments to
   Override the ASCII art color palette for this run (comma-separated list, e.g., "1,2,3,4,5,6,7").
 - `--custom_ascii_path <PATH>`  
   Use a custom ASCII art file for this run.
+- `terminal stdin`  
+  Read ASCII logo content from standard input instead of using built-in or custom files.
+  
 
 ## CONFIGURATION
 leenfetch uses RON files for configuration, typically located at:
@@ -54,6 +59,13 @@ Each config file is heavily commented to explain all available options and their
   Create default config files if missing.
 - `leenfetch --reinit`  
   Delete and regenerate all config files.
+- `echo "Rustacean" | leenfetch`  
+  Display system info with a piped ASCII logo generated from the input text.
+- `fortune | cowsay | leenfetch`  
+  fortune generates a random quote.
+  cowsay wraps it in a cow speech bubble (ASCII art).
+  leenfetch takes piped input and displays it as an ASCII logo.
+
 
 ## ENVIRONMENT
 - **XDG_CONFIG_HOME**: Specifies the base directory for user-specific configuration files. Defaults to `~/.config` if not set.

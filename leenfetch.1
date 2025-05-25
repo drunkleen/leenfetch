@@ -19,6 +19,9 @@ enthusiasts and new users.
 .PP
 Configuration is handled via human\-friendly RON files, with detailed
 comments to guide users through all available options.
+.PP
+leenfetch can also accept \f[B]piped input\f[R] to render as ASCII art.
+This allows users to display custom text logos via standard input.
 .SS OPTIONS
 .IP \[bu] 2
 \f[CR]\-v\f[R], \f[CR]\-\-version\f[R]
@@ -72,6 +75,13 @@ list, e.g., \[lq]1,2,3,4,5,6,7\[rq]).
 .P
 .PD
 Use a custom ASCII art file for this run.
+.IP \[bu] 2
+\f[CR]terminal stdin\f[R]
+.PD 0
+.P
+.PD
+Read ASCII logo content from standard input instead of using built\-in
+or custom files.
 .SS CONFIGURATION
 leenfetch uses RON files for configuration, typically located at:
 .IP
@@ -115,6 +125,21 @@ Create default config files if missing.
 .P
 .PD
 Delete and regenerate all config files.
+.IP \[bu] 2
+\f[CR]echo \[dq]Rustacean\[dq] | leenfetch\f[R]
+.PD 0
+.P
+.PD
+Display system info with a piped ASCII logo generated from the input
+text.
+.IP \[bu] 2
+\f[CR]fortune | cowsay | leenfetch\f[R]
+.PD 0
+.P
+.PD
+fortune generates a random quote.
+cowsay wraps it in a cow speech bubble (ASCII art).
+leenfetch takes piped input and displays it as an ASCII logo.
 .SS ENVIRONMENT
 .IP \[bu] 2
 \f[B]XDG_CONFIG_HOME\f[R]: Specifies the base directory for
