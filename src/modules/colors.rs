@@ -128,8 +128,23 @@ pub fn get_builtin_distro_colors(distro: &str) -> &'static [u8] {
 
         ("cyberos", _) | ("cyber os", _) => &[4, 5, 6],
 
-        // ("name", _) => &[],
+        ("dahlia", _) => &[1, 7, 3],
+
         ("debian", _) => &[1, 3, 7],
+
+        ("deepin", _) => &[2, 7],
+
+        ("desaos", _) => &[2, 7],
+
+        ("devuan", _) => &[5, 7],
+
+        ("dracos", _) => &[1, 7, 3],
+
+        ("darkos", _) | ("dark os", _) => &[1, 6, 5, 3, 2],
+
+        ("dragonfly_old", _) | ("dragonfly", _) => &[1, 7, 3],
+
+        ("drauger", _) => &[1, 7],
 
         ("elementary", _) => &[4, 7, 1],
 
