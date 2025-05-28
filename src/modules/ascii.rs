@@ -162,8 +162,25 @@ pub fn get_builtin_ascii_art(ascii_distro: &str) -> &'static str {
         ("endeavouros", true) => ENDEAVOUROS_SMALL,
         ("endeavouros", false) => ENDEAVOUROS,
 
+        ("endless", _) => ENDLESS,
+
+        ("eurolinux", _) | ("euro linux", _) => EURO_LINUX,
+
+        ("`exherbo`", _) => EXHERBO,
+
         ("fedora", true) => FEDORA_SMALL,
         ("fedora", false) => FEDORA,
+
+        ("feren", _) => FEREN,
+
+        ("freebsd", true) => FREEBSD_SMALL,
+        ("freebsd", false) | ("hardenedbsd", false) => FREEBSD,
+
+        ("freemint", _) => FREE_MINT,
+
+        ("frugalware", _) => FRUGALWARE,
+
+        ("funtoo", _) => FUNTOO,
 
         ("garuda", _) => GARUDA,
 
@@ -1564,6 +1581,69 @@ ${c1} `..-+${c2}oosssssssssssssssssssssssso${c3}+++++/`
    ./++++++++++++++++++++++++++++++/:.
   `:::::::::::::::::::::::::------``"#;
 
+const ENDLESS: &str = r#"${c1}           `:+yhmNMMMMNmhy+:`
+        -odMMNhso//////oshNMMdo-
+      /dMMh+.              .+hMMd/
+    /mMNo`                    `oNMm:
+  `yMMo`                        `oMMy`
+ `dMN-                            -NMd`
+ hMN.                              .NMh
+/MM/                  -os`          /MM/
+dMm    `smNmmhs/- `:sNMd+   ``       mMd
+MMy    oMd--:+yMMMMMNo.:ohmMMMNy`    yMM
+MMy    -NNyyhmMNh+oNMMMMMy:.  dMo    yMM
+dMm     `/++/-``/yNNh+/sdNMNddMm-    mMd
+/MM/          `dNy:       `-::-     /MM/
+ hMN.                              .NMh
+ `dMN-                            -NMd`
+  `yMMo`                        `oMMy`
+    /mMNo`                    `oNMm/
+      /dMMh+.              .+hMMd/
+        -odMMNhso//////oshNMMdo-
+           `:+yhmNMMMMNmhy+:`"#;
+
+const EURO_LINUX: &str = r#"${c1}                __
+         -wwwWWWWWWWWWwww-
+        -WWWWWWWWWWWWWWWWWWw-
+          \WWWWWWWWWWWWWWWWWWW-
+  _Ww      `WWWWWWWWWWWWWWWWWWWw
+ -W${c2}E${c1}Www                -WWWWWWWWW-
+_WW${c2}U${c1}WWWW-                _WWWWWWWW
+_WW${c2}R${c1}WWWWWWWWWWWWWWWWWWWWWWWWWWWWWW-
+wWW${c2}O${c1}WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+WWW${c2}L${c1}WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWw
+WWW${c2}I${c1}WWWWWWWWWWWWWWWWWWWWWWWWWWWWww-
+wWW${c2}N${c1}WWWWw
+ WW${c2}U${c1}WWWWWWw
+ wW${c2}X${c1}WWWWWWWWww
+   wWWWWWWWWWWWWWWWw
+    wWWWWWWWWWWWWWWWw
+       WWWWWWWWWWWWWw
+           wWWWWWWWw"#;
+
+const EXHERBO: &str = r#"${c2} ,
+OXo.
+NXdX0:    .cok0KXNNXXK0ko:.
+KX  '0XdKMMK;.xMMMk, .0MMMMMXx;  ...
+'NO..xWkMMx   kMMM    cMMMMMX,NMWOxOXd.
+  cNMk  NK    .oXM.   OMMMMO. 0MMNo  kW.
+  lMc   o:       .,   .oKNk;   ;NMMWlxW'
+ ;Mc    ..   .,,'    .0M${c1}g;${c2}WMN'dWMMMMMMO
+ XX        ,WMMMMW.  cM${c1}cfli${c2}WMKlo.   .kMk
+.Mo        .WM${c1}GD${c2}MW.   XM${c1}WO0${c2}MMk        oMl
+,M:         ,XMMWx::,''oOK0x;          NM.
+'Ml      ,kNKOxxxxxkkO0XXKOd:.         oMk
+ NK    .0Nxc${c3}:::::::::::::::${c2}fkKNk,      .MW
+ ,Mo  .NXc${c3}::${c2}qXWXb${c3}::::::::::${c2}oo${c3}::${c2}lNK.    .MW
+  ;Wo oMd${c3}:::${c2}oNMNP${c3}::::::::${c2}oWMMMx${c3}:${c2}c0M;   lMO
+   'NO;W0c${c3}:::::::::::::::${c2}dMMMMO${c3}::${c2}lMk  .WM'
+     xWONXdc${c3}::::::::::::::${c2}oOOo${c3}::${c2}lXN. ,WMd
+      'KWWNXXK0Okxxo,${c3}:::::::${c2},lkKNo  xMMO
+        :XMNxl,';:lodxkOO000Oxc. .oWMMo
+          'dXMMXkl;,.        .,o0MMNo'
+             ':d0XWMMMMWNNNNMMMNOl'
+                   ':okKXWNKkl'"#;
+
 const FEDORA_SMALL: &str = r#"${c1}        ,'''''.
        |   ,.  |
        |  |  '_'
@@ -1592,6 +1672,97 @@ cccccccc;${c2}.:odl:.${c1};cccccccccccccc:,.
 :cccccccccccccccccccccccccccc:'.
 .:cccccccccccccccccccccc:;,..
   '::cccccccccccccc::;,."#;
+
+const FEREN: &str = r#"${c1} `----------`
+ :+ooooooooo+.
+-o+oooooooooo+-
+..`/+++++++++++/...`````````````````
+   .++++++++++++++++++++++++++/////-
+    ++++++++++++++++++++++++++++++++//:`
+    -++++++++++++++++++++++++++++++/-`
+     ++++++++++++++++++++++++++++:.
+     -++++++++++++++++++++++++/.
+      +++++++++++++++++++++/-`
+      -++++++++++++++++++//-`
+        .:+++++++++++++//////-
+           .:++++++++//////////-
+             `-++++++---:::://///.
+           `.:///+++.             `
+          `........."#;
+
+const FREEBSD_SMALL: &str = r#"${c1}/\,-'''''-,/\
+\_)       (_/
+|           |
+|           |
+ ;         ;
+  '-_____-'"#;
+
+const FREEBSD: &str = r#"   ${c2}```                        ${c1}`
+  ${c2}` `.....---...${c1}....--.```   -/
+  ${c2}+o   .--`         ${c1}/y:`      +.
+  ${c2} yo`:.            ${c1}:o      `+-
+    ${c2}y/               ${c1}-/`   -o/
+   ${c2}.-                  ${c1}::/sy+:.
+   ${c2}/                     ${c1}`--  /
+  ${c2}`:                          ${c1}:`
+  ${c2}`:                          ${c1}:`
+   ${c2}/                          ${c1}/
+   ${c2}.-                        ${c1}-.
+    ${c2}--                      ${c1}-.
+     ${c2}`:`                  ${c1}`:`
+       .--             `--.
+          .---.....----."#;
+
+const FREE_MINT: &str = r#"${c1}          ##
+          ##         #########
+                    ####      ##
+            ####  ####        ##
+####        ####  ##        ##
+        ####    ####      ##  ##
+        ####  ####  ##  ##  ##
+            ####  ######
+        ######  ##  ##  ####
+      ####    ################
+    ####        ##  ####
+    ##            ####  ######
+    ##      ##    ####  ####
+    ##    ##  ##    ##  ##  ####
+      ####  ##          ##  ##"#;
+
+const FRUGALWARE: &str = r#"${c1}          `++/::-.`
+         /o+++++++++/::-.`
+        `o+++++++++++++++o++/::-.`
+        /+++++++++++++++++++++++oo++/:-.``
+       .o+ooooooooooooooooooosssssssso++oo++/:-`
+       ++osoooooooooooosssssssssssssyyo+++++++o:
+      -o+ssoooooooooooosssssssssssssyyo+++++++s`
+      o++ssoooooo++++++++++++++sssyyyyo++++++o:
+     :o++ssoooooo${c2}/-------------${c1}+syyyyyo+++++oo
+    `o+++ssoooooo${c2}/-----${c1}+++++ooosyyyyyyo++++os:
+    /o+++ssoooooo${c2}/-----${c1}ooooooosyyyyyyyo+oooss
+   .o++++ssooooos${c2}/------------${c1}syyyyyyhsosssy-
+   ++++++ssooooss${c2}/-----${c1}+++++ooyyhhhhhdssssso
+  -s+++++syssssss${c2}/-----${c1}yyhhhhhhhhhhhddssssy.
+  sooooooyhyyyyyh${c2}/-----${c1}hhhhhhhhhhhddddyssy+
+ :yooooooyhyyyhhhyyyyyyhhhhhhhhhhdddddyssy`
+ yoooooooyhyyhhhhhhhhhhhhhhhhhhhddddddysy/
+-ysooooooydhhhhhhhhhhhddddddddddddddddssy
+ .-:/+osssyyyysyyyyyyyyyyyyyyyyyyyyyyssy:
+       ``.-/+oosysssssssssssssssssssssss
+               ``.:/+osyysssssssssssssh.
+                        `-:/+osyyssssyo
+                                .-:+++`"#;
+
+const FUNTOO: &str = r#"${c1}   .dKXXd                         .
+  :XXl;:.                      .OXo
+.'OXO''  .''''''''''''''''''''':XNd..'oco.lco,
+xXXXXXX, cXXXNNNXXXXNNXXXXXXXXNNNNKOOK; d0O .k
+  kXX  xXo  KNNN0  KNN.       'xXNo   :c; 'cc.
+  kXX  xNo  KNNN0  KNN. :xxxx. 'NNo
+  kXX  xNo  loooc  KNN. oNNNN. 'NNo
+  kXX  xN0:.       KNN' oNNNX' ,XNk
+  kXX  xNNXNNNNNNNNXNNNNNNNNXNNOxXNX0Xl
+  ...  ......................... .;cc;."#;
 
 const GARUDA: &str = r#"#{c3}                  __,,,,,,,_  
             _╓╗╣╫╠╠╠╠╠╠╠╠╠╠╠╠╠╕╗╗┐_ 

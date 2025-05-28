@@ -150,7 +150,23 @@ pub fn get_builtin_distro_colors(distro: &str) -> &'static [u8] {
 
         ("endeavouros", _) => &[1, 5, 4],
 
+        ("endless", _) => &[1, 7],
+
+        ("eurolinux", _) | ("euro linux", _) => &[4, 7],
+
+        ("exherbo", _) => &[4, 7, 1],
+
         ("fedora", _) => &[4, 7, 1],
+
+        ("feren", _) => &[4, 7, 1],
+
+        ("freebsd", _) | ("hardenedbsd", _) => &[1, 7, 3],
+
+        ("freemint", _) => &[7],
+
+        ("frugalware", _) => &[4, 7, 1],
+
+        ("funtoo", _) => &[5, 7],
 
         ("hash", _) => &[1, 2, 3],
 
