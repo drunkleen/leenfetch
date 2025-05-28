@@ -25,8 +25,8 @@ use crate::{
         system::{distro::get_distro, kernel::get_kernel, model::get_model, os::get_os},
         title::get_titles,
         utils::{
-            colorize_text, get_ascii_and_colors, get_custom_ascii, get_custom_colors_order,
-            get_distro_colors, get_terminal_color,
+            get_ascii_and_colors, get_custom_ascii, get_custom_colors_order, get_distro_colors,
+            get_terminal_color,
         },
     },
 };
@@ -79,7 +79,7 @@ impl Core {
     /// * The first `String` is the colorized system information output.
     /// * The second `String` is the colorized ASCII art.
 
-    pub fn fill_layout(&mut self, override_map: HashMap<&'static str, String>) -> (String, String) {
+    pub fn get_info_layout(&mut self) -> String {
         for info in &self.layout {
             match info.field.as_str() {
                 "titles" => {
@@ -388,6 +388,13 @@ impl Core {
             }
         }
 
+        self.output.clone()
+    }
+
+    pub fn get_ascii_and_colors(
+        &mut self,
+        override_map: HashMap<&'static str, String>,
+    ) -> (String, HashMap<&str, &str>) {
         let mut custom_ascii_path = override_map.get("custom_ascii_path").map(String::as_str);
         if custom_ascii_path == Some("") {
             custom_ascii_path = Some(self.flags.custom_ascii_path.as_str());
@@ -430,9 +437,7 @@ impl Core {
             }
         };
 
-        let info_colored = colorize_text(self.output.clone(), &distro_colors);
-        let ascii_colored = colorize_text(raw_ascii_art, &distro_colors);
-        (info_colored, ascii_colored)
+        (raw_ascii_art, distro_colors)
     }
 
     /// If the given `data` is `Some`, it will be added to `output` with the given `label`.

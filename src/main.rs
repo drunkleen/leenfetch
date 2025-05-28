@@ -4,7 +4,7 @@ mod modules;
 
 use atty::Stream;
 use core::Core;
-use modules::helper::handle_args;
+use modules::{helper::handle_args, utils::colorize_text};
 use regex::Regex;
 use std::io::{self, Read};
 use unicode_width::UnicodeWidthStr;
@@ -33,17 +33,25 @@ fn main() {
     }
 
     let mut core = Core::new();
-    let (info, ascii) = core.fill_layout(override_map);
+
+    let info_layout = core.get_info_layout();
+    let (ascii, colors) = core.get_ascii_and_colors(override_map);
 
     if !pipe_input.is_empty() {
         print_ascii_and_info(
             &pipe_input,
-            &info.lines().map(|l| l.to_string()).collect::<Vec<_>>(),
+            &colorize_text(info_layout, &colors)
+                .lines()
+                .map(|l| l.to_string())
+                .collect::<Vec<_>>(),
         );
     } else {
         print_ascii_and_info(
-            &ascii,
-            &info.lines().map(|l| l.to_string()).collect::<Vec<_>>(),
+            &colorize_text(ascii, &colors),
+            &colorize_text(info_layout, &colors)
+                .lines()
+                .map(|l| l.to_string())
+                .collect::<Vec<_>>(),
         );
     }
 }
