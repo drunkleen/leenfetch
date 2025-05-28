@@ -59,17 +59,84 @@ pub fn get_builtin_ascii_art(ascii_distro: &str) -> &'static str {
 
         ("archstrike", _) => ARCH_STRIKE,
 
+        ("archmerge", _) => ARCH_MERGE,
+
+        ("artix", _) => ARTIX,
+
+        ("arya", _) => ARYA,
+
+        ("asteroidos", _) | ("asteroid", _) => ASTEROIDOS,
+
         ("aix", _) => AIX,
+
+        ("bedrock", _) => BEDROCK,
+
+        ("bitrig", _) => BITRIG,
+
+        ("blackarch", _) | ("black arch", _) => BLACK_ARCH,
+
+        ("blag", _) => BLAG,
+
+        ("blankon", _) | ("blank on", _) => BLANK_ON,
+
+        ("bluelight", _) => BLUE_LIGHT,
 
         ("bodhi", _) => BODHI,
 
+        ("bonsai", _) => BONSAI,
+
+        ("bsd", _) => BSD,
+
+        ("bunsenlabs", _) | ("bunsen labs", _) => BUNSEN_LABS,
+
         ("calculate", _) | ("calculateos", _) => CALCULATE,
+
+        ("carbs", _) => CARBS,
+
+        ("cbl-mariner", _) | ("cbl mariner", _) => CBL_MARINER,
+
+        ("celos", _) | ("cel os", _) => CEL_OS,
 
         ("clearos", _) => CLEAROS,
 
         ("centos", true) => CENTOS_SMALL,
         ("centos", false) => CENTOS,
 
+        ("chakra", _) => CHAKRA,
+
+        ("chaletos", _) | ("chalet os", _) => CHALET_OS,
+
+        ("chapeau", _) => CHEAPEAU,
+
+        ("chrom", _) | ("chrome", _) | ("chromeos", _) | ("chrome os", _) => CHROME,
+
+        ("cleanjaro", true) => CLEANJARO_SMALL,
+        ("cleanjaro", false) => CLEANJARO,
+
+        ("clear linux os", _)
+        | ("clearlinuxos", _)
+        | ("clear_linux", _)
+        | ("clear_linux_os", _) => CLEAR_OS,
+
+        ("clover", _) => CLOVER,
+
+        ("condres", _) => CONDRES,
+
+        ("container Linux by coreos", _) | ("container_linux", _) | ("container", _) => {
+            CONTAINER_LINUX
+        }
+
+        ("crux", true) => CRUX_SMALL,
+        ("crux", false) => CRUX,
+
+        ("crystal linux", _) | ("crystal", _) => CRYSTAL_LINUX,
+
+        ("cucumber", _) => CUCUMBER,
+
+        ("cyberos", _) | ("cyber os", _) => CYBER_OS,
+
+        // ("cucumber", _) => CRYSTAL_LINUX,
+        // const CYBER_OS: &str = r#""#;
         ("debian", true) => DEBIAN_SMALL,
         ("debian", false) => DEBIAN,
 
@@ -561,6 +628,82 @@ const ARCH_STRIKE: &str = r#"${c1}                   *
     ********${c2}/${c1}* ${c2}///      ${c1}*${c2}/${c1}********
   ,******     ${c2}// ______ /    ${c1}******,"#;
 
+const ARCH_MERGE: &str = r#"$${c1}                  y:
+                  sMN-
+                 +MMMm`
+                /MMMMMd`
+               :NMMMMMMy
+              -NMMMMMMMMs
+             .NMMMMMMMMMM+
+            .mMMMMMMMMMMMM+
+            oNMMMMMMMMMMMMM+
+          `+:-+NMMMMMMMMMMMM+
+          .sNMNhNMMMMMMMMMMMM/
+        `hho/sNMMMMMMMMMMMMMMM/
+       `.`omMMmMMMMMMMMMMMMMMMM+
+      .mMNdshMMMMd+::oNMMMMMMMMMo
+     .mMMMMMMMMM+     `yMMMMMMMMMs
+    .NMMMMMMMMM/        yMMMMMMMMMy
+   -NMMMMMMMMMh         `mNMMMMMMMMd`
+  /NMMMNds+:.`             `-/oymMMMm.
+ +Mmy/.                          `:smN:
+/+.                                  -o."#;
+
+const ARTIX: &str = r#"${c1}                   '
+                  'o'
+                 'ooo'
+                'ooxoo'
+               'ooxxxoo'
+              'oookkxxoo'
+             'oiioxkkxxoo'
+            ':;:iiiioxxxoo'
+               `'.;::ioxxoo'
+          '-.      `':;jiooo'
+         'oooio-..     `'i:io'
+        'ooooxxxxoio:,.   `'-;'
+       'ooooxxxxxkkxoooIi:-.  `'
+      'ooooxxxxxkkkkxoiiiiiji'
+     'ooooxxxxxkxxoiiii:'`     .i'
+    'ooooxxxxxoi:::'`       .;ioxo'
+   'ooooxooi::'`         .:iiixkxxo'
+  'ooooi:'`                `'';ioxxo'
+ 'i:'`                          '':io'
+'`                                   `'"#;
+
+const ARYA: &str = r#"${c1}                `oyyy/${c2}-yyyyyy+
+${c1}               -syyyy/${c2}-yyyyyy+
+${c1}              .syyyyy/${c2}-yyyyyy+
+${c1}              :yyyyyy/${c2}-yyyyyy+
+${c1}           `/ :yyyyyy/${c2}-yyyyyy+
+${c1}          .+s :yyyyyy/${c2}-yyyyyy+
+${c1}         .oys :yyyyyy/${c2}-yyyyyy+
+${c1}        -oyys :yyyyyy/${c2}-yyyyyy+
+${c1}       :syyys :yyyyyy/${c2}-yyyyyy+
+${c1}      /syyyys :yyyyyy/${c2}-yyyyyy+
+${c1}     +yyyyyys :yyyyyy/${c2}-yyyyyy+
+${c1}   .oyyyyyyo. :yyyyyy/${c2}-yyyyyy+ ---------
+${c1}  .syyyyyy+`  :yyyyyy/${c2}-yyyyy+-+syyyyyyyy
+${c1} -syyyyyy/    :yyyyyy/${c2}-yyys:.syyyyyyyyyy
+${c1}:syyyyyy/     :yyyyyy/${c2}-yyo.:syyyyyyyyyyy"#;
+
+const ASTEROIDOS: &str = r#"${c1}                    ***
+${c1}                   *****
+${c1}                **********
+${c1}              ***************
+${c1}           *///****////****////.
+${c2}         (/////// /////// ///////(
+${c2}      /(((((//*     //,     //((((((.
+${c2}    (((((((((((     (((        ((((((((
+${c2} *(((((((((((((((((((((((        ((((((((
+${c3}    (((((#(((((((#(((((        ((#(((((
+${c3}     (#(#(#####(#(#,       ####(#(#
+${c3}         #########        ########
+${c3}           /########   ########
+${c4}              #######%#######
+${c4}                (#%%%%%%%#
+${c4}                   %%%%%
+${c4}                    %%%"#;
+
 const AIX: &str = r#"${c1}           `:+ssssossossss+-`
         .oys///oyhddddhyo///sy+.
       /yo:+hNNNNNNNNNNNNNNNNh+:oy/
@@ -582,6 +725,120 @@ h//NNNNh  ossss` +h  md- .hm/ `sNNNNN:+y
         .+ys///osyhhhhys+///sy+.
             -/osssossossso/-"#;
 
+const BEDROCK: &str = r#"${c1}--------------------------------------
+--------------------------------------
+--------------------------------------
+---${c2}\\\\\\\\\\\\${c1}-----------------------
+----${c2}\\\      \\\${c1}----------------------
+-----${c2}\\\      \\\${c1}---------------------
+------${c2}\\\      \\\\\\\\\\\\\\\\\${c1}------
+-------${c2}\\\                    \\\${c1}-----
+--------${c2}\\\                    \\\${c1}----
+---------${c2}\\\        ______      \\\${c1}---
+----------${c2}\\\                   ///${c1}---
+-----------${c2}\\\                 ///${c1}----
+------------${c2}\\\               ///${c1}-----
+-------------${c2}\\\////////////////${c1}------
+--------------------------------------
+--------------------------------------
+--------------------------------------"#;
+
+const BITRIG: &str = r#"${c1}   `hMMMMN+
+   -MMo-dMd`
+   oMN- oMN`
+   yMd  /NM:
+  .mMmyyhMMs
+  :NMMMhsmMh
+  +MNhNNoyMm-
+  hMd.-hMNMN:
+  mMmsssmMMMo
+ .MMdyyhNMMMd
+ oMN.`/dMddMN`
+ yMm/hNm+./MM/
+.dMMMmo.``.NMo
+:NMMMNmmmmmMMh
+/MN/-------oNN:
+hMd.       .dMh
+sm/         /ms"#;
+
+const BLACK_ARCH: &str = r#"${c3}                   00
+                   11
+                  ====${c1}
+                  .${c3}//${c1}
+                 `o${c3}//${c1}:
+                `+o${c3}//${c1}o:
+               `+oo${c3}//${c1}oo:
+               -+oo${c3}//${c1}oo+:
+             `/:-:+${c3}//${c1}ooo+:
+            `/+++++${c3}//${c1}+++++:
+           `/++++++${c3}//${c1}++++++:
+          `/+++o${c2}ooo${c3}//${c2}ooo${c1}oooo/`
+${c2}         ${c1}./${c2}ooosssso${c3}//${c2}osssssso${c1}+`
+${c2}        .oossssso-`${c3}//${c1}`/ossssss+`
+       -osssssso.  ${c3}//${c1}  :ssssssso.
+      :osssssss/   ${c3}//${c1}   osssso+++.
+     /ossssssss/   ${c3}//${c1}   +ssssooo/-
+   `/ossssso+/:-   ${c3}//${c1}   -:/+osssso+-
+  `+sso+:-`        ${c3}//${c1}       `.-/+oso:
+ `++:.             ${c3}//${c1}            `-/+/
+ .`                ${c3}/${c1}                `/"#;
+
+const BLAG: &str = r#"${c1}             d
+            ,MK:
+            xMMMX:
+           .NMMMMMX;
+           lMMMMMMMM0clodkO0KXWW:
+           KMMMMMMMMMMMMMMMMMMX'
+      .;d0NMMMMMMMMMMMMMMMMMMK.
+ .;dONMMMMMMMMMMMMMMMMMMMMMMx
+'dKMMMMMMMMMMMMMMMMMMMMMMMMl
+   .:xKWMMMMMMMMMMMMMMMMMMM0.
+       .:xNMMMMMMMMMMMMMMMMMK.
+          lMMMMMMMMMMMMMMMMMMK.
+          ,MMMMMMMMWkOXWMMMMMM0
+          .NMMMMMNd.     `':ldko
+           OMMMK:
+           oWk,
+           ;:"#;
+
+const BLANK_ON: &str = r#"${c2}        `./ohdNMMMMNmho+.` ${c1}       .+oo:`
+${c2}      -smMMMMMMMMMMMMMMMMmy-`    ${c1}`yyyyy+
+${c2}   `:dMMMMMMMMMMMMMMMMMMMMMMd/`  ${c1}`yyyyys
+${c2}  .hMMMMMMMNmhso/++symNMMMMMMMh- ${c1}`yyyyys
+${c2} -mMMMMMMms-`         -omMMMMMMN-${c1}.yyyyys
+${c2}.mMMMMMMy.              .yMMMMMMm:${c1}yyyyys
+${c2}sMMMMMMy                 `sMMMMMMh${c1}yyyyys
+${c2}NMMMMMN:                  .NMMMMMN${c1}yyyyys
+${c2}MMMMMMm.                   NMMMMMN${c1}yyyyys
+${c2}hMMMMMM+                  /MMMMMMN${c1}yyyyys
+${c2}:NMMMMMN:                :mMMMMMM+${c1}yyyyys
+${c2} oMMMMMMNs-            .sNMMMMMMs.${c1}yyyyys
+${c2}  +MMMMMMMNho:.`  `.:ohNMMMMMMNo ${c1}`yyyyys
+${c2}   -hMMMMMMMMNNNmmNNNMMMMMMMMh-  ${c1}`yyyyys
+${c2}     :yNMMMMMMMMMMMMMMMMMMNy:`   ${c1}`yyyyys
+${c2}       .:sdNMMMMMMMMMMNds/.      ${c1}`yyyyyo
+${c2}           `.:/++++/:.`           ${c1}:oys+."#;
+
+const BLUE_LIGHT: &str = r#"${c1}              oMMNMMMMMMMMMMMMMMMMMMMMMM
+              oMMMMMMMMMMMMMMMMMMMMMMMMM
+              oMMMMMMMMMMMMMMMMMMMMMMMMM
+              oMMMMMMMMMMMMMMMMMMMMMMMMM
+              -+++++++++++++++++++++++mM${c2}
+             ```````````````````````..${c1}dM${c2}
+           ```````````````````````....${c1}dM${c2}
+         ```````````````````````......${c1}dM${c2}
+       ```````````````````````........${c1}dM${c2}
+     ```````````````````````..........${c1}dM${c2}
+   ```````````````````````............${c1}dM${c2}
+.::::::::::::::::::::::-..............${c1}dM${c2}
+ `-+yyyyyyyyyyyyyyyyyyyo............${c1}+mMM${c2}
+     -+yyyyyyyyyyyyyyyyo..........${c1}+mMMMM${c2}
+        ./syyyyyyyyyyyyo........${c1}+mMMMMMM${c2}
+           ./oyyyyyyyyyo......${c1}+mMMMMMMMM${c2}
+              omdyyyyyyo....${c1}+mMMMMMMMMMM${c2}
+              ${c1}oMMM${c2}mdhyyo..${c1}+mMMMMMMMMMMMM
+              oNNNNNNm${c2}dso${c1}mMMMMMMMMMMMMMM"#;
+
 const BODHI: &str = r#"${c1}|           ${c2},,mmKKKKKKKKWm,,
  ${c1}'      ${c2},aKKP${c1}LL**********|L*${c2}TKp,
    ${c1}t  ${c2}aKP${c1}L**```          ```**L${c2}*Kp
@@ -600,6 +857,64 @@ TH${c1}L*     ${c3}TKKKKKK##KKKN@KKKK^         ${c1}|I${c2}M
      `Tp${c1}pLL,                ,|||${c2}p'L
         "Kpp${c1}LL++,.,    ,,|||$${c2}#K*   ${c1}'.
            ${c2}`"MKWpppppppp#KM"`        ${c1}`h,"#;
+
+const BONSAI: &str = r#"${c2}   ,####,
+   ${c2}#######,  ${c2},#####,
+   ${c2}#####',#  ${c2}'######
+    ${c2}''###'${c3}';,,,'${c2}###'
+   ${c3}       ,;  ''''
+   ${c3}      ;;;   ${c2},#####,
+   ${c3}     ;;;'  ,,;${c2};;###
+   ${c3}     ';;;;''${c2}'####'
+   ${c3}      ;;;
+   ${c3}   ,.;;';'',,,
+   ${c3}  '     '
+${c1} #
+ #                        O
+ ##, ,##,',##, ,##  ,#,   ,
+ # # #  # #''# #,,  # #   #
+ '#' '##' #  #  ,,# '##;, #"#;
+
+const BSD: &str = r#"${c1}             ,        ,
+            /(        )`
+            \ \___   / |
+            /- _  `-/  '
+           (${c2}/\/ \ ${c1}\   /\
+           ${c2}/ /   | `    ${c1}\
+           ${c3}O O   ${c2}) ${c1}/    |
+           ${c2}`-^--'${c1}`<     '
+          (_.)  _  )   /
+           `.___/`    /
+             `-----' /
+${c4}<----.     __ / __   \
+${c4}<----|====${c1}O)))${c4}==${c1}) \) /${c4}====|
+<----'    ${c1}`--' `.__,' \
+             |        |
+              \       /       /\
+         ${c5}______${c1}( (_  / \______/
+       ${c5},'  ,-----'   |
+       `--{__________)"#;
+
+const BUNSEN_LABS: &str = r#"${c1}        `++
+      -yMMs
+    `yMMMMN`
+   -NMMMMMMm.
+  :MMMMMMMMMN-
+ .NMMMMMMMMMMM/
+ yMMMMMMMMMMMMM/
+`MMMMMMNMMMMMMMN.
+-MMMMN+ /mMMMMMMy
+-MMMm`   `dMMMMMM
+`MMN.     .NMMMMM.
+ hMy       yMMMMM`
+ -Mo       +MMMMN
+  /o       +MMMMs
+           +MMMN`
+           hMMM:
+          `NMM/
+          +MN:
+          mh.
+         -/"#;
 
 const CALCULATE: &str = r#"${c1}                              ......
                            ,,+++++++,.
@@ -621,6 +936,64 @@ const CALCULATE: &str = r#"${c1}                              ......
      ${c2}.,++*****+++${c1}*****************${c2}+++++,.${c1}
       ${c2},++++++**+++++${c1}***********${c2}+++++++++,${c1}
      ${c2}.,,,,++++,..  .,,,,,.....,+++,.,,${c1}"#;
+
+const CARBS: &str = r#"${c2}             ..........
+          ..,;:ccccccc:;'..
+       ..,clllc:;;;;;:cllc,.
+      .,cllc,...     ..';;'.
+     .;lol;..           ..
+    .,lol;.
+    .coo:.
+   .'lol,.
+   .,lol,.
+   .,lol,.
+    'col;.
+    .:ooc'.
+    .'col:.
+     .'cllc'..          .''.
+      ..:lolc,'.......',cll,.
+        ..;cllllccccclllc;'.
+          ...',;;;;;;,,...
+                ....."#;
+
+const CBL_MARINER: &str = r#"${c1}                    .
+                  :-  .
+                :==. .=:
+              :===:  -==:
+            :-===:  .====:
+          :-====-   -=====:
+         -======   :=======:
+        -======.  .=========:
+       -======:   -==========.
+      -======-    -===========.
+     :======-      :===========.
+    :=======.       .-==========.
+   :=======:          -==========.
+  :=======-            :==========.
+ :=======-              .-========-
+:--------.                :========-
+                    ..:::--=========-
+            ..::---================-=-"#;
+
+const CEL_OS: &str = r#"${c4}                     .,cmmmmmmmmmmmc,.
+                .,cmMMMMMMMMMMMMMMMMMMMMmc.
+             .cMMMMMMMMMMMMMMMMMMMMMMMMMMMmc.
+           .cMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMc.
+         ,:MMM ${c3}####################################${c4}
+        cMMMMMMmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmc.
+       .MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM.
+      .MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMc
+      "******************************MMMMMMMMMMMMMc:
+${c3}#################################### ${c4}MMMMMMMMMMMMMc
+      "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM:
+       "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM"
+       'MMMMMMMMM*******************************:
+        \"MMMMMM ${c3}#####################################
+         ${c4}`:MMMMMMmmmmmmmmmmmmmmmmmmmmmmmmmmmmm;
+           `"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM"
+             `":MMMMMMMMMMMMMMMMMMMMMMMMM;'
+                `":MMMMMMMMMMMMMMMMMMM:"
+                     "************""#;
 
 const CENTOS_SMALL: &str = r#"${c2} ____${c1}^${c4}____
 ${c2} |\  ${c1}|${c4}  /|
@@ -649,6 +1022,105 @@ ${c2}              <><><><>
                'MKKM'
                  ''"#;
 
+const CHAKRA: &str = r#"${c1}     _ _ _        "kkkkkkkk.
+   ,kkkkkkkk.,    'kkkkkkkkk,
+   ,kkkkkkkkkkkk., 'kkkkkkkkk.
+  ,kkkkkkkkkkkkkkkk,'kkkkkkkk,
+ ,kkkkkkkkkkkkkkkkkkk'kkkkkkk.
+  "''"''',;::,,"''kkk''kkkkk;   __
+      ,kkkkkkkkkk, "k''kkkkk' ,kkkk
+    ,kkkkkkk' ., ' .: 'kkkk',kkkkkk
+  ,kkkkkkkk'.k'   ,  ,kkkk;kkkkkkkkk
+ ,kkkkkkkk';kk 'k  "'k',kkkkkkkkkkkk
+.kkkkkkkkk.kkkk.'kkkkkkkkkkkkkkkkkk'
+;kkkkkkkk''kkkkkk;'kkkkkkkkkkkkk''
+'kkkkkkk; 'kkkkkkkk.,""''"''""
+  ''kkkk;  'kkkkkkkkkk.,
+     ';'    'kkkkkkkkkkkk.,
+             ';kkkkkkkkkk'
+               ';kkkkkk'
+                  "''""#;
+
+const CHALET_OS: &str = r#"${c1}             `.//+osso+/:``
+         `/sdNNmhyssssydmNNdo:`
+       :hNmy+-`          .-+hNNs-
+     /mMh/`       `+:`       `+dMd:
+   .hMd-        -sNNMNo.  /yyy  /mMs`
+  -NM+       `/dMd/--omNh::dMM   `yMd`
+ .NN+      .sNNs:/dMNy:/hNmo/s     yMd`
+ hMs    `/hNd+-smMMMMMMd+:omNy-    `dMo
+:NM.  .omMy:/hNMMMMMMMMMMNy:/hMd+`  :Md`
+/Md` `sm+.omMMMMMMMMMMMMMMMMd/-sm+  .MN:
+/Md`      MMMMMMMMMMMMMMMMMMMN      .MN:
+:NN.      MMMMMMm....--NMMMMMN      -Mm.
+`dMo      MMMMMMd      mMMMMMN      hMs
+ -MN:     MMMMMMd      mMMMMMN     oMm`
+  :NM:    MMMMMMd      mMMMMMN    +Mm-
+   -mMy.  mmmmmmh      dmmmmmh  -hMh.
+     oNNs-                    :yMm/
+      .+mMdo:`            `:smMd/`
+         -ohNNmhsoo++osshmNNh+.
+            `./+syyhhyys+:``"#;
+
+const CHEAPEAU: &str = r#"${c1}               .-/-.
+            ////////.
+          ////////${c2}y+${c1}//.
+        ////////${c2}mMN${c1}/////.
+      ////////${c2}mMN+${c1}////////.
+    ////////////////////////.
+  /////////+${c2}shhddhyo${c1}+////////.
+ ////////${c2}ymMNmdhhdmNNdo${c1}///////.
+///////+${c2}mMms${c1}////////${c2}hNMh${c1}///////.
+///////${c2}NMm+${c1}//////////${c2}sMMh${c1}///////
+//////${c2}oMMNmmmmmmmmmmmmMMm${c1}///////
+//////${c2}+MMmssssssssssssss+${c1}///////
+`//////${c2}yMMy${c1}////////////////////
+ `//////${c2}smMNhso++oydNm${c1}////////
+  `///////${c2}ohmNMMMNNdy+${c1}///////
+    `//////////${c2}++${c1}//////////
+       `////////////////.
+           -////////-"#;
+
+const CHROME: &str = r#"${c2}            .,:loool:,.
+        .,coooooooooooooc,.
+     .,lllllllllllllllllllll,.
+    ;ccccccccccccccccccccccccc;
+${c1}  '${c2}ccccccccccccccccccccccccccccc.
+${c1} ,oo${c2}c::::::::okO${c5}000${c3}0OOkkkkkkkkkkk:
+${c1}.ooool${c2};;;;:x${c5}K0${c4}kxxxxxk${c5}0X${c3}K0000000000.
+${c1}:oooool${c2};,;O${c5}K${c4}ddddddddddd${c5}KX${c3}000000000d
+${c1}lllllool${c2};l${c5}N${c4}dllllllllllld${c5}N${c3}K000000000
+${c1}lllllllll${c2}o${c5}M${c4}dccccccccccco${c5}W${c3}K000000000
+${c1};cllllllllX${c5}X${c4}c:::::::::c${c5}0X${c3}000000000d
+${c1}.ccccllllllO${c5}Nk${c4}c;,,,;cx${c5}KK${c3}0000000000.
+${c1} .cccccclllllxOO${c5}OOO${c1}Okx${c3}O0000000000;
+${c1}  .:ccccccccllllllllo${c3}O0000000OOO,
+${c1}    ,:ccccccccclllcd${c3}0000OOOOOOl.
+${c1}      '::ccccccccc${c3}dOOOOOOOkx:.
+${c1}        ..,::cccc${c3}xOOOkkko;.
+${c1}            ..,:${c3}dOkxl:."#;
+
+const CLEANJARO_SMALL: &str = r#"${c1}█████ ██████████
+█████ ██████████
+█████
+█████
+█████
+████████████████
+████████████████"#;
+
+const CLEANJARO: &str = r#"${c1}███████▌ ████████████████
+███████▌ ████████████████
+███████▌ ████████████████
+███████▌
+███████▌
+███████▌
+███████▌
+███████▌
+█████████████████████████
+█████████████████████████
+█████████████████████████
+▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀"#;
+
 const CLEAROS: &str = r#"${c1}             `.--::::::--.`
          .-:////////////////:-.
       `-////////////////////////-`
@@ -669,6 +1141,172 @@ const CLEAROS: &str = r#"${c1}             `.--::::::--.`
        .::   `///:    :///`   -:.
              `///:    :///`
               `...    ...`"#;
+
+const CLEAR_OS: &str = r#"${c1}          BBB
+       BBBBBBBBB
+     BBBBBBBBBBBBBBB
+   BBBBBBBBBBBBBBBBBBBB
+   BBBBBBBBBBB         BBB
+  BBBBBBBB${c2}YYYYY
+${c1}  BBBBBBBB${c2}YYYYYY
+${c1}  BBBBBBBB${c2}YYYYYYY
+${c1}  BBBBBBBBB${c2}YYYYY${c3}W
+${c4} GG${c1}BBBBBBBY${c2}YYYY${c3}WWW
+${c4} GGG${c1}BBBBBBB${c2}YY${c3}WWWWWWWW
+${c4} GGGGGG${c1}BBBBBB${c3}WWWWWWWW
+${c4} GGGGGGGG${c1}BBBB${c3}WWWWWWWW
+${c4}GGGGGGGGGGG${c1}BBB${c3}WWWWWWW
+${c4}GGGGGGGGGGGGG${c1}B${c3}WWWWWW
+${c4}GGGGGGGG${c3}WWWWWWWWWWW
+${c4}GG${c3}WWWWWWWWWWWWWWWW
+ WWWWWWWWWWWWWWWW
+      WWWWWWWWWW
+          WWW"#;
+
+const CLOVER: &str = r#"${c1}               `omo``omo`
+             `oNMMMNNMMMNo`
+           `oNMMMMMMMMMMMMNo`
+          oNMMMMMMMMMMMMMMMMNo
+          `sNMMMMMMMMMMMMMMNs`
+     `omo`  `sNMMMMMMMMMMNs`  `omo`
+   `oNMMMNo`  `sNMMMMMMNs`  `oNMMMNo`
+ `oNMMMMMMMNo`  `oNMMNs`  `oNMMMMMMMNo`
+oNMMMMMMMMMMMNo`  `sy`  `oNMMMMMMMMMMMNo
+`sNMMMMMMMMMMMMNo.${c2}oNNs${c1}.oNMMMMMMMMMMMMNs`
+`oNMMMMMMMMMMMMNs.${c2}oNNs${c1}.oNMMMMMMMMMMMMNo`
+oNMMMMMMMMMMMNs`  `sy`  `oNMMMMMMMMMMMNo
+ `oNMMMMMMMNs`  `oNMMNo`  `oNMMMMMMMNs`
+   `oNMMMNs`  `sNMMMMMMNs`  `oNMMMNs`
+     `oNs`  `sNMMMMMMMMMMNs`  `oNs`
+          `sNMMMMMMMMMMMMMMNs`
+          +NMMMMMMMMMMMMMMMMNo
+           `oNMMMMMMMMMMMMNo`
+             `oNMMMNNMMMNs`
+               `omo``oNs`"#;
+
+const CONDRES: &str = r#"${c1}syyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy+${c3}.+.
+${c1}`oyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy+${c3}:++.
+${c2}/o${c1}+oyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy/${c3}oo++.
+${c2}/y+${c1}syyyyyyyyyyyyyyyyyyyyyyyyyyyyy${c3}+ooo++.
+${c2}/hy+${c1}oyyyhhhhhhhhhhhhhhyyyyyyyyy${c3}+oo+++++.
+${c2}/hhh+${c1}shhhhhdddddhhhhhhhyyyyyyy${c3}+oo++++++.
+${c2}/hhdd+${c1}oddddddddddddhhhhhyyyys${c3}+oo+++++++.
+${c2}/hhddd+${c1}odmmmdddddddhhhhyyyy${c3}+ooo++++++++.
+${c2}/hhdddmo${c1}odmmmdddddhhhhhyyy${c3}+oooo++++++++.
+${c2}/hdddmmms${c1}/dmdddddhhhhyyys${c3}+oooo+++++++++.
+${c2}/hddddmmmy${c1}/hdddhhhhyyyyo${c3}+oooo++++++++++:
+${c2}/hhdddmmmmy${c1}:yhhhhyyyyy+${c3}+oooo+++++++++++:
+${c2}/hhddddddddy${c1}-syyyyyys+${c3}ooooo++++++++++++:
+${c2}/hhhddddddddy${c1}-+yyyy+${c3}/ooooo+++++++++++++:
+${c2}/hhhhhdddddhhy${c1}./yo:${c3}+oooooo+++++++++++++/
+${c2}/hhhhhhhhhhhhhy${c1}:-.${c3}+sooooo+++++++++++///:
+${c2}:sssssssssssso++${c1}${c3}`:/:--------.````````"#;
+
+const CONTAINER_LINUX: &str = r#"${c1}                .....
+          .';:cccccccc:;'.
+        ':ccccclc${c3}lllllllll${c1}cc:.
+     .;cccccccc${c3}lllllllllllllll${c1}c,
+    ;clllccccc${c3}llllllllllllllllll${c1}c,
+  .cllclccccc${c3}lllll${c2}lll${c3}llllllllllll${c1}c:
+  ccclclcccc${c3}cllll${c2}kWMMNKk${c3}llllllllll${c1}c:
+ :ccclclcccc${c3}llll${c2}oWMMMMMMWO${c3}lllllllll${c1}c,
+.ccllllllccc${c3}clll${c2}OMMMMMMMMM0${c3}lllllllll${c1}c
+.lllllclcccc${c3}llll${c2}KMMMMMMMMMMo${c3}llllllll${c1}c.
+.lllllllcccc${c3}clll${c2}KMMMMMMMMN0${c3}lllllllll${c1}c.
+.cclllllcccc${c3}lllld${c2}xkkxxdo${c3}llllllllllc${c1}lc
+ :cccllllllcccc${c3}lllccllllcclccc${c1}cccccc;
+ .ccclllllllcccccccc${c3}lll${c1}ccccclccccccc
+  .cllllllllllclcccclccclccllllcllc
+    :cllllllllccclcllllllllllllcc;
+     .cccccccccccccclcccccccccc:.
+       .;cccclccccccllllllccc,.
+          .';ccccclllccc:;..
+                ....."#;
+
+const CRUX_SMALL: &str = r#"${c1}    ___
+   (${c3}.· ${c1}|
+   (${c2}<> ${c1}|
+  / ${c3}__  ${c1}\
+ ( ${c3}/  \ ${c1}/|
+${c2}_${c1}/\ ${c3}__)${c1}/${c2}_${c1})
+${c2}\/${c1}-____${c2}\/"#;
+
+const CRUX: &str = r#"${c1}         odddd
+      oddxkkkxxdoo
+     ddcoddxxxdoool
+     xdclodod  olol
+     xoc  xdd  olol
+     xdc  ${c2}k00${c1}Okdlol
+     xxd${c2}kOKKKOkd${c1}ldd
+     xdco${c2}xOkdlo${c1}dldd
+     ddc:cl${c2}lll${c1}oooodo
+   odxxdd${c3}xkO000kx${c1}ooxdo
+  oxdd${c3}x0NMMMMMMWW0od${c1}kkxo
+ oooxd${c3}0WMMMMMMMMMW0o${c1}dxkx
+docldkXW${c3}MMMMMMMWWN${c1}Odolco
+xx${c2}dx${c1}kxxOKN${c3}WMMWN${c1}0xdoxo::c
+${c2}xOkkO${c1}0oo${c3}odOW${c2}WW${c1}XkdodOxc:l
+${c2}dkkkxkkk${c3}OKX${c2}NNNX0Oxx${c1}xc:cd
+${c2} odxxdx${c3}xllod${c2}ddooxx${c1}dc:ldo
+${c2}   lodd${c1}dolccc${c2}ccox${c1}xoloo"#;
+
+const CRYSTAL_LINUX: &str = r#"${c1}                        mysssym
+${c1}                      mysssym
+${c1}                    mysssym
+${c1}                  mysssym
+${c1}                mysssyd
+${c1}              mysssyd    N
+${c1}            mysssyd    mysym
+${c1}          mysssyd      dysssym
+${c1}        mysssyd          dysssym
+${c1}      mysssyd              dysssym
+${c1}      mysssyd              dysssym
+${c1}        mysssyd          dysssym
+${c1}          mysssyd      dysssym
+${c1}            mysym    dysssym
+${c1}              N    dysssym
+${c1}                 dysssym
+${c1}               dysssym
+${c1}             dysssym
+${c1}           dysssym
+${c1}         dysssym"#;
+
+const CUCUMBER: &str = r#"${c1}           `.-://++++++//:-.`
+        `:/+//${c2}::--------${c1}:://+/:`
+      -++/:${c2}----..........----${c1}:/++-
+    .++:${c2}---...........-......---${c1}:++.
+   /+:${c2}---....-::/:/--//:::-....---${c1}:+/
+ `++:${c2}--.....:---::/--/::---:.....--${c1}:++`
+ /+:${c2}--.....--.--::::-/::--.--.....--${c1}:+/
+-o:${c2}--.......-:::://--/:::::-.......--${c1}:o-
+/+:${c2}--...-:-::---:::..:::---:--:-...--${c1}:+/
+o/:${c2}-...-:.:.-/:::......::/:.--.:-...-${c1}:/o
+o/${c2}--...::-:/::/:-......-::::::-/-...-${c1}:/o
+/+:${c2}--..-/:/:::--:::..:::--::////-..--${c1}:+/
+-o:${c2}--...----::/:::/--/:::::-----...--${c1}:o-
+ /+:${c2}--....://:::.:/--/:.::://:....--${c1}:+/
+ `++:${c2}--...-:::.--.:..:.--.:/:-...--${c1}:++`
+   /+:${c2}---....----:-..-:----....---${c1}:+/
+    .++:${c2}---..................---${c1}:++.
+      -/+/:${c2}----..........----${c1}:/+/-
+        `:/+//${c2}::--------:::${c1}/+/:`
+           `.-://++++++//:-.`"#;
+
+const CYBER_OS: &str = r#"${c3}             !M$EEEEEEEEEEEP
+            .MMMMM000000Nr.
+            ${c3}&MMMMMM${c2}MMMMMMMMMMMMM9
+           ${c3}~MMM${c1}MMMM${c2}MMMMMMMMMMMMC
+      ${c1}"    ${c3}M${c1}MMMMMMM${c2}MMMMMMMMMMs
+    ${c1}iM${c2}MMM&&${c1}MMMMMMMM${c2}MMMMMMMM\\
+   ${c1}BMMM${c2}MMMMM${c1}MMMMMMM${c2}MMMMMM${c3}"
+  ${c1}9MMMMM${c2}MMMMMMM${c1}MMMM${c2}MMMM${c3}MMMf-
+        ${c2}sMMMMMMMM${c1}MM${c2}M${c3}MMMMMMMMM3_
+         ${c2}+ffffffff${c1}P${c3}MMMMMMMMMMMM0
+                    ${c2}CMMMMMMMMMMM
+                      }MMMMMMMMM
+                        ~MMMMMMM
+                          "RMMMM
+                            .PMB"#;
 
 const DEBIAN_SMALL: &str = r#"${c1}  _____
  /  __ \
