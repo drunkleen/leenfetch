@@ -3,7 +3,7 @@ use serde::Deserialize;
 /// Describes a single line/block in the output layout.
 /// `label`: The label to display (e.g., "CPU").
 /// `field`: The field name to match in the data (e.g., "cpu").
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct Layout {
     pub label: String,
     pub field: String,
@@ -11,7 +11,7 @@ pub struct Layout {
 
 /// Toggles for enabling/disabling each info block in the output.
 /// All fields are booleans. If true, the corresponding block is shown.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize,Clone)]
 pub struct Toggles {
     #[serde(default)]
     pub show_titles: bool,            // Show user@host title block
@@ -57,7 +57,7 @@ pub struct Toggles {
 
 /// Fine-grained configuration for how each block is displayed.
 /// Most fields correspond to a feature or formatting option.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize,Clone)]
 pub struct Flags {
     #[serde(default)]
     pub ascii_distro: String,         // Which distro's ASCII art to use ("auto" or a specific name)

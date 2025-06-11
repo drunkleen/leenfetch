@@ -2,7 +2,7 @@ use crate::modules::enums::SongInfo;
 
 /// Holds all the collected system information for display.
 /// Each field corresponds to a block or value in the output.
-#[derive(Default)]
+#[derive(Default,Clone, Debug)]
 pub struct Data {
     /// Username of the current user (e.g., "snape")
     pub username: Option<String>,
