@@ -6,7 +6,6 @@
 
 
 
-
 <!-- > 🌐 Available in: [English](#) | [فارسی](./readme/README-fa.md) | [Русский](./readme/README-ru.md) | [中文](./readme/README-zh.md)
 **** -->
 
@@ -19,15 +18,18 @@
 > Want to help? Contributions, testing, and feedback are always welcome!
 
 
+
 ## 💬 Feedback & Issues
 
 Found a bug? Got a feature idea?  
 Head over to the [issues](https://github.com/drunkleen/leenfetch/issues) or join the [discussions](https://github.com/drunkleen/leenfetch/discussions) page!
 
+
 ## 📚 Table of Contents
 
 - [📸 Screenshots](#-screenshots)
 - [🚀 Features](#-features)
+- [▨ Packaging Status](#-packaging-status)
 - [📦 Installation](#-installation)
   - [Install on Arch Linux (via AUR)](#install-on-arch-linux-via-aur)
   - [Install on Debian / Ubuntu (via .deb)](#install-on-debian--ubuntu-via-deb)
@@ -68,6 +70,11 @@ Head over to the [issues](https://github.com/drunkleen/leenfetch/issues) or join
 - 🎨 Supports theme-based color profiles (`ascii_colors=distro`, etc.)
 - 🔌 Simple config file: `~/.config/leenfetch/config.conf`
 - 🧵 Accepts piped ASCII input — use `fortune | cowsay | leenfetch` for dynamic text logos
+
+
+## ▨ Packaging Status
+
+[![Repository status](https://repology.org/badge/vertical-allrepos/leenfetch.svg)](https://repology.org/project/leenfetch/versions)
 
 
 ## 📦 Installation
