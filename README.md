@@ -27,27 +27,31 @@ Head over to the [issues](https://github.com/drunkleen/leenfetch/issues) or join
 
 ## 📚 Table of Contents
 
-- [📸 Screenshots](#-screenshots)
-- [🚀 Features](#-features)
-- [▨ Packaging Status](#-packaging-status)
-- [📦 Installation](#-installation)
-  - [Install on Arch Linux (via AUR)](#install-on-arch-linux-via-aur)
-  - [Install on Debian / Ubuntu (via .deb)](#install-on-debian--ubuntu-via-deb)
-  - [Install on Fedora / RHEL (via .rpm)](#install-on-fedora--rhel-via-rpm)
-  - [Install on Windows (via .zip)](#install-on-windows-via-zip)
-  - [Install from crates.io](#install-from-cratesio)
-  - [🛠️ Manual Installation (Build from Source)](#️-manual-installation-build-from-source)
-- [📥 Using Piped Input](#-using-piped-input)
-- [⚙️ Configuration](#️-configuration)
-  - [flags.ron](#flagsron)
-  - [toggles.ron](#togglesron)
-  - [print\_layout.ron](#print_layoutron)
-  - [How to Edit](#how-to-edit)
-- [🎯 Roadmap](#-roadmap)
-- [🤝 Contributing](#-contributing)
-- [☕ Support LeenFetch](#-support-leenfetch)
-- [📄 License](#-license)
-- [💡 Inspiration](#-inspiration)
+- [🧠 LeenFetch](#-leenfetch)
+        - [A fast, minimal, and customizable system information tool built in Rust — your alternative to Neofetch, for real power users.](#a-fast-minimal-and-customizable-system-information-tool-built-in-rust--your-alternative-to-neofetch-for-real-power-users)
+  - [💬 Feedback \& Issues](#-feedback--issues)
+  - [📚 Table of Contents](#-table-of-contents)
+  - [📸 Screenshots](#-screenshots)
+  - [🚀 Features](#-features)
+  - [▨ Packaging Status](#-packaging-status)
+  - [📦 Installation](#-installation)
+    - [Install on Arch Linux (via AUR)](#install-on-arch-linux-via-aur)
+    - [Install on Debian / Ubuntu (via .deb)](#install-on-debian--ubuntu-via-deb)
+    - [Install on Fedora / RHEL (via .rpm)](#install-on-fedora--rhel-via-rpm)
+    - [Install on Windows (via .zip)](#install-on-windows-via-zip)
+    - [Install from crates.io](#install-from-cratesio)
+    - [🛠️ Manual Installation (Build from Source)](#️-manual-installation-build-from-source)
+  - [📥 Using Piped Input](#-using-piped-input)
+  - [⚙️ Configuration](#️-configuration)
+    - [flags.ron](#flagsron)
+    - [toggles.ron](#togglesron)
+    - [print\_layout.ron](#print_layoutron)
+    - [How to Edit](#how-to-edit)
+  - [🎯 Roadmap](#-roadmap)
+  - [🤝 Contributing](#-contributing)
+  - [☕ Support LeenFetch](#-support-leenfetch)
+  - [📄 License](#-license)
+  - [💡 Inspiration](#-inspiration)
 
 
 ## 📸 Screenshots
@@ -68,7 +72,7 @@ Head over to the [issues](https://github.com/drunkleen/leenfetch/issues) or join
 - 📦 Detects installed packages, shell, GPU, DE/WM, and more
 - 🖼️ Custom ASCII art support and override via config
 - 🎨 Supports theme-based color profiles (`ascii_colors=distro`, etc.)
-- 🔌 Simple config file: `~/.config/leenfetch/config.conf`
+- 🔌 Simple config files: `~/.config/leenfetch/*`
 - 🧵 Accepts piped ASCII input — use `fortune | cowsay | leenfetch` for dynamic text logos
 
 

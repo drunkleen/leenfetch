@@ -82,7 +82,7 @@ pub fn get_custom_ascii(custom_path: &str) -> String {
         return content;
     }
 
-    "\n".to_string()
+    "".to_string()
 }
 
 /// Given a distro name, returns a string of its corresponding ASCII art.

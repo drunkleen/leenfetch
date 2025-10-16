@@ -200,6 +200,8 @@ pub fn get_builtin_distro_colors(distro: &str) -> &'static [u8] {
         | ("opensuse tumbleweed", _)
         | ("opensuse_tumbleweed", _) => &[2, 7],
 
+        ("omarchy", _) => &[2, 7],
+
         ("parch", _) | ("parch linux", _) => &[4, 7, 1],
 
         ("parrot", _) | ("parrot linux", _) => &[6, 7],

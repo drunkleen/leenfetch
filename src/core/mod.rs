@@ -1,6 +1,11 @@
 mod data;
 
-use std::{collections::HashMap, str::FromStr, sync::{Arc, Mutex}, thread};
+use std::{
+    collections::HashMap,
+    str::FromStr,
+    sync::{Arc, Mutex},
+    thread,
+};
 
 use data::Data;
 
@@ -116,7 +121,9 @@ impl Core {
                             return;
                         }
                         let os = get_os();
-                        result.push_str(format!("${{c1}}{}: ${{reset}}{}\n", info.label, os).as_str());
+                        result.push_str(
+                            format!("${{c1}}{}: ${{reset}}{}\n", info.label, os).as_str(),
+                        );
                         let mut data = data.lock().unwrap();
                         data.os = Some(os);
                     }
@@ -225,7 +232,10 @@ impl Core {
                             if data.de.is_none() {
                                 data.de = get_de(toggles.show_wm, data.wm.as_deref());
                             }
-                            (data.wm.as_deref().unwrap_or("").to_string(), data.de.clone())
+                            (
+                                data.wm.as_deref().unwrap_or("").to_string(),
+                                data.de.clone(),
+                            )
                         };
                         let wm_theme = get_wm_theme(&wm, de.as_deref());
                         Self::is_some_add_to_output(&info.label, &wm_theme, &mut result);
@@ -268,8 +278,11 @@ impl Core {
                         } else {
                             for (index, gpu) in gpus.iter().enumerate() {
                                 result.push_str(
-                                    format!("${{c1}}{} #{}: ${{reset}}{}\n", &info.label, index, gpu)
-                                        .as_str(),
+                                    format!(
+                                        "${{c1}}{} #{}: ${{reset}}{}\n",
+                                        &info.label, index, gpu
+                                    )
+                                    .as_str(),
                                 );
                             }
                         }
@@ -311,8 +324,11 @@ impl Core {
                                 data.disk = Some(disks);
                             } else {
                                 result.push_str(
-                                    format!("${{c1}}{}: ${{reset}}{}\n", &info.label, "No disks found")
-                                        .as_str(),
+                                    format!(
+                                        "${{c1}}{}: ${{reset}}{}\n",
+                                        &info.label, "No disks found"
+                                    )
+                                    .as_str(),
                                 );
                                 let mut data = data.lock().unwrap();
                                 data.disk = None;
@@ -349,13 +365,17 @@ impl Core {
 
                         let battery_display_mode =
                             BatteryDisplayMode::from_str(&flags.battery_display);
-                        let batteries =
-                            get_battery(battery_display_mode.unwrap_or(BatteryDisplayMode::BarInfo));
+                        let batteries = get_battery(
+                            battery_display_mode.unwrap_or(BatteryDisplayMode::BarInfo),
+                        );
 
                         if batteries.is_empty() {
                             result.push_str(
-                                format!("${{c1}}{}: ${{reset}}{}\n", &info.label, "No Battery found")
-                                    .as_str(),
+                                format!(
+                                    "${{c1}}{}: ${{reset}}{}\n",
+                                    &info.label, "No Battery found"
+                                )
+                                .as_str(),
                             );
                         } else if batteries.len() == 1 {
                             result.push_str(
@@ -449,10 +469,14 @@ impl Core {
         &mut self,
         override_map: HashMap<&'static str, String>,
     ) -> (String, HashMap<&str, &str>) {
-        let mut custom_ascii_path = override_map.get("custom_ascii_path").map(String::as_str);
-        if custom_ascii_path == Some("") {
-            custom_ascii_path = Some(self.flags.custom_ascii_path.as_str());
-        }
+        let flags_path = self.flags.custom_ascii_path.as_str();
+        let custom_ascii_path: Option<&str> = override_map
+            .get("custom_ascii_path")
+            .map(String::as_str)
+            // If override exists: empty => use flags_path; non-empty => use override
+            .map(|ov| if ov.is_empty() { flags_path } else { ov })
+            // If override missing: keep flags_path only if non-empty; else None
+            .or_else(|| (!flags_path.is_empty()).then_some(flags_path));
 
         let custom_ascii_colors = override_map
             .get("ascii_colors")
