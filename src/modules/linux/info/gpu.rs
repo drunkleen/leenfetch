@@ -77,7 +77,7 @@ fn describe_device(device_dir: &Path) -> Option<String> {
     let vendor_name = vendor_id.and_then(|id| {
         db.as_ref()
             .and_then(|db| db.vendors.get(&id).cloned())
-            .map(|s| s.trim().to_string().replace(" Corporation", ""))
+            .map(|s| s.trim().to_string())
     });
     let device_name: Option<String> =
         if let (Some(vendor_id), Some(device_id)) = (vendor_id, device_id) {
@@ -94,7 +94,7 @@ fn describe_device(device_dir: &Path) -> Option<String> {
 
     let mut label = match (vendor_name, device_name) {
         (Some(vendor), Some(model)) => {
-            format!("{} {}", vendor, model)
+            format!("{} {}", vendor.replace(" Corporation", ""), model)
         }
         (Some(vendor), _) => vendor,
         (_, Some(model)) => model,

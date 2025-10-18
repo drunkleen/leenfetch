@@ -14,7 +14,7 @@ use crate::{
         },
         info::{
             battery::get_battery, cpu::get_cpu, disk::get_disks, gpu::get_gpus, memory::get_memory,
-             uptime::get_uptime, os_age::get_os_age,
+            os_age::get_os_age, uptime::get_uptime,
         },
         packages::get_packages,
         shell::get_shell,
@@ -211,10 +211,10 @@ impl Core {
                                     format!("${{c1}}{} ${{reset}}{}\n", label, gpus[0]).as_str(),
                                 );
                             } else {
-                                for (index, gpu) in gpus.iter().enumerate() {
+                                for (_, gpu) in gpus.iter().enumerate() {
                                     final_output.push_str(
-                                        format!("${{c1}}{} {}: ${{reset}}{}\n", label, index, gpu)
-                                            .as_str(),
+                                        // format!("${{c1}}{} {}: ${{reset}}{}\n", label, index, gpu)
+                                        format!("${{c1}}{} ${{reset}}{}\n", label, gpu).as_str(),
                                     );
                                 }
                             }
