@@ -33,12 +33,17 @@ pub fn get_wm() -> Option<String> {
 
 // Uses `ps -e` to scan processes for known WMs
 fn scan_proc(wm_names: &[&str]) -> Option<String> {
-    let output = Command::new("ps").arg("-e").output().ok()?.stdout;
+    let output = Command::new("ps")
+        .args(["-eo", "comm="])
+        .output()
+        .ok()?
+        .stdout;
     let ps_text = String::from_utf8_lossy(&output);
 
     for line in ps_text.lines() {
+        let name = line.trim();
         for &wm in wm_names {
-            if line.contains(wm) {
+            if name.eq_ignore_ascii_case(wm) || name.contains(wm) {
                 return Some(normalize_wm(wm));
             }
         }
@@ -147,11 +152,7 @@ mod tests {
 
     #[test]
     fn test_scan_proc_finds_known_wm() {
-        let sample_ps = "\
-            1000 ?        00:00:00 i3
-            1001 ?        00:00:00 bash
-            1002 ?        00:00:00 Xorg
-        ";
+        let sample_ps = "i3\nbash\nXorg\n";
 
         for wm in ALL_WMS {
             let fake_output = sample_ps.replace("i3", wm);
@@ -163,8 +164,9 @@ mod tests {
     // Internal helper to isolate scan_proc logic
     fn parse_ps_for_wm(ps_output: &str, targets: &[&str]) -> Option<String> {
         for line in ps_output.lines() {
+            let name = line.trim();
             for &wm in targets {
-                if line.contains(wm) {
+                if name.eq_ignore_ascii_case(wm) || name.contains(wm) {
                     return Some(normalize_wm(wm));
                 }
             }

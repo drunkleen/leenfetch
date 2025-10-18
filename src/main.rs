@@ -4,10 +4,14 @@ mod modules;
 
 use atty::Stream;
 use core::Core;
+use once_cell::sync::Lazy;
 use modules::{helper::handle_args, utils::colorize_text};
 use regex::Regex;
 use std::io::{self, Read};
 use unicode_width::UnicodeWidthStr;
+
+static ANSI_REGEX: Lazy<Regex> =
+    Lazy::new(|| Regex::new(r"\x1b\[[0-9;]*m").expect("valid ANSI regex"));
 
 fn main() {
     let mut args = std::env::args();
@@ -79,14 +83,11 @@ fn print_ascii_and_info(ascii: &str, info_lines: &[String]) {
     let info_count = info_lines.len();
     let mut total_lines = ascii_count.max(info_count);
 
-    // Strip ANSI escape codes for accurate display width calculation
-    let ansi_regex = Regex::new(r"\x1b\[[0-9;]*m").unwrap();
-
     // Calculate the max visible width of ASCII lines
     let max_ascii_width = ascii_lines
         .iter()
         .map(|line| {
-            let stripped = ansi_regex.replace_all(line, "");
+            let stripped = ANSI_REGEX.replace_all(line, "");
             UnicodeWidthStr::width(stripped.as_ref())
         })
         .max()

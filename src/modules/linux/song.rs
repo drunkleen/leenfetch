@@ -74,11 +74,11 @@ fn detect_player() -> Option<String> {
         "clementine",
     ];
 
-    let output = Command::new("ps").arg("aux").output().ok()?;
+    let output = Command::new("ps").args(["-eo", "comm="]).output().ok()?;
     let ps_output = String::from_utf8_lossy(&output.stdout);
 
     for player in players {
-        if ps_output.contains(player) {
+        if ps_output.lines().any(|line| line.trim().contains(player)) {
             return Some(player.to_string());
         }
     }
