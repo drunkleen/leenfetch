@@ -4,8 +4,8 @@ mod modules;
 
 use atty::Stream;
 use core::Core;
-use once_cell::sync::Lazy;
 use modules::{helper::handle_args, utils::colorize_text};
+use once_cell::sync::Lazy;
 use regex::Regex;
 use std::io::{self, Read};
 use unicode_width::UnicodeWidthStr;

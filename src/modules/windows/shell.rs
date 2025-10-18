@@ -1,5 +1,5 @@
-use std::{path::Path, process::Command};
 use crate::modules::windows::utils::run_powershell;
+use std::{path::Path, process::Command};
 
 pub fn get_shell(show_path: bool, show_version: bool) -> Option<String> {
     let parent_shell_path = detect_parent_shell()?;
@@ -41,22 +41,39 @@ pub fn get_shell(show_path: bool, show_version: bool) -> Option<String> {
 /// Tries to detect the actual shell that launched this process.
 fn detect_parent_shell() -> Option<String> {
     // Try WMIC first
-    if let Ok(output) = Command::new("wmic").args([
-        "process",
-        "where",
-        &format!("ProcessId={}", std::process::id()),
-        "get",
-        "ParentProcessId",
-        "/value",
-    ]).output() {
+    if let Ok(output) = Command::new("wmic")
+        .args([
+            "process",
+            "where",
+            &format!("ProcessId={}", std::process::id()),
+            "get",
+            "ParentProcessId",
+            "/value",
+        ])
+        .output()
+    {
         let parent_out = String::from_utf8_lossy(&output.stdout);
-        if let Some(parent_pid_line) = parent_out.lines().find(|line| line.contains("ParentProcessId=")) {
+        if let Some(parent_pid_line) = parent_out
+            .lines()
+            .find(|line| line.contains("ParentProcessId="))
+        {
             if let Some(parent_pid) = parent_pid_line.trim().split('=').nth(1) {
-                if let Ok(parent_output) = Command::new("wmic").args([
-                    "process","where",&format!("ProcessId={}", parent_pid.trim()),"get","ExecutablePath","/value"
-                ]).output() {
+                if let Ok(parent_output) = Command::new("wmic")
+                    .args([
+                        "process",
+                        "where",
+                        &format!("ProcessId={}", parent_pid.trim()),
+                        "get",
+                        "ExecutablePath",
+                        "/value",
+                    ])
+                    .output()
+                {
                     let parent_exe = String::from_utf8_lossy(&parent_output.stdout);
-                    if let Some(exe_path_line) = parent_exe.lines().find(|line| line.contains("ExecutablePath=")) {
+                    if let Some(exe_path_line) = parent_exe
+                        .lines()
+                        .find(|line| line.contains("ExecutablePath="))
+                    {
                         if let Some(path) = exe_path_line.trim().strip_prefix("ExecutablePath=") {
                             return Some(path.trim().to_string());
                         }

@@ -311,10 +311,7 @@ mod tests {
         env::set_var("LEENFETCH_PCI_IDS", db_path.to_str().unwrap());
 
         let result = super::collect_from_sysfs_root(temp.as_path());
-        assert_eq!(
-            result,
-            vec!["Intel Corporation Alder Lake-P GT1 [UHD Graphics] [Integrated]"]
-        );
+        assert_eq!(result, vec!["Intel UHD Graphics [Integrated]"]);
 
         env::remove_var("LEENFETCH_PCI_IDS");
         fs::remove_dir_all(temp).unwrap();

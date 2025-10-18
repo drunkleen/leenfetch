@@ -1,5 +1,5 @@
-use std::process::Command;
 use crate::modules::windows::utils::run_powershell_json;
+use std::process::Command;
 
 pub fn get_model() -> Option<String> {
     // Try WMIC first
@@ -16,7 +16,10 @@ pub fn get_model() -> Option<String> {
 
     // PowerShell fallback
     #[derive(serde::Deserialize)]
-    struct Rec { manufacturer: Option<String>, model: Option<String> }
+    struct Rec {
+        manufacturer: Option<String>,
+        model: Option<String>,
+    }
     let rec: Option<Rec> = run_powershell_json(
         "Get-CimInstance Win32_ComputerSystem | Select-Object -First 1 Manufacturer,Model",
     );

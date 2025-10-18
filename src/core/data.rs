@@ -16,6 +16,8 @@ pub struct Data {
     pub model: Option<String>,
     /// Kernel version (e.g., "6.14.6-arch1-1")
     pub kernel: Option<String>,
+    /// OS installation age string (e.g., "120 days")
+    pub os_age: Option<String>,
     /// Uptime string (format depends on UptimeShorthand)
     pub uptime: Option<String>,
     /// Package count or summary (format depends on PackageShorthand)

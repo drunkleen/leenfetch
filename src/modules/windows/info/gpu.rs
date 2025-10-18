@@ -1,5 +1,5 @@
-use std::process::Command;
 use crate::modules::windows::utils::run_powershell;
+use std::process::Command;
 
 pub fn get_gpus() -> Vec<String> {
     // WMIC first

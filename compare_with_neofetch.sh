@@ -4,7 +4,7 @@ set -euo pipefail
 # Defaults (tuned to reduce outliers)
 RUNS=100
 WARMUP=5
-CMD1="leenfetch"
+CMD1="neofetch"
 CMD2="./target/release/leenfetch"
 # CMD2="leenfetch"
 PREPARE="sleep 0.1"   # small pause between runs; stabilizes CPU scheduler

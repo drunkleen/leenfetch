@@ -1,6 +1,13 @@
 mod data;
 
-use std::{collections::HashMap, str::FromStr};
+use std::{
+    collections::{HashMap, HashSet},
+    str::FromStr,
+    sync::Arc,
+};
+
+use once_cell::sync::OnceCell;
+use rayon::prelude::*;
 
 use data::Data;
 
@@ -28,6 +35,88 @@ use crate::{
     },
 };
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+enum ModuleKind {
+    Titles,
+    Os,
+    Distro,
+    Model,
+    Kernel,
+    OsAge,
+    Uptime,
+    Packages,
+    Shell,
+    Wm,
+    De,
+    Cpu,
+    Gpu,
+    Memory,
+    Disk,
+    Resolution,
+    Theme,
+    Battery,
+    Song,
+    Colors,
+}
+
+impl ModuleKind {
+    fn from_field_name(name: &str) -> Option<Self> {
+        let normalized = name.trim().to_ascii_lowercase().replace('-', "_");
+        match normalized.as_str() {
+            "titles" => Some(Self::Titles),
+            "os" => Some(Self::Os),
+            "distro" => Some(Self::Distro),
+            "model" => Some(Self::Model),
+            "kernel" => Some(Self::Kernel),
+            "os_age" => Some(Self::OsAge),
+            "uptime" => Some(Self::Uptime),
+            "packages" => Some(Self::Packages),
+            "shell" => Some(Self::Shell),
+            "wm" => Some(Self::Wm),
+            "de" => Some(Self::De),
+            "cpu" => Some(Self::Cpu),
+            "gpu" => Some(Self::Gpu),
+            "memory" => Some(Self::Memory),
+            "disk" => Some(Self::Disk),
+            "resolution" => Some(Self::Resolution),
+            "theme" => Some(Self::Theme),
+            "battery" => Some(Self::Battery),
+            "song" => Some(Self::Song),
+            "colors" => Some(Self::Colors),
+            _ => None,
+        }
+    }
+}
+
+struct CollectContext {
+    flags: settings::Flags,
+    wm: OnceCell<Option<String>>,
+    de: OnceCell<Option<String>>,
+}
+
+impl CollectContext {
+    fn new(flags: settings::Flags) -> Self {
+        Self {
+            flags,
+            wm: OnceCell::new(),
+            de: OnceCell::new(),
+        }
+    }
+
+    fn get_wm(&self) -> Option<String> {
+        self.wm.get_or_init(get_wm).clone()
+    }
+
+    fn get_de(&self) -> Option<String> {
+        self.de
+            .get_or_init(|| {
+                let wm = self.get_wm();
+                get_de(self.flags.de_version, wm.as_deref())
+            })
+            .clone()
+    }
+}
+
 pub struct Core {
     output: String,
     flags: settings::Flags,
@@ -53,16 +142,16 @@ impl Core {
 
     /// Builds the final colorized layout output using the loaded configuration.
     ///
-    /// Each entry in the layout is resolved against the configured flags. System information
-    /// is collected on demand, cached in `self.data`, and appended to the final string with
-    /// the requested labels. Custom rows are written verbatim and `"break"` entries insert
-    /// blank lines to keep section separators intact. ASCII art is handled separately when
-    /// rendering the banner.
+    /// Each entry in the layout is resolved against the configured flags. Module data is collected
+    /// in parallel, cached in `self.data`, and rendered in the configured order so that expensive
+    /// lookups overlap without changing how the output is composed.
     ///
     /// # Returns
     ///
     /// A single colorized `String` containing the assembled module output.
     pub fn get_info_layout(&mut self) -> String {
+        self.data = self.collect_data_parallel();
+
         let mut final_output = String::new();
 
         for item in &self.layout {
@@ -78,9 +167,7 @@ impl Core {
                     }
                 }
                 settings::LayoutItem::Module(module) => {
-                    let Some(field_name) =
-                        module.field_name().map(|name| name.to_ascii_lowercase())
-                    else {
+                    let Some(raw_field_name) = module.field_name() else {
                         continue;
                     };
 
@@ -94,242 +181,180 @@ impl Core {
                         continue;
                     }
 
+                    let field_name = raw_field_name.to_ascii_lowercase();
                     let label_storage = module
                         .label()
                         .map(|value| value.to_string())
                         .unwrap_or_else(|| field_name.clone());
                     let label = label_storage.as_str();
 
-                    match field_name.as_str() {
-                        "titles" => {
-                            let (user, host) = get_titles(true);
-                            final_output.push_str(
-                                format!(
-                                    "${{c1}}{}${{reset}} {}${{c1}}@${{reset}}{}${{reset}}\n",
-                                    label, user, host,
-                                )
-                                .as_str(),
+                    match ModuleKind::from_field_name(&field_name) {
+                        Some(ModuleKind::Titles) => {
+                            let username = self.data.username.as_deref().unwrap_or("Unknown");
+                            let hostname = self.data.hostname.as_deref().unwrap_or("Unknown");
+                            let titles_line = format!(
+                                "${{c1}}{}${{reset}} {}${{c1}}@${{reset}}{}${{reset}}\n",
+                                label, username, hostname,
                             );
-                            self.data.username = Some(user);
-                            self.data.hostname = Some(host);
+                            final_output.push_str(&titles_line);
                         }
-                        "os" => {
-                            let os = get_os();
-                            final_output
-                                .push_str(format!("${{c1}}{} ${{reset}}{}\n", label, os).as_str());
-                            self.data.os = Some(os);
+                        Some(ModuleKind::Os) => {
+                            Self::is_some_add_to_output(label, &self.data.os, &mut final_output);
                         }
-                        "distro" => {
-                            let distro = get_distro(
-                                DistroDisplay::from_str(&self.flags.distro_display)
-                                    .unwrap_or(DistroDisplay::NameModelVersionArch),
+                        Some(ModuleKind::Distro) => {
+                            Self::is_some_add_to_output(
+                                label,
+                                &self.data.distro,
+                                &mut final_output,
                             );
-                            final_output.push_str(
-                                format!("${{c1}}{} ${{reset}}{}\n", label, distro).as_str(),
+                        }
+                        Some(ModuleKind::Model) => {
+                            Self::is_some_add_to_output(label, &self.data.model, &mut final_output);
+                        }
+                        Some(ModuleKind::Kernel) => {
+                            Self::is_some_add_to_output(
+                                label,
+                                &self.data.kernel,
+                                &mut final_output,
                             );
-                            self.data.distro = Some(distro);
                         }
-                        "model" => {
-                            let model = get_model();
-                            Self::is_some_add_to_output(label, &model, &mut final_output);
-                            self.data.model = model;
-                        }
-                        "kernel" => {
-                            let kernel = get_kernel();
-                            Self::is_some_add_to_output(label, &kernel, &mut final_output);
-                            self.data.kernel = kernel;
-                        }
-                        "os_age" => {
-                            let uptime = get_os_age(
-                                OsAgeShorthand::from_str(&self.flags.os_age_shorthand)
-                                    .unwrap_or(OsAgeShorthand::Tiny),
+                        Some(ModuleKind::OsAge) => {
+                            Self::is_some_add_to_output(
+                                label,
+                                &self.data.os_age,
+                                &mut final_output,
                             );
-                            Self::is_some_add_to_output(label, &uptime, &mut final_output);
-                            self.data.uptime = uptime;
                         }
-                        "uptime" => {
-                            let uptime = get_uptime(
-                                UptimeShorthand::from_str(&self.flags.uptime_shorthand)
-                                    .unwrap_or(UptimeShorthand::Full),
+                        Some(ModuleKind::Uptime) => {
+                            Self::is_some_add_to_output(
+                                label,
+                                &self.data.uptime,
+                                &mut final_output,
                             );
-                            Self::is_some_add_to_output(label, &uptime, &mut final_output);
-                            self.data.uptime = uptime;
                         }
-                        "packages" => {
-                            let packages = get_packages(
-                                PackageShorthand::from_str(&self.flags.package_managers)
-                                    .unwrap_or(PackageShorthand::On),
+                        Some(ModuleKind::Packages) => {
+                            Self::is_some_add_to_output(
+                                label,
+                                &self.data.packages,
+                                &mut final_output,
                             );
-                            Self::is_some_add_to_output(label, &packages, &mut final_output);
-                            self.data.packages = packages;
                         }
-                        "shell" => {
-                            let shell = get_shell(self.flags.shell_path, self.flags.shell_version);
-                            Self::is_some_add_to_output(label, &shell, &mut final_output);
-                            self.data.shell = shell;
+                        Some(ModuleKind::Shell) => {
+                            Self::is_some_add_to_output(label, &self.data.shell, &mut final_output);
                         }
-                        "wm" => {
-                            if self.data.wm.is_none() {
-                                self.data.wm = get_wm();
+                        Some(ModuleKind::Wm) => {
+                            Self::is_some_add_to_output(label, &self.data.wm, &mut final_output);
+                        }
+                        Some(ModuleKind::De) => {
+                            Self::is_some_add_to_output(label, &self.data.de, &mut final_output);
+                        }
+                        Some(ModuleKind::Cpu) => {
+                            Self::is_some_add_to_output(label, &self.data.cpu, &mut final_output);
+                        }
+                        Some(ModuleKind::Gpu) => match self.data.gpu.as_ref() {
+                            Some(gpus) if gpus.is_empty() => {
+                                let line =
+                                    format!("${{c1}}{} ${{reset}}{}\n", label, "No GPU found");
+                                final_output.push_str(&line);
                             }
-                            let wm = self.data.wm.clone();
-                            Self::is_some_add_to_output(label, &wm, &mut final_output);
-                        }
-                        "de" => {
-                            if self.data.wm.is_none() {
-                                self.data.wm = get_wm();
+                            Some(gpus) if gpus.len() == 1 => {
+                                let line = format!("${{c1}}{} ${{reset}}{}\n", label, gpus[0]);
+                                final_output.push_str(&line);
                             }
-                            let de = get_de(self.flags.de_version, self.data.wm.as_deref());
-                            Self::is_some_add_to_output(label, &de, &mut final_output);
-                            self.data.de = de;
-                        }
-                        "cpu" => {
-                            let cpu = get_cpu(
-                                self.flags.cpu_brand,
-                                self.flags.cpu_frequency,
-                                self.flags.cpu_cores,
-                                self.flags.cpu_show_temp,
-                                self.flags.cpu_speed,
-                                match self.flags.cpu_temp {
-                                    'f' | 'F' => Some('F'),
-                                    'c' | 'C' => Some('C'),
-                                    _ => None,
-                                },
-                            );
-                            Self::is_some_add_to_output(label, &cpu, &mut final_output);
-                            self.data.cpu = cpu;
-                        }
-                        "gpu" => {
-                            let gpus = get_gpus();
-                            if gpus.is_empty() {
-                                final_output.push_str(
-                                    format!("${{c1}}{} ${{reset}}{}\n", label, "No GPU found")
-                                        .as_str(),
-                                );
-                            } else if gpus.len() == 1 {
-                                final_output.push_str(
-                                    format!("${{c1}}{} ${{reset}}{}\n", label, gpus[0]).as_str(),
-                                );
-                            } else {
-                                for (_, gpu) in gpus.iter().enumerate() {
-                                    final_output.push_str(
-                                        // format!("${{c1}}{} {}: ${{reset}}{}\n", label, index, gpu)
-                                        format!("${{c1}}{} ${{reset}}{}\n", label, gpu).as_str(),
-                                    );
+                            Some(gpus) => {
+                                for gpu in gpus {
+                                    let line = format!("${{c1}}{} ${{reset}}{}\n", label, gpu);
+                                    final_output.push_str(&line);
                                 }
                             }
-                            self.data.gpu = Some(gpus);
-                        }
-                        "memory" => {
-                            let memory = get_memory(
-                                self.flags.memory_percent,
-                                MemoryUnit::from_str(self.flags.memory_unit.as_str())
-                                    .unwrap_or(MemoryUnit::MiB),
+                            None => Self::push_unknown(label, &mut final_output),
+                        },
+                        Some(ModuleKind::Memory) => {
+                            Self::is_some_add_to_output(
+                                label,
+                                &self.data.memory,
+                                &mut final_output,
                             );
-                            Self::is_some_add_to_output(label, &memory, &mut final_output);
-                            self.data.memory = memory;
                         }
-                        "disk" => {
-                            if let Some(disks) = get_disks(
-                                DiskSubtitle::from_str(self.flags.disk_subtitle.as_str())
-                                    .unwrap_or(DiskSubtitle::Dir),
-                                DiskDisplay::from_str(self.flags.disk_display.as_str())
-                                    .unwrap_or(DiskDisplay::InfoBar),
-                                None,
-                            ) {
-                                for disk in &disks {
-                                    final_output.push_str(
-                                        format!(
+                        Some(ModuleKind::Disk) => match self.data.disk.as_ref() {
+                            Some(disks) => {
+                                if disks.is_empty() {
+                                    let line = format!(
+                                        "${{c1}}{} ${{reset}}{}\n",
+                                        label, "No disks found"
+                                    );
+                                    final_output.push_str(&line);
+                                } else {
+                                    for (name, summary) in disks {
+                                        let line = format!(
                                             "${{c1}}{} {}: ${{reset}}{}\n",
-                                            label, disk.0, disk.1
-                                        )
-                                        .as_str(),
-                                    );
+                                            label, name, summary
+                                        );
+                                        final_output.push_str(&line);
+                                    }
                                 }
-                                self.data.disk = Some(disks);
-                            } else {
-                                final_output.push_str(
-                                    format!("${{c1}}{} ${{reset}}{}\n", label, "No disks found")
-                                        .as_str(),
-                                );
-                                self.data.disk = None;
                             }
-                        }
-                        "resolution" => {
-                            let resolution = get_resolution(self.flags.refresh_rate);
-                            Self::is_some_add_to_output(label, &resolution, &mut final_output);
-                            self.data.resolution = resolution;
-                        }
-                        "theme" => {
-                            if self.data.de.is_none() {
-                                self.data.de =
-                                    get_de(self.flags.de_version, self.data.wm.as_deref());
+                            None => {
+                                let line =
+                                    format!("${{c1}}{} ${{reset}}{}\n", label, "No disks found");
+                                final_output.push_str(&line);
                             }
-                            let theme = get_theme(self.data.de.as_deref());
-                            Self::is_some_add_to_output(label, &theme, &mut final_output);
-                            self.data.theme = theme;
+                        },
+                        Some(ModuleKind::Resolution) => {
+                            Self::is_some_add_to_output(
+                                label,
+                                &self.data.resolution,
+                                &mut final_output,
+                            );
                         }
-                        "battery" => {
-                            let display_mode =
-                                BatteryDisplayMode::from_str(self.flags.battery_display.as_str())
-                                    .unwrap_or(BatteryDisplayMode::BarInfo);
-                            let batteries = get_battery(display_mode);
-
-                            if batteries.is_empty() {
-                                final_output.push_str(
-                                    format!("${{c1}}{} ${{reset}}{}\n", label, "No Battery found")
-                                        .as_str(),
-                                );
-                            } else if batteries.len() == 1 {
-                                final_output.push_str(
-                                    format!("${{c1}}{} ${{reset}}{}\n", label, batteries[0])
-                                        .as_str(),
-                                );
-                            } else {
+                        Some(ModuleKind::Theme) => {
+                            Self::is_some_add_to_output(label, &self.data.theme, &mut final_output);
+                        }
+                        Some(ModuleKind::Battery) => match self.data.battery.as_ref() {
+                            Some(batteries) if batteries.is_empty() => {
+                                let line =
+                                    format!("${{c1}}{} ${{reset}}{}\n", label, "No Battery found");
+                                final_output.push_str(&line);
+                            }
+                            Some(batteries) if batteries.len() == 1 => {
+                                let line = format!("${{c1}}{} ${{reset}}{}\n", label, batteries[0]);
+                                final_output.push_str(&line);
+                            }
+                            Some(batteries) => {
                                 for (index, battery) in batteries.iter().enumerate() {
-                                    final_output.push_str(
-                                        format!(
-                                            "${{c1}}{} {}: ${{reset}}{}\n",
-                                            label, index, battery
-                                        )
-                                        .as_str(),
+                                    let line = format!(
+                                        "${{c1}}{} {}: ${{reset}}{}\n",
+                                        label, index, battery
                                     );
+                                    final_output.push_str(&line);
                                 }
                             }
-                            self.data.battery = Some(batteries);
-                        }
-                        "song" => {
-                            let song = get_song();
-                            if let Some(ref music) = song {
-                                final_output.push_str(
-                                    format!(
-                                        "${{c1}}Playing${{reset}}\n    {}\n    {}\n",
-                                        music.title, music.artist
-                                    )
-                                    .as_str(),
-                                );
+                            None => {
+                                let line =
+                                    format!("${{c1}}{} ${{reset}}{}\n", label, "No Battery found");
+                                final_output.push_str(&line);
                             }
-                            self.data.song = song;
+                        },
+                        Some(ModuleKind::Song) => {
+                            if let Some(music) = self.data.song.as_ref() {
+                                let line = format!(
+                                    "${{c1}}Playing${{reset}}\n    {}\n    {}\n",
+                                    music.title, music.artist
+                                );
+                                final_output.push_str(&line);
+                            }
                         }
-                        "colors" => {
-                            let color_blocks = if self.flags.color_blocks.is_empty() {
-                                "●"
-                            } else {
-                                self.flags.color_blocks.as_str()
-                            };
-
-                            let colors = get_terminal_color(color_blocks);
-
-                            final_output.push_str(
-                                format!("${{c1}}{} ${{reset}}{}\n", label, &colors).as_str(),
+                        Some(ModuleKind::Colors) => {
+                            Self::is_some_add_to_output(
+                                label,
+                                &self.data.colors,
+                                &mut final_output,
                             );
-
-                            self.data.colors = Some(colors);
                         }
-                        other => {
-                            final_output.push_str(
-                                format!("${{c1}}{} ${{reset}}{}\n", label, other).as_str(),
-                            );
+                        None => {
+                            let fallback_line =
+                                format!("${{c1}}{} ${{reset}}{}\n", label, field_name);
+                            final_output.push_str(&fallback_line);
                         }
                     }
                 }
@@ -338,6 +363,231 @@ impl Core {
 
         self.output = final_output.clone();
         self.output.clone()
+    }
+
+    fn collect_data_parallel(&self) -> Data {
+        let mut required = HashSet::new();
+
+        for item in &self.layout {
+            if let settings::LayoutItem::Module(module) = item {
+                if module.is_custom() {
+                    continue;
+                }
+
+                if let Some(field_name) = module.field_name() {
+                    if let Some(kind) = ModuleKind::from_field_name(field_name) {
+                        required.insert(kind);
+                    }
+                }
+            }
+        }
+
+        if required.is_empty() {
+            return Data::default();
+        }
+
+        let context = Arc::new(CollectContext::new(self.flags.clone()));
+        let modules: Vec<_> = required.into_iter().collect();
+
+        let results: Vec<Data> = modules
+            .into_par_iter()
+            .map(|kind| Self::collect_module_data(kind, context.clone()))
+            .collect();
+
+        let mut data = Data::default();
+        for update in results {
+            Self::merge_data(&mut data, update);
+        }
+
+        data
+    }
+
+    fn collect_module_data(kind: ModuleKind, context: Arc<CollectContext>) -> Data {
+        let mut data = Data::default();
+        let flags = &context.flags;
+
+        match kind {
+            ModuleKind::Titles => {
+                let (user, host) = get_titles(true);
+                data.username = Some(user);
+                data.hostname = Some(host);
+            }
+            ModuleKind::Os => {
+                data.os = Some(get_os());
+            }
+            ModuleKind::Distro => {
+                let display = DistroDisplay::from_str(&flags.distro_display)
+                    .unwrap_or(DistroDisplay::NameModelVersionArch);
+                data.distro = Some(get_distro(display));
+            }
+            ModuleKind::Model => {
+                data.model = get_model();
+            }
+            ModuleKind::Kernel => {
+                data.kernel = get_kernel();
+            }
+            ModuleKind::OsAge => {
+                let os_age = get_os_age(
+                    OsAgeShorthand::from_str(&flags.os_age_shorthand)
+                        .unwrap_or(OsAgeShorthand::Tiny),
+                );
+                data.os_age = os_age;
+            }
+            ModuleKind::Uptime => {
+                let uptime = get_uptime(
+                    UptimeShorthand::from_str(&flags.uptime_shorthand)
+                        .unwrap_or(UptimeShorthand::Full),
+                );
+                data.uptime = uptime;
+            }
+            ModuleKind::Packages => {
+                let packages = get_packages(
+                    PackageShorthand::from_str(&flags.package_managers)
+                        .unwrap_or(PackageShorthand::On),
+                );
+                data.packages = packages;
+            }
+            ModuleKind::Shell => {
+                data.shell = get_shell(flags.shell_path, flags.shell_version);
+            }
+            ModuleKind::Wm => {
+                data.wm = context.get_wm();
+            }
+            ModuleKind::De => {
+                data.wm = context.get_wm();
+                data.de = context.get_de();
+            }
+            ModuleKind::Cpu => {
+                data.cpu = get_cpu(
+                    flags.cpu_brand,
+                    flags.cpu_frequency,
+                    flags.cpu_cores,
+                    flags.cpu_show_temp,
+                    flags.cpu_speed,
+                    match flags.cpu_temp {
+                        'f' | 'F' => Some('F'),
+                        'c' | 'C' => Some('C'),
+                        _ => None,
+                    },
+                );
+            }
+            ModuleKind::Gpu => {
+                data.gpu = Some(get_gpus());
+            }
+            ModuleKind::Memory => {
+                data.memory = get_memory(
+                    flags.memory_percent,
+                    MemoryUnit::from_str(flags.memory_unit.as_str()).unwrap_or(MemoryUnit::MiB),
+                );
+            }
+            ModuleKind::Disk => {
+                data.disk = get_disks(
+                    DiskSubtitle::from_str(flags.disk_subtitle.as_str())
+                        .unwrap_or(DiskSubtitle::Dir),
+                    DiskDisplay::from_str(flags.disk_display.as_str())
+                        .unwrap_or(DiskDisplay::InfoBar),
+                    None,
+                );
+            }
+            ModuleKind::Resolution => {
+                data.resolution = get_resolution(flags.refresh_rate);
+            }
+            ModuleKind::Theme => {
+                let de = context.get_de();
+                data.de = de.clone();
+                data.theme = get_theme(de.as_deref());
+            }
+            ModuleKind::Battery => {
+                let mode = BatteryDisplayMode::from_str(flags.battery_display.as_str())
+                    .unwrap_or(BatteryDisplayMode::BarInfo);
+                let batteries = get_battery(mode);
+                data.battery = Some(batteries);
+            }
+            ModuleKind::Song => {
+                data.song = get_song();
+            }
+            ModuleKind::Colors => {
+                let color_blocks = if flags.color_blocks.is_empty() {
+                    "●"
+                } else {
+                    flags.color_blocks.as_str()
+                };
+                let colors = get_terminal_color(color_blocks);
+                data.colors = Some(colors);
+            }
+        }
+
+        data
+    }
+
+    fn merge_data(target: &mut Data, update: Data) {
+        if let Some(username) = update.username {
+            target.username = Some(username);
+        }
+        if let Some(hostname) = update.hostname {
+            target.hostname = Some(hostname);
+        }
+        if let Some(os) = update.os {
+            target.os = Some(os);
+        }
+        if let Some(distro) = update.distro {
+            target.distro = Some(distro);
+        }
+        if let Some(model) = update.model {
+            target.model = Some(model);
+        }
+        if let Some(kernel) = update.kernel {
+            target.kernel = Some(kernel);
+        }
+        if let Some(os_age) = update.os_age {
+            target.os_age = Some(os_age);
+        }
+        if let Some(uptime) = update.uptime {
+            target.uptime = Some(uptime);
+        }
+        if let Some(packages) = update.packages {
+            target.packages = Some(packages);
+        }
+        if let Some(shell) = update.shell {
+            target.shell = Some(shell);
+        }
+        if let Some(wm) = update.wm {
+            target.wm = Some(wm);
+        }
+        if let Some(de) = update.de {
+            target.de = Some(de);
+        }
+        if let Some(cpu) = update.cpu {
+            target.cpu = Some(cpu);
+        }
+        if let Some(gpu) = update.gpu {
+            target.gpu = Some(gpu);
+        }
+        if let Some(memory) = update.memory {
+            target.memory = Some(memory);
+        }
+        if let Some(disk) = update.disk {
+            target.disk = Some(disk);
+        }
+        if let Some(resolution) = update.resolution {
+            target.resolution = Some(resolution);
+        }
+        if let Some(theme) = update.theme {
+            target.theme = Some(theme);
+        }
+        if let Some(battery) = update.battery {
+            target.battery = Some(battery);
+        }
+        if let Some(song) = update.song {
+            target.song = Some(song);
+        }
+        if let Some(colors) = update.colors {
+            target.colors = Some(colors);
+        }
+    }
+
+    fn push_unknown(label: &str, output: &mut String) {
+        output.push_str(format!("${{c1}}{} ${{reset}}{}\n", label, "Unknown").as_str());
     }
 
     pub fn get_ascii_and_colors(

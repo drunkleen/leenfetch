@@ -1,9 +1,9 @@
+use crate::modules::windows::utils::run_powershell_json;
 use crate::modules::{
     enums::{DiskDisplay, DiskSubtitle},
     utils::get_bar,
 };
 use std::process::Command;
-use crate::modules::windows::utils::run_powershell_json;
 
 pub fn get_disks(
     subtitle_mode: DiskSubtitle,
@@ -40,7 +40,10 @@ pub fn get_disks(
     let list = items?;
     let mut results = Vec::new();
     for d in list.into_iter() {
-        let total = match d.size { Some(v) if v > 0 => v, _ => continue };
+        let total = match d.size {
+            Some(v) if v > 0 => v,
+            _ => continue,
+        };
         let free = d.free_space.unwrap_or(0);
         let mount = d.device_id;
 
@@ -63,7 +66,11 @@ pub fn get_disks(
             DiskSubtitle::Mount => mount.clone(),
             DiskSubtitle::None => String::new(),
         };
-        let label = if subtitle.is_empty() { "Disk".to_string() } else { format!("Disk ({})", subtitle) };
+        let label = if subtitle.is_empty() {
+            "Disk".to_string()
+        } else {
+            format!("Disk ({})", subtitle)
+        };
         results.push((label, final_str));
     }
 

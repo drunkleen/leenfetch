@@ -1,5 +1,5 @@
-use std::process::Command;
 use crate::modules::windows::utils::run_powershell;
+use std::process::Command;
 
 pub fn get_cpu(
     cpu_brand: bool,
@@ -67,7 +67,10 @@ fn get_cpu_model(show_brand: bool) -> String {
 
 fn get_core_count() -> u32 {
     // Try WMIC
-    if let Ok(out) = Command::new("wmic").args(["cpu", "get", "NumberOfCores"]).output() {
+    if let Ok(out) = Command::new("wmic")
+        .args(["cpu", "get", "NumberOfCores"])
+        .output()
+    {
         let text = String::from_utf8_lossy(&out.stdout);
         if let Some(line) = text.lines().skip(1).find(|l| !l.trim().is_empty()) {
             if let Ok(val) = line.trim().parse::<u32>() {
@@ -90,7 +93,10 @@ fn get_core_count() -> u32 {
 
 fn get_cpu_speed_mhz() -> Option<u32> {
     // WMIC first
-    if let Ok(output) = Command::new("wmic").args(["cpu", "get", "MaxClockSpeed"]).output() {
+    if let Ok(output) = Command::new("wmic")
+        .args(["cpu", "get", "MaxClockSpeed"])
+        .output()
+    {
         let raw = String::from_utf8_lossy(&output.stdout);
         if let Some(val) = raw
             .lines()
@@ -114,13 +120,15 @@ fn get_cpu_speed_mhz() -> Option<u32> {
 
 fn get_cpu_temperature() -> Option<f32> {
     // WMIC (legacy)
-    if let Ok(output) = Command::new("wmic").args([
-        "/namespace:\\root\\wmi",
-        "path",
-        "MSAcpi_ThermalZoneTemperature",
-        "get",
-        "CurrentTemperature",
-    ]).output()
+    if let Ok(output) = Command::new("wmic")
+        .args([
+            "/namespace:\\root\\wmi",
+            "path",
+            "MSAcpi_ThermalZoneTemperature",
+            "get",
+            "CurrentTemperature",
+        ])
+        .output()
     {
         let raw = String::from_utf8_lossy(&output.stdout);
         if let Some(raw_line) = raw

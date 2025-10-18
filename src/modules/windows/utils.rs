@@ -30,4 +30,3 @@ pub fn run_powershell_json<T: serde::de::DeserializeOwned>(cmd: &str) -> Option<
     }
     serde_json::from_str::<T>(out.trim()).ok()
 }
-
