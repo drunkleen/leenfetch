@@ -73,6 +73,18 @@ fn cleanup_model_string(model: &str) -> String {
         s = s.replace(g, "").trim().to_string();
     }
 
+    // Friendly replacements for known DMI strings that are too terse
+    let replacements = [(
+        "ASUSTeK COMPUTER INC. FX517ZC",
+        "ASUS TUF Dash F15 FX517ZC_FX517ZC (1.0)",
+    )];
+
+    for (needle, replacement) in replacements {
+        if s.eq_ignore_ascii_case(needle) {
+            return replacement.to_string();
+        }
+    }
+
     if s.starts_with("Standard PC") {
         s = format!("KVM/QEMU ({})", model.trim());
     } else if s.starts_with("OpenBSD") {
@@ -95,6 +107,13 @@ mod tests {
         let raw = "Standard PC (i440FX)";
         let cleaned = cleanup_model_string(raw);
         assert!(cleaned.contains("KVM/QEMU"));
+    }
+
+    #[test]
+    fn test_custom_asus_model_name() {
+        let raw = "ASUSTeK COMPUTER INC. FX517ZC";
+        let cleaned = cleanup_model_string(raw);
+        assert_eq!(cleaned, "ASUS TUF Dash F15 FX517ZC_FX517ZC (1.0)");
     }
 
     #[test]
