@@ -99,6 +99,30 @@ impl FromStr for UptimeShorthand {
     }
 }
 
+/// Controls the format of the OS age string in the output.
+/// - Full: Verbose (e.g., "123 days, 4 hours, 12 minutes"). (default)
+/// - Tiny: Compact (e.g., "123d 4h 12m").
+/// - Seconds: Only seconds (e.g., "10612345s").
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum OsAgeShorthand {
+    Full,
+    Tiny,
+    Seconds,
+}
+
+impl FromStr for OsAgeShorthand {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str() {
+            "full" => Ok(Self::Full),
+            "tiny" => Ok(Self::Tiny),
+            "seconds" => Ok(Self::Seconds),
+            _ => Ok(Self::Full),
+        }
+    }
+}
+
 /// Controls the unit used to display memory usage.
 /// - MiB: Mebibytes (default).
 /// - GiB: Gibibytes.

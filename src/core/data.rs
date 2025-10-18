@@ -26,8 +26,6 @@ pub struct Data {
     pub wm: Option<String>,
     /// Desktop environment name (e.g., "GNOME", "KDE")
     pub de: Option<String>,
-    /// Window manager theme name
-    pub wm_theme: Option<String>,
     /// CPU info string (model, speed, cores, etc.)
     pub cpu: Option<String>,
     /// List of GPU(s) detected

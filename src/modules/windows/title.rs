@@ -1,11 +1,10 @@
 use std::env;
 
-pub fn get_titles(fqdn: bool) -> (String, String, usize) {
+pub fn get_titles(fqdn: bool) -> (String, String) {
     let user = get_user();
     let host = get_hostname(fqdn);
 
-    let len = user.len() + host.len() + 1; // include '@' or separator
-    (user, host, len)
+    (user, host)
 }
 
 fn get_user() -> String {

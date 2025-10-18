@@ -2,8 +2,7 @@
 ///
 /// The JSONC format accepts both standard JSON and `//` comments, mirroring what Fastfetch ships.
 /// Users can keep everything in one place while still enjoying inline descriptions.
-pub const DEFAULT_CONFIG: &str = r#"
-// ===============================
+pub const DEFAULT_CONFIG: &str = r#"// ===============================
 // config.jsonc - Unified configuration for leenfetch
 //
 // This file combines the previous flags.ron, toggles.ron, and print_layout.ron files.
@@ -26,10 +25,10 @@ pub const DEFAULT_CONFIG: &str = r#"
         "custom_ascii_path": "",
 
         // How to display battery information: "off", "bar", "infobar", or "barinfo".
-        "battery_display": "barinfo",
+        "battery_display": "off",
 
         // String used to draw color blocks in the palette preview.
-        "color_blocks": "███",
+        "color_blocks": "●",
 
         // Show the brand name of your CPU.
         "cpu_brand": true,
@@ -47,7 +46,7 @@ pub const DEFAULT_CONFIG: &str = r#"
         "cpu_temp": "C",
 
         // Show the CPU temperature.
-        "cpu_show_temp": true,
+        "cpu_show_temp": false,
 
         // Show the version of your desktop environment.
         "de_version": true,
@@ -56,7 +55,7 @@ pub const DEFAULT_CONFIG: &str = r#"
         "distro_display": "name_model_arch",
 
         // How to display disk usage information.
-        "disk_display": "barinfo",
+        "disk_display": "info",
 
         // What label to show for each disk.
         "disk_subtitle": "dir",
@@ -80,64 +79,44 @@ pub const DEFAULT_CONFIG: &str = r#"
         "shell_version": true,
 
         // How to display system uptime: "full", "tiny", or "seconds".
-        "uptime_shorthand": "full"
+        "uptime_shorthand": "tiny",
+
+        // How to display os age: "full", "tiny", or "seconds".
+        "os_age_shorthand": "tiny"
     },
 
-    // -------------------------------
-    // toggles - Enable or disable information blocks
-    // -------------------------------
-    "toggles": {
-        "show_titles": true,
-        "show_os": true,
-        "show_distro": true,
-        "show_model": true,
-        "show_uptime": true,
-        "show_packages": true,
-        "show_shell": true,
-        "show_wm": true,
-        "show_de": true,
-        "show_wm_theme": true,
-        "show_kernel": true,
-        "show_cpu": true,
-        "show_gpu": true,
-        "show_memory": true,
-        "show_song": true,
-        "show_resolution": true,
-        "show_theme": true,
-        "show_disks": true,
-        "show_battery": true,
-        "show_terminal_colors": true
-    },
-
+    
     // -------------------------------
     // modules - Output order and custom rows
     // -------------------------------
     "modules": [
-        "break",
-        { "type": "custom", "format": "\u001b[90m┌────────────────── System ──────────────────┐" },
-        { "type": "titles", "key": "User" },
-        { "type": "os", "key": "OS" },
-        { "type": "distro", "key": "Distro" },
-        { "type": "model", "key": "Model" },
-        { "type": "kernel", "key": "Kernel" },
-        { "type": "uptime", "key": "Uptime" },
-        { "type": "packages", "key": "Packages" },
-        { "type": "shell", "key": "Shell" },
-        { "type": "wm", "key": "WM" },
-        { "type": "de", "key": "DE" },
-        { "type": "wm_theme", "key": "WM Theme" },
-        { "type": "custom", "format": "\u001b[90m├───────────────── Hardware ─────────────────┤" },
-        { "type": "cpu", "key": "CPU" },
-        { "type": "gpu", "key": "GPU" },
-        { "type": "memory", "key": "Memory" },
-        { "type": "disk", "key": "Disk" },
-        { "type": "resolution", "key": "Resolution" },
-        { "type": "theme", "key": "Theme" },
-        { "type": "battery", "key": "Battery" },
-        { "type": "song", "key": "" },
-        { "type": "colors", "key": "" },
-        { "type": "custom", "format": "\u001b[90m└────────────────────────────────────────────┘" },
-        "break"
+        { "type": "custom", "format": "${c16}┌─System────────────────────────────────" },
+        { "type": "titles", "key": "${c16}│${c1} ├:"},
+        // { "type": "os", "key": "${c16}│${c1} ├OS"},
+        { "type": "distro", "key": "${c16}│${c1} ├:"},
+        { "type": "kernel", "key": "${c16}│${c1} ├:"},
+        { "type": "packages", "key": "${c16}│${c1} ├󰏖:"},
+        { "type": "shell", "key": "${c16}│ ${c1}├:"},
+        { "type": "wm", "key": "${c16}│${c1} ├:"},
+        { "type": "de", "key": "${c16}│${c1} ├󰇄:"},
+        { "type": "theme", "key": "${c16}│${c1} └󰸌:"},
+        { "type": "custom", "format": "${c16}└───────────────────────────────────────" },
+        // "break",
+        { "type": "custom", "format": "${c16}┌─Hardware──────────────────────────────" },
+        { "type": "model", "key": "${c16}│${c1} ├:"},
+        { "type": "cpu", "key": "${c16}│${c1} ├:"},
+        { "type": "gpu", "key": "${c16}│${c1} ├:"},
+        { "type": "memory", "key": "${c16}│${c1} ├:"},
+        { "type": "disk", "key": "${c16}│${c1} ├󰋊:"},
+        { "type": "resolution", "key": "${c16}│${c1} ├󱄄:"},
+        { "type": "battery", "key": "${c16}│${c1} ├:"},
+        { "type": "song", "key": "${c16}│${c1} ├"},
+        { "type": "colors", "key": "${c16}│${c1} └:"},
+        { "type": "custom", "format": "${c16}└───────────────────────────────────────" },
+        // "break",
+        { "type": "os_age", "key": "${c16}󱦟 OS Age"},
+        { "type": "uptime", "key": "${c16}󱫐 Uptime"}
     ]
 }
+
 "#;

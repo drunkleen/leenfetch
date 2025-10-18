@@ -3,13 +3,6 @@ use winapi::um::winnt::KEY_READ;
 use winapi::um::winnt::REG_DWORD;
 use winapi::um::winreg::{RegOpenKeyExW, RegQueryValueExW, HKEY_CURRENT_USER};
 
-pub fn get_wm_theme(_wm: &str, _de: Option<&str>) -> Option<String> {
-    let mode = detect_light_dark_mode();
-    let accent = detect_accent_color().unwrap_or("Unknown".to_string());
-
-    Some(format!("{} theme, accent: {}", mode, accent))
-}
-
 fn detect_light_dark_mode() -> &'static str {
     // Read the "AppsUseLightTheme" registry value
     match read_reg_dword(

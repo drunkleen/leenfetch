@@ -3,7 +3,7 @@ pub mod settings;
 
 use self::{
     defaults::DEFAULT_CONFIG,
-    settings::{Config, Flags, LayoutItem, Toggles},
+    settings::{Config, Flags, LayoutItem},
 };
 use dirs::config_dir;
 use json5;
@@ -47,15 +47,6 @@ pub fn load_flags() -> Flags {
     load_config().flags
 }
 
-/// Loads the info block toggles from `config.jsonc`.
-///
-/// # Returns
-///
-/// A `Toggles` struct containing the loaded configuration.
-pub fn load_toggles() -> Toggles {
-    load_config().toggles
-}
-
 /// Generates the default unified configuration file.
 ///
 /// Writes `config.jsonc` with the default contents. Returns a map with the filename
@@ -88,7 +79,6 @@ pub fn generate_config_files() -> HashMap<String, bool> {
 fn save_to_config_file(file_name: &str, content: &str) -> std::io::Result<()> {
     let path = config_file(file_name);
 
-    // مطمئن شو دایرکتوری وجود داره
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent)?;
     }
@@ -116,7 +106,7 @@ pub fn delete_config_files() -> HashMap<String, bool> {
 
 /// Deletes the given configuration file, returning an error if the operation fails.
 ///
-/// This function is used by `delete_config_files` to delete all configuration files.
+/// This function is used by `delete_config_files` to remove the generated configuration.
 /// It does not report an error if the file does not exist.
 fn delete_config_file(file_name: &str) -> std::io::Result<()> {
     let path = config_file(file_name);

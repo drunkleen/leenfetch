@@ -1,3 +1,10 @@
+---
+title: leenfetch
+section: 1
+header: Manual
+footer: Leenfetch 1.0.0
+---
+
 # leenfetch — User Commands
 
 ## NAME
@@ -23,7 +30,7 @@ leenfetch can also accept **piped input** to render as ASCII art. This allows us
 - `-l`, `--list-options`  
   List all available configuration options and their possible values.
 - `-i`, `--init`  
-  Create default configuration files in the user config directory if they do not exist.
+  Create the default configuration file in the user config directory if it does not exist.
 - `-r`, `--reinit`  
   Delete the configuration file and regenerate it with default values.
 - `--ascii_distro <DISTRO>`  
@@ -44,7 +51,7 @@ $XDG_CONFIG_HOME/leenfetch/
 ```
 
 The configuration file is:
-- **config.jsonc**: Includes `flags`, `toggles`, and a Fastfetch-style `modules` array. Use strings like `"break"` for spacers or objects with `type`/`key` to control the output. JSONC keeps comments intact so every option is documented in place.
+- **config.jsonc**: Includes `flags`, an ordered `modules` (`layout`) array, and an optional `logo` override. Use strings like `"break"` for spacers or objects with `type`/`key` to control the output. JSONC keeps comments intact so every option is documented in place.
 
 Edit the file to adjust appearance, enabled modules, spacing, or output order.
 
@@ -70,6 +77,10 @@ Edit the file to adjust appearance, enabled modules, spacing, or output order.
 
 ## FILE
 - `~/.config/leenfetch/config.jsonc`
+
+## WIKI
+Please report bugs or feature requests at:  
+https://github.com/drunkleen/leenfetch/wiki
 
 ## BUGS
 Please report bugs or feature requests at:  

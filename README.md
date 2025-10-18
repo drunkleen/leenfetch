@@ -44,7 +44,6 @@ Head over to the [issues](https://github.com/drunkleen/leenfetch/issues) or join
   - [📥 Using Piped Input](#-using-piped-input)
   - [⚙️ Configuration](#️-configuration)
     - [flags section](#flags-section)
-    - [toggles section](#toggles-section)
     - [modules array](#modules-array)
     - [How to Edit](#how-to-edit)
   - [🎯 Roadmap](#-roadmap)
@@ -72,7 +71,7 @@ Head over to the [issues](https://github.com/drunkleen/leenfetch/issues) or join
 - 📦 Detects installed packages, shell, GPU, DE/WM, and more
 - 🖼️ Custom ASCII art support and override via config
 - 🎨 Supports theme-based color profiles (`ascii_colors=distro`, etc.)
-- 🔌 Simple config files: `~/.config/leenfetch/*`
+- 🔌 Single JSONC config: `~/.config/leenfetch/config.jsonc`
 - 🧵 Accepts piped ASCII input — use `fortune | cowsay | leenfetch` for dynamic text logos
 
 
@@ -229,15 +228,15 @@ On first run, LeenFetch writes a single `config.jsonc` file to your configuratio
 C:\Users\<username>\AppData\Roaming\leenfetch\config.jsonc
 ```
 
-The file uses JSON with comments (JSONC), so you can keep inline explanations next to your settings. It combines the previous trio of files into three sections:
+The file uses JSON with comments (JSONC), so you can keep inline explanations next to your settings. It combines the previous trio of files into a single document with clear sections:
 
 - `flags` — Controls display and formatting options for each block.
-- `toggles` — Controls which information blocks are shown or hidden.
-- `modules` — Controls the order, headings, and custom rows in the output.
+- `modules` *(alias `layout`)* — Controls the order, headings, and custom rows in the output.
+- *(optional)* `logo` — Override ASCII art source, colors, and padding.
 
 ### flags section
 
-The `flags` object lets you fine-tune how each block of information is displayed. Pick ASCII art, choose units, and decide how detailed each line should be.
+The `flags` object lets you fine-tune how each block of information is displayed. Pick ASCII art, choose units, and decide how detailed each line should be. Notable options include `distro_display` for OS formatting, `package_managers` for package summaries, `uptime_shorthand` and `os_age_shorthand` for duration formatting, plus boolean switches for CPU details, shell paths, and refresh rates.
 
 > If input is piped into `leenfetch`, the ASCII logo from `ascii_distro` or `custom_ascii_path` is ignored and the piped content is used instead.
 
@@ -254,23 +253,23 @@ The `flags` object lets you fine-tune how each block of information is displayed
 }
 ```
 
-### toggles section
+### logo section (optional)
 
-The `toggles` object controls which blocks of information are shown in the output. Set each option to `true` to show that block, or `false` to hide it.
+Use the `logo` object to point to custom ASCII art, tweak padding, or override colors. When `source` is set, it behaves like `custom_ascii_path`. Padding adds blank lines or spaces around the art.
 
 ```jsonc
 {
-  "toggles": {
-    "show_titles": true,
-    "show_gpu": true,
-    "show_song": false
+  "logo": {
+    "type": "file",
+    "source": "~/.config/leenfetch/branding/about.txt",
+    "padding": { "top": 2, "right": 6 }
   }
 }
 ```
 
 ### modules array
 
-The `modules` array controls the rendering order. Entries can be a literal string (use `"break"` for a blank line) or an object describing a module. Objects accept a `type` (matching LeenFetch modules) and optional properties like `key` for the label or `format` for custom text.
+The `modules` array controls the rendering order. Entries can be a literal string (use `"break"` for a blank line) or an object describing a module. Objects accept a `type` (matching LeenFetch modules such as `titles`, `distro`, `os_age`, `uptime`, etc.) and optional properties like `key` for the label or `format` for custom text.
 
 ```jsonc
 {

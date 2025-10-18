@@ -7,17 +7,14 @@ use data::Data;
 use crate::{
     config::{self, settings},
     modules::{
-        desktop::{
-            de::get_de, resolution::get_resolution, theme::get_theme, wm::get_wm,
-            wm_theme::get_wm_theme,
-        },
+        desktop::{de::get_de, resolution::get_resolution, theme::get_theme, wm::get_wm},
         enums::{
             BatteryDisplayMode, DiskDisplay, DiskSubtitle, DistroDisplay, MemoryUnit,
-            PackageShorthand, UptimeShorthand,
+            OsAgeShorthand, PackageShorthand, UptimeShorthand,
         },
         info::{
             battery::get_battery, cpu::get_cpu, disk::get_disks, gpu::get_gpus, memory::get_memory,
-            uptime::get_uptime,
+            os_age::get_os_age, uptime::get_uptime,
         },
         packages::get_packages,
         shell::get_shell,
@@ -33,7 +30,6 @@ use crate::{
 
 pub struct Core {
     output: String,
-    toggles: settings::Toggles,
     flags: settings::Flags,
     layout: Vec<settings::LayoutItem>,
     data: Data,
@@ -42,42 +38,30 @@ pub struct Core {
 impl Core {
     /// Creates a new instance of the `Core` struct.
     ///
-    /// This function reads the configuration files and populates the `Core` struct with
+    /// This function reads the configuration file and populates the `Core` struct with
     /// the configuration and default system information.
     pub fn new() -> Self {
-        let toggles = config::load_toggles();
         let flags = config::load_flags();
         let layout = config::load_print_layout();
         Self {
             output: String::new(),
-            toggles,
             flags,
             layout,
             data: Data::default(),
         }
     }
 
-    /// Fills the layout with system information based on the configuration and overrides.
+    /// Builds the final colorized layout output using the loaded configuration.
     ///
-    /// This function iterates over the configured layout and gathers system information
-    /// according to the toggles and flags set. It builds the output string by appending
-    /// the formatted information for each section, including user@host titles, OS, distro,
-    /// model, kernel, uptime, packages, shell, window manager, desktop environment, CPU, GPU,
-    /// memory, disk, resolution, theme, battery, currently playing song, and terminal colors.
-    /// The gathered data is stored in the `data` field, and the formatted output is stored in
-    /// the `output` string. Additionally, the function handles custom ASCII art and colors,
-    /// applying any overrides provided in the `override_map`.
-    ///
-    /// # Arguments
-    ///
-    /// * `override_map` - A `HashMap` that allows overriding certain configuration values
-    ///   such as custom ASCII path, ASCII colors, and ASCII distro.
+    /// Each entry in the layout is resolved against the configured flags. System information
+    /// is collected on demand, cached in `self.data`, and appended to the final string with
+    /// the requested labels. Custom rows are written verbatim and `"break"` entries insert
+    /// blank lines to keep section separators intact. ASCII art is handled separately when
+    /// rendering the banner.
     ///
     /// # Returns
     ///
-    /// A tuple containing two `String` values:
-    /// * The first `String` is the colorized system information output.
-    /// * The second `String` is the colorized ASCII art.
+    /// A single colorized `String` containing the assembled module output.
     pub fn get_info_layout(&mut self) -> String {
         let mut final_output = String::new();
 
@@ -94,7 +78,9 @@ impl Core {
                     }
                 }
                 settings::LayoutItem::Module(module) => {
-                    let Some(field_name) = module.field_name().map(|name| name.to_ascii_lowercase()) else {
+                    let Some(field_name) =
+                        module.field_name().map(|name| name.to_ascii_lowercase())
+                    else {
                         continue;
                     };
 
@@ -108,10 +94,6 @@ impl Core {
                         continue;
                     }
 
-                    if !Self::should_collect(field_name.as_str(), &self.toggles) {
-                        continue;
-                    }
-
                     let label_storage = module
                         .label()
                         .map(|value| value.to_string())
@@ -120,15 +102,11 @@ impl Core {
 
                     match field_name.as_str() {
                         "titles" => {
-                            let (user, host, dash_len) = get_titles(true);
+                            let (user, host) = get_titles(true);
                             final_output.push_str(
                                 format!(
-                                    "${{c1}}{}${{reset}}@${{c1}}{}${{reset}}
-{}
-",
-                                    user,
-                                    host,
-                                    "-".repeat(dash_len)
+                                    "${{c1}}{}${{reset}} {}${{c1}}@${{reset}}{}${{reset}}\n",
+                                    label, user, host,
                                 )
                                 .as_str(),
                             );
@@ -137,10 +115,8 @@ impl Core {
                         }
                         "os" => {
                             let os = get_os();
-                            final_output.push_str(
-                                format!("${{c1}}{}: ${{reset}}{}
-", label, os).as_str(),
-                            );
+                            final_output
+                                .push_str(format!("${{c1}}{} ${{reset}}{}\n", label, os).as_str());
                             self.data.os = Some(os);
                         }
                         "distro" => {
@@ -149,8 +125,7 @@ impl Core {
                                     .unwrap_or(DistroDisplay::NameModelVersionArch),
                             );
                             final_output.push_str(
-                                format!("${{c1}}{}: ${{reset}}{}
-", label, distro).as_str(),
+                                format!("${{c1}}{} ${{reset}}{}\n", label, distro).as_str(),
                             );
                             self.data.distro = Some(distro);
                         }
@@ -163,6 +138,14 @@ impl Core {
                             let kernel = get_kernel();
                             Self::is_some_add_to_output(label, &kernel, &mut final_output);
                             self.data.kernel = kernel;
+                        }
+                        "os_age" => {
+                            let uptime = get_os_age(
+                                OsAgeShorthand::from_str(&self.flags.os_age_shorthand)
+                                    .unwrap_or(OsAgeShorthand::Tiny),
+                            );
+                            Self::is_some_add_to_output(label, &uptime, &mut final_output);
+                            self.data.uptime = uptime;
                         }
                         "uptime" => {
                             let uptime = get_uptime(
@@ -200,20 +183,6 @@ impl Core {
                             Self::is_some_add_to_output(label, &de, &mut final_output);
                             self.data.de = de;
                         }
-                        "wm_theme" => {
-                            if self.data.wm.is_none() {
-                                self.data.wm = get_wm();
-                            }
-                            if self.data.de.is_none() {
-                                self.data.de = get_de(self.flags.de_version, self.data.wm.as_deref());
-                            }
-                            let wm_theme = get_wm_theme(
-                                self.data.wm.as_deref().unwrap_or(""),
-                                self.data.de.as_deref(),
-                            );
-                            Self::is_some_add_to_output(label, &wm_theme, &mut final_output);
-                            self.data.wm_theme = wm_theme;
-                        }
                         "cpu" => {
                             let cpu = get_cpu(
                                 self.flags.cpu_brand,
@@ -234,24 +203,18 @@ impl Core {
                             let gpus = get_gpus();
                             if gpus.is_empty() {
                                 final_output.push_str(
-                                    format!("${{c1}}{}: ${{reset}}{}
-", label, "No GPU found")
+                                    format!("${{c1}}{} ${{reset}}{}\n", label, "No GPU found")
                                         .as_str(),
                                 );
                             } else if gpus.len() == 1 {
                                 final_output.push_str(
-                                    format!("${{c1}}{}: ${{reset}}{}
-", label, gpus[0]).as_str(),
+                                    format!("${{c1}}{} ${{reset}}{}\n", label, gpus[0]).as_str(),
                                 );
                             } else {
                                 for (index, gpu) in gpus.iter().enumerate() {
                                     final_output.push_str(
-                                        format!(
-                                            "${{c1}}{} {}: ${{reset}}{}
-",
-                                            label, index, gpu
-                                        )
-                                        .as_str(),
+                                        format!("${{c1}}{} {}: ${{reset}}{}\n", label, index, gpu)
+                                            .as_str(),
                                     );
                                 }
                             }
@@ -277,8 +240,7 @@ impl Core {
                                 for disk in &disks {
                                     final_output.push_str(
                                         format!(
-                                            "${{c1}}{} {}: ${{reset}}{}
-",
+                                            "${{c1}}{} {}: ${{reset}}{}\n",
                                             label, disk.0, disk.1
                                         )
                                         .as_str(),
@@ -287,8 +249,7 @@ impl Core {
                                 self.data.disk = Some(disks);
                             } else {
                                 final_output.push_str(
-                                    format!("${{c1}}{}: ${{reset}}{}
-", label, "No disks found")
+                                    format!("${{c1}}{} ${{reset}}{}\n", label, "No disks found")
                                         .as_str(),
                                 );
                                 self.data.disk = None;
@@ -301,36 +262,34 @@ impl Core {
                         }
                         "theme" => {
                             if self.data.de.is_none() {
-                                self.data.de = get_de(self.flags.de_version, self.data.wm.as_deref());
+                                self.data.de =
+                                    get_de(self.flags.de_version, self.data.wm.as_deref());
                             }
                             let theme = get_theme(self.data.de.as_deref());
                             Self::is_some_add_to_output(label, &theme, &mut final_output);
                             self.data.theme = theme;
                         }
                         "battery" => {
-                            let display_mode = BatteryDisplayMode::from_str(
-                                self.flags.battery_display.as_str(),
-                            )
-                            .unwrap_or(BatteryDisplayMode::BarInfo);
+                            let display_mode =
+                                BatteryDisplayMode::from_str(self.flags.battery_display.as_str())
+                                    .unwrap_or(BatteryDisplayMode::BarInfo);
                             let batteries = get_battery(display_mode);
 
                             if batteries.is_empty() {
                                 final_output.push_str(
-                                    format!("${{c1}}{}: ${{reset}}{}
-", label, "No Battery found")
+                                    format!("${{c1}}{} ${{reset}}{}\n", label, "No Battery found")
                                         .as_str(),
                                 );
                             } else if batteries.len() == 1 {
                                 final_output.push_str(
-                                    format!("${{c1}}{}: ${{reset}}{}
-", label, batteries[0]).as_str(),
+                                    format!("${{c1}}{} ${{reset}}{}\n", label, batteries[0])
+                                        .as_str(),
                                 );
                             } else {
                                 for (index, battery) in batteries.iter().enumerate() {
                                     final_output.push_str(
                                         format!(
-                                            "${{c1}}{} {}: ${{reset}}{}
-",
+                                            "${{c1}}{} {}: ${{reset}}{}\n",
                                             label, index, battery
                                         )
                                         .as_str(),
@@ -354,21 +313,22 @@ impl Core {
                         }
                         "colors" => {
                             let color_blocks = if self.flags.color_blocks.is_empty() {
-                                "███"
+                                "●"
                             } else {
                                 self.flags.color_blocks.as_str()
                             };
 
-                            let colors = get_terminal_color(color_blocks).join("
-");
-                            final_output.push('\n');
-                            final_output.push_str(&colors);
+                            let colors = get_terminal_color(color_blocks);
+
+                            final_output.push_str(
+                                format!("${{c1}}{} ${{reset}}{}\n", label, &colors).as_str(),
+                            );
+
                             self.data.colors = Some(colors);
                         }
                         other => {
                             final_output.push_str(
-                                format!("${{c1}}{}: ${{reset}}{}
-", label, other).as_str(),
+                                format!("${{c1}}{} ${{reset}}{}\n", label, other).as_str(),
                             );
                         }
                     }
@@ -379,7 +339,6 @@ impl Core {
         self.output = final_output.clone();
         self.output.clone()
     }
-
 
     pub fn get_ascii_and_colors(
         &mut self,
@@ -439,37 +398,11 @@ impl Core {
     fn is_some_add_to_output(label: &str, data: &Option<String>, output: &mut String) {
         match data {
             Some(d) => {
-                output.push_str(format!("${{c1}}{}: ${{reset}}{}\n", label, d).as_str());
+                output.push_str(format!("${{c1}}{} ${{reset}}{}\n", label, d).as_str());
             }
             None => {
-                output.push_str(format!("${{c1}}{}: ${{reset}}{}\n", label, "Unknown").as_str());
+                output.push_str(format!("${{c1}}{} ${{reset}}{}\n", label, "Unknown").as_str());
             }
-        }
-    }
-
-    fn should_collect(field: &str, toggles: &settings::Toggles) -> bool {
-        match field {
-            "titles" => toggles.show_titles,
-            "os" => toggles.show_os,
-            "distro" => toggles.show_distro,
-            "model" => toggles.show_model,
-            "kernel" => toggles.show_kernel,
-            "uptime" => toggles.show_uptime,
-            "packages" => toggles.show_packages,
-            "shell" => toggles.show_shell,
-            "wm" => toggles.show_wm,
-            "de" => toggles.show_de,
-            "wm_theme" => toggles.show_wm_theme,
-            "cpu" => toggles.show_cpu,
-            "gpu" => toggles.show_gpu,
-            "memory" => toggles.show_memory,
-            "disk" => toggles.show_disks,
-            "resolution" => toggles.show_resolution,
-            "theme" => toggles.show_theme,
-            "battery" => toggles.show_battery,
-            "song" => toggles.show_song,
-            "colors" => toggles.show_terminal_colors,
-            _ => true,
         }
     }
 }

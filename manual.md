@@ -1,77 +1,78 @@
 # LeenFetch Documentation
 
 ## Table of Contents
-- [Overview](#overview)
-- [Quick Start](#quick-start)
-- [Features](#features)
-- [Architecture](#architecture)
-- [Installation](#installation)
-  - [From crates.io (Recommended)](#from-cratesio-recommended)
-  - [Build from Source](#build-from-source)
-  - [Binary Releases](#binary-releases)
-  - [Shell Completions](#shell-completions)
-- [Configuration](#configuration)
-  - [Configuration Overview](#configuration-overview)
-  - [flags section](#flags-section)
-  - [toggles section](#toggles-section)
-  - [modules array](#modules-array)
-- [Reloading Configs](#reloading-configs)
-- [Information Blocks](#information-blocks)
-  - [ASCII Art Block](#ascii-art-block)
-  - [Titles](#titles)
-  - [Operating System & Distribution](#operating-system--distribution)
-  - [Hardware Model](#hardware-model)
-  - [Uptime](#uptime)
-  - [Package Managers](#package-managers)
-  - [Shell](#shell)
-  - [Window Manager](#window-manager)
-  - [Desktop Environment](#desktop-environment)
-  - [WM Theme](#wm-theme)
-  - [Kernel](#kernel)
-  - [CPU](#cpu)
-  - [GPU](#gpu)
-  - [Memory](#memory)
-  - [Disk Usage](#disk-usage)
-  - [Resolution](#resolution)
-  - [Theme](#theme)
-  - [Battery](#battery)
-  - [Now Playing](#now-playing)
-  - [Terminal Color Swatch](#terminal-color-swatch)
-- [ASCII Art & Colors](#ascii-art--colors)
-- [Usage](#usage)
-  - [Interactive Examples](#interactive-examples)
-  - [Command-Line Options](#command-line-options)
-  - [Exit Codes](#exit-codes)
-- [Customization](#customization)
-  - [Profiles & Version Control](#profiles--version-control)
-  - [Theming Recipes](#theming-recipes)
-- [Scripting & Automation](#scripting--automation)
-- [Performance & Diagnostics](#performance--diagnostics)
-- [Troubleshooting](#troubleshooting)
-- [Frequently Asked Questions](#frequently-asked-questions)
-- [Contributing](#contributing)
-- [Support](#support)
-- [License](#license)
-- [Inspiration](#inspiration)
-- [Appendix](#appendix)
-  - [Default Modules Example](#default-modules-example)
-  - [Color Index Reference](#color-index-reference)
-  - [Glossary](#glossary)
+- [LeenFetch Documentation](#leenfetch-documentation)
+  - [Table of Contents](#table-of-contents)
+  - [Overview](#overview)
+  - [Quick Start](#quick-start)
+  - [Features](#features)
+  - [Architecture](#architecture)
+  - [Installation](#installation)
+    - [From crates.io (Recommended)](#from-cratesio-recommended)
+    - [Build from Source](#build-from-source)
+    - [Binary Releases](#binary-releases)
+    - [Shell Completions](#shell-completions)
+  - [Configuration](#configuration)
+    - [Configuration Overview](#configuration-overview)
+    - [flags section](#flags-section)
+    - [modules array](#modules-array)
+    - [Reloading Configs](#reloading-configs)
+  - [Information Blocks](#information-blocks)
+    - [ASCII Art Block](#ascii-art-block)
+    - [Titles](#titles)
+    - [Operating System \& Distribution](#operating-system--distribution)
+    - [Hardware Model](#hardware-model)
+    - [OS Age](#os-age)
+    - [Uptime](#uptime)
+    - [Package Managers](#package-managers)
+    - [Shell](#shell)
+    - [Window Manager](#window-manager)
+    - [Desktop Environment](#desktop-environment)
+    - [Kernel](#kernel)
+    - [CPU](#cpu)
+    - [GPU](#gpu)
+    - [Memory](#memory)
+    - [Disk Usage](#disk-usage)
+    - [Resolution](#resolution)
+    - [Theme](#theme)
+    - [Battery](#battery)
+    - [Now Playing](#now-playing)
+    - [Terminal Color Swatch](#terminal-color-swatch)
+  - [ASCII Art \& Colors](#ascii-art--colors)
+  - [Usage](#usage)
+    - [Interactive Examples](#interactive-examples)
+    - [Command-Line Options](#command-line-options)
+    - [Exit Codes](#exit-codes)
+  - [Customization](#customization)
+    - [Profiles \& Version Control](#profiles--version-control)
+    - [Theming Recipes](#theming-recipes)
+  - [Scripting \& Automation](#scripting--automation)
+  - [Performance \& Diagnostics](#performance--diagnostics)
+  - [Troubleshooting](#troubleshooting)
+  - [Frequently Asked Questions](#frequently-asked-questions)
+  - [Contributing](#contributing)
+  - [Support](#support)
+  - [License](#license)
+  - [Inspiration](#inspiration)
+  - [Appendix](#appendix)
+    - [Default Modules Example](#default-modules-example)
+    - [Color Index Reference](#color-index-reference)
+    - [Glossary](#glossary)
 
 ---
 
 ## Overview
 
-**LeenFetch** is a fast, minimal, and highly customizable system information tool written in Rust. It is designed as a modern alternative to Neofetch, providing beautiful, colorized terminal output and deep configuration for power users. Every element that LeenFetch prints can be toggled, reordered, and restyled without touching the source code. Users who love to tinker get full control, while sane defaults make the first run delightful.
+**LeenFetch** is a fast, minimal, and highly customizable system information tool written in Rust. It is designed as a modern alternative to Neofetch, providing beautiful, colorized terminal output and deep configuration for power users. Every element that LeenFetch prints can be reordered and restyled without touching the source code. Users who love to tinker get full control, while sane defaults make the first run delightful.
 
 ---
 
 ## Quick Start
 
 1. Install LeenFetch via `cargo install leenfetch`.
-2. Run `leenfetch` to generate the default configuration files.
+2. Run `leenfetch` to generate the default configuration file.
 3. Open `config.jsonc` in `~/.config/leenfetch/` (Linux) or `C:\Users\<you>\AppData\Roaming\leenfetch\` (Windows).
-4. Edit the `flags`, `toggles`, or `modules` sections, then re-run `leenfetch` to see your changes instantly.
+4. Edit the `flags` or `modules` sections, then re-run `leenfetch` to see your changes instantly.
 
 ---
 
@@ -81,7 +82,7 @@
 - Fully customizable output layout, labels, and color palette.
 - Rich ASCII art support with distro detection and custom artwork.
 - Tracks packages, shell, GPU, DE/WM, theme, and more per platform.
-- Commented configuration files in human-readable RON format.
+- Commented configuration file shipped in human-readable JSONC format.
 - Works on Linux and Windows with feature-aware fallbacks (macOS in progress).
 - Plays nicely in scripts, status bars, and login shells.
 
@@ -92,7 +93,6 @@
 LeenFetch separates data gathering from rendering:
 - **Collectors** probe the system for raw information (CPU, GPU, packages, etc.).
 - **Flags** control how the collected data is transformed or formatted.
-- **Toggles** decide which blocks reach the renderer.
 - **Layout** orders and labels the final output, stitching in ASCII art and colors.
 
 Collectors rely on platform-specific backends where necessary. When a value cannot be fetched on the current platform, LeenFetch falls back to safe defaults or hides the block entirely if configured to do so. This design keeps runtime fast and makes new modules easy to add.
@@ -163,8 +163,7 @@ LeenFetch stores its settings in a single JSON-with-comments file so you get str
 | Section | Purpose | Typical Changes |
 | ------- | ------- | ---------------- |
 | `flags` | Formatting, measurement units, ASCII art preferences | Switch palettes, change CPU display detail, adjust disk layout |
-| `toggles` | On/off switches for each information block | Hide GPU, disable battery on desktops, turn on now playing |
-| `modules` | Ordering, separators, and custom rows | Reorder modules, add headings, insert breaks |
+| `modules` (`layout`) | Ordering, separators, and custom rows | Reorder modules, add headings, insert breaks |
 
 The file is authored in JSONC, which is JSON plus `//` comments. Every default entry includes a brief explanation right in the file.
 
@@ -190,6 +189,7 @@ The `flags` object tunes how each block of information is displayed. Each key ha
 - **refresh_rate**: Enable detection of display refresh rates (supported on select setups).
 - **shell_path** / **shell_version**: Control whether LeenFetch prints the full shell path or version.
 - **uptime_shorthand**: Choose `full`, `tiny`, or `seconds` based on your preferred format.
+- **os_age_shorthand**: Match `uptime_shorthand` but for the dedicated OS install age module.
 
 Most options are purely visual. If a certain value is unsupported on your system, LeenFetch gracefully falls back to the closest available presentation.
 
@@ -203,34 +203,19 @@ Most options are purely visual. If a certain value is unsupported on your system
 }
 ```
 
-### toggles section
 
-This object controls which blocks appear in the final output. Every option maps directly to a collector name that you can reference in the `modules` array.
+```
 
-- **show_titles**: User and host banner.
-- **show_os** / **show_distro**: Base OS and distro details.
-- **show_model**: Hardware device or chassis model.
-- **show_uptime**: Time since last boot.
-- **show_packages**: Package manager statistics.
-- **show_shell**: Shell name/path/version (respecting flags).
-- **show_wm** / **show_de** / **show_wm_theme**: Graphical session information.
-- **show_kernel**: Operating system kernel version.
-- **show_cpu** / **show_gpu** / **show_memory**: Hardware performance stats.
-- **show_song**: Currently playing track (if supported by your environment).
-- **show_resolution**: Active monitor resolutions and refresh rates (when available).
-- **show_theme**: GTK/Qt theme detection.
-- **show_disks**: Disk usage listing according to `disk_display` in `flags`.
-- **show_battery**: Battery charge information for laptops and UPS-connected desktops.
-- **show_terminal_colors**: Color swatch block.
+### logo section (optional)
 
-Set any boolean to `false` to hide an entire block. This is ideal when scripting LeenFetch for minimal status outputs.
+The `logo` object controls ASCII art. Use it to point to a file (`source`), adjust spacing (`padding`), or override palette indices (`color`).
 
 ```jsonc
 {
-  "toggles": {
-    "show_titles": true,
-    "show_gpu": true,
-    "show_song": false
+  "logo": {
+    "type": "file",
+    "source": "~/.config/leenfetch/branding/about.txt",
+    "padding": { "top": 2, "right": 6 }
   }
 }
 ```
@@ -256,7 +241,7 @@ The `modules` array governs ordering, headings, and custom rows. Entries can be 
 - **key**: Optional label printed before the value. Leave empty (`""`) for no label.
 - **format**: When `type` is `custom`, print the supplied string as-is.
 - Duplicate entries are allowed if you want to emphasize a field in multiple places.
-- Remove entries to hide a block even if the toggle is enabled, or insert `"break"` for spacing.
+- Remove entries to hide a block entirely, or insert `"break"` for spacing.
 
 ### Reloading Configs
 
@@ -269,144 +254,124 @@ LeenFetch reads configuration at startup. When you update `config.jsonc`:
 
 ## Information Blocks
 
-Each subsection below details the relationship between toggles, module types, relevant flags, and data sources. Use this as a cross-reference when building your perfect layout.
+Each entry in the `modules` array triggers a collector. The summaries below highlight the module name, which flags influence it, and any notable behavior so you can tailor layouts quickly.
 
 ### ASCII Art Block
-- **Toggle**: Controlled implicitly; there is no dedicated toggle.
-- **Module type**: Not part of the `modules` array (ASCII art renders alongside info rows).
+- **Module entry**: Implicit (renders alongside the `titles` module)
 - **Flags**: `ascii_distro`, `ascii_colors`, `custom_ascii_path`
 - **Data**: Distro-specific or custom ASCII artwork.
-- **Notes**: Pairs naturally with the `titles` block. For a text-only layout, point `custom_ascii_path` to an empty file or pipe alternate content into LeenFetch.
+- **Notes**: Pair with `titles` for the classic banner look, or pipe input to override art on the fly.
 
 ### Titles
-- **Toggle**: `show_titles`
-- **Module type**: `titles`
-- **Flags**: No dedicated flags; inherits ASCII palette when paired with `ascii`
-- **Data**: Current user and hostname
-- **Notes**: Ideal place to display ASCII art beside the main banner.
+- **Module entry**: `titles`
+- **Flags**: Inherits ASCII palette; no dedicated flags.
+- **Data**: Current user and hostname.
+- **Notes**: Commonly the first info row, aligning the banner with text output.
 
 ### Operating System & Distribution
-- **Toggle**: `show_os`, `show_distro`
-- **Module type**: `distro`
+- **Module entry**: `distro`
 - **Flags**: `distro_display`
 - **Data**: Distro name, version, architecture, and optionally hardware model depending on `distro_display`.
-- **Notes**: On Windows, shows edition and build number when available.
+- **Notes**: Windows reports edition and build when available.
 
 ### Hardware Model
-- **Toggle**: `show_model`
-- **Module type**: `model`
-- **Flags**: `distro_display` can append model info to distro lines if you prefer a single block.
+- **Module entry**: `model`
+- **Flags**: None directly; `distro_display` can embed the same info in the distro row.
 - **Data**: Motherboard, laptop chassis, or device identifier.
-- **Notes**: Helpful for multi-device screenshots.
+- **Notes**: Useful for multi-device screenshots or inventory output.
+
+### OS Age
+- **Module entry**: `os_age`
+- **Flags**: `os_age_shorthand`
+- **Data**: Time since the current OS install or root filesystem creation.
+- **Notes**: Combine with `uptime` to show both install age and current session length.
 
 ### Uptime
-- **Toggle**: `show_uptime`
-- **Module type**: `uptime`
+- **Module entry**: `uptime`
 - **Flags**: `uptime_shorthand`
 - **Data**: Time since the last boot using the best available system clock.
 - **Notes**: `tiny` formatting condenses the value for compact layouts.
 
 ### Package Managers
-- **Toggle**: `show_packages`
-- **Module type**: `packages`
+- **Module entry**: `packages`
 - **Flags**: `package_managers`
 - **Data**: Package counts aggregated from supported managers on your platform. Unsupported managers are skipped silently.
 - **Notes**: `tiny` mode displays a short summary such as `pacman(1200)`.
 
 ### Shell
-- **Toggle**: `show_shell`
-- **Module type**: `shell`
+- **Module entry**: `shell`
 - **Flags**: `shell_path`, `shell_version`
 - **Data**: Active shell process. On Windows, respects PowerShell, cmd, and third-party shells.
-- **Notes**: Combine `shell_path=false` and `shell_version=false` for the cleanest output.
+- **Notes**: Disable both flags for the cleanest single-word shell output.
 
 ### Window Manager
-- **Toggle**: `show_wm`
-- **Module type**: `wm`
-- **Flags**: None in the `flags` section of `config.jsonc`
+- **Module entry**: `wm`
+- **Flags**: None in the `flags` section.
 - **Data**: Currently running window manager, including Wayland compositors where detected.
-- **Notes**: Works best in graphical sessions.
+- **Notes**: Requires a graphical session; falls back gracefully otherwise.
 
 ### Desktop Environment
-- **Toggle**: `show_de`
-- **Module type**: `de`
+- **Module entry**: `de`
 - **Flags**: `de_version`
 - **Data**: Desktop environment name and optional version.
 - **Notes**: Set `de_version=false` to avoid noise when the version cannot be detected.
 
-### WM Theme
-- **Toggle**: `show_wm_theme`
-- **Module type**: `wm_theme`
-- **Flags**: None in the `flags` section of `config.jsonc`
-- **Data**: Reads WM theme when the compositor exposes it (commonly on GNOME/KDE).
-- **Notes**: Some environments may not export theme information.
-
 ### Kernel
-- **Toggle**: `show_kernel`
-- **Module type**: `kernel`
-- **Flags**: None in the `flags` section of `config.jsonc`
+- **Module entry**: `kernel`
+- **Flags**: None in the `flags` section.
 - **Data**: Kernel or OS build string.
 - **Notes**: On Windows, shows the NT kernel version.
 
 ### CPU
-- **Toggle**: `show_cpu`
-- **Module type**: `cpu`
+- **Module entry**: `cpu`
 - **Flags**: `cpu_brand`, `cpu_cores`, `cpu_frequency`, `cpu_speed`, `cpu_temp`, `cpu_show_temp`
 - **Data**: CPU vendor, model, clock speeds, core counts, and optional temperature.
 - **Notes**: Temperature collection depends on platform sensors; disable `cpu_show_temp` if sensors are unreliable.
 
 ### GPU
-- **Toggle**: `show_gpu`
-- **Module type**: `gpu`
-- **Flags**: None in the `flags` section of `config.jsonc`
+- **Module entry**: `gpu`
+- **Flags**: None in the `flags` section.
 - **Data**: Active graphics adapter(s).
 - **Notes**: Multi-GPU systems are collapsed or listed individually depending on platform.
 
 ### Memory
-- **Toggle**: `show_memory`
-- **Module type**: `memory`
+- **Module entry**: `memory`
 - **Flags**: `memory_percent`, `memory_unit`
 - **Data**: RAM usage, optionally with percentage.
 - **Notes**: `memory_unit` enforces consistent units across outputs.
 
 ### Disk Usage
-- **Toggle**: `show_disks`
-- **Module type**: `disk`
+- **Module entry**: `disk`
 - **Flags**: `disk_display`, `disk_subtitle`
 - **Data**: Mounted filesystem usage.
 - **Notes**: `infobar` and `barinfo` draw textual bars for a quick overview.
 
 ### Resolution
-- **Toggle**: `show_resolution`
-- **Module type**: `resolution`
+- **Module entry**: `resolution`
 - **Flags**: `refresh_rate`
 - **Data**: Connected monitor resolutions, optionally including refresh rate when supported.
 - **Notes**: Ideal for showcasing multi-monitor setups.
 
 ### Theme
-- **Toggle**: `show_theme`
-- **Module type**: `theme`
-- **Flags**: None in the `flags` section of `config.jsonc`
+- **Module entry**: `theme`
+- **Flags**: None in the `flags` section.
 - **Data**: GTK/Qt theme names when available.
 - **Notes**: Falls back silently if the theme cannot be detected.
 
 ### Battery
-- **Toggle**: `show_battery`
-- **Module type**: `battery`
+- **Module entry**: `battery`
 - **Flags**: `battery_display`
 - **Data**: Battery charge, status, and optionally bars.
-- **Notes**: Desktop users can disable the block entirely to avoid empty placeholders.
+- **Notes**: Desktop users can remove the module entirely to avoid empty placeholders.
 
 ### Now Playing
-- **Toggle**: `show_song`
-- **Module type**: `song`
-- **Flags**: None in the `flags` section of `config.jsonc`
+- **Module entry**: `song`
+- **Flags**: None in the `flags` section.
 - **Data**: Integrates with common media players via MPRIS or platform APIs.
 - **Notes**: Appears only when playback is active and a song title is available.
 
 ### Terminal Color Swatch
-- **Toggle**: `show_terminal_colors`
-- **Module type**: `colors`
+- **Module entry**: `colors`
 - **Flags**: `color_blocks`, `ascii_colors`
 - **Data**: Color palette preview showing up to 16 colors.
 - **Notes**: Customize `color_blocks` to change the glyph used in the swatch.
@@ -481,7 +446,7 @@ Ideas to get you started:
 - **Minimal**: Disable ASCII art by piping input or using an empty custom ASCII, and keep only titles and distro within the `modules` array.
 - **Screenshots**: Enable ASCII art, color swatches, CPU, GPU, resolution, and theme. Stick to `memory_percent=false` for clean numbers.
 - **Monitoring**: Enable uptime, disks with `barinfo`, memory percent, and battery infobar.
-- **Music Showcase**: Turn on `show_song`, customize the label to `Now Playing`, and keep color blocks bright.
+- **Music Showcase**: Add the `song` module with a custom `key` like `Now Playing`, and keep color blocks bright.
 
 ---
 
@@ -493,7 +458,7 @@ LeenFetch plays nicely with automation:
 - Combine with cron or systemd timers to snapshot system info periodically.
 - Pair with screenshot tools to publish desktop showcase posts with consistent styling.
 
-When scripting, disable unnecessary blocks via the `toggles` section to reduce noise and speed up execution even further.
+When scripting, trim the `modules` array to only the collectors you need to reduce noise and speed up execution even further.
 
 ---
 
@@ -502,15 +467,15 @@ When scripting, disable unnecessary blocks via the `toggles` section to reduce n
 LeenFetch is optimized for speed, but you can fine-tune it:
 - Disable heavy collectors (package counts, now playing) if you prefer bare minimum output.
 - Keep ASCII art short to reduce terminal scrollback.
-- Monitor configuration parse errors: LeenFetch prints descriptive messages for invalid RON syntax, including line numbers.
-- When debugging, temporarily set `package_managers="off"` or `show_terminal_colors=false` to isolate problematic sections.
+- Monitor configuration parse errors: LeenFetch prints descriptive messages for invalid JSONC syntax, including line numbers.
+- When debugging, temporarily set `package_managers="off"` or remove the `colors` module to isolate problematic sections.
 
 ---
 
 ## Troubleshooting
 
 - **Tool fails to start**: Check terminal output for parse errors. The message includes file paths and line numbers.
-- **Missing blocks**: Ensure both the toggle and the corresponding modules entry are present.
+- **Missing blocks**: Make sure the module appears in `modules` and any related flag (like `package_managers`) isn't disabling the data.
 - **Wrong ASCII art**: Verify `ascii_distro` is spelled correctly or set it to `"auto"`.
 - **Incorrect colors**: Terminal themes can override ANSI colors; test in a default theme to confirm.
 - **Package count is zero**: The manager might not be supported on your platform yet. Contributions are welcome.
@@ -620,7 +585,7 @@ ANSI color indexes used in `ascii_colors`:
 ### Glossary
 
 - **Collector**: Module that queries the system for data (CPU info, disk stats, etc.).
-- **RON**: Rusty Object Notation, a human-friendly data format used for configuration.
+- **JSONC**: JSON with `//` comments, the format used for LeenFetch configuration.
 - **Block**: A single line or section in the LeenFetch output (CPU, Memory, etc.).
 - **Palette**: The set of colors used to render ASCII art and color swatches.
-- **Toggle**: A boolean switch in the `toggles` section that enables or disables a block.
+- **Module entry**: A string or object in the `modules` array that controls which collector runs and how it is labeled.

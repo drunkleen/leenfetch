@@ -9,8 +9,8 @@ use std::collections::HashMap;
 /// - `--version` or `-v`: Prints the package name and version, then exits.
 /// - `--help` or `-h`: Displays help information and exits.
 /// - `--list-options` or `-l`: Lists available options and exits.
-/// - `--init` or `-i`: Ensures configuration files exist, creating them if necessary, and exits.
-/// - `--reinit` or `-r`: Deletes and regenerates configuration files, then exits.
+/// - `--init` or `-i`: Ensures the configuration file exists, creating it if necessary, and exits.
+/// - `--reinit` or `-r`: Deletes and regenerates the configuration file, then exits.
 /// - `--ascii_distro`: Sets the ASCII distribution to the specified value.
 /// - `--ascii_colors`: Sets the ASCII colors to the specified value.
 /// - `--custom_ascii_path`: Sets the custom ASCII path to the specified value.
@@ -145,20 +145,20 @@ DESCRIPTION:
   🛠️  Configuration:
     • Linux:   ~/.config/leenfetch/config.jsonc
     • Windows: %APPDATA%/leenfetch/config.jsonc
-    One JSONC file with inline comments covering flags, toggles, and a Fastfetch-style modules array.
+    One JSONC file with inline comments covering flags and a Fastfetch-style modules array.
     Edit it to control appearance, spacing (via "break" entries), and output order.
 
 EXAMPLES:
   leenfetch                         🚀 Run normally with your config
-  leenfetch --init                  🔧 Create default config files
+  leenfetch --init                  🔧 Create the default config file
   leenfetch --ascii_distro arch     🎨 Use Arch logo manually
   leenfetch --ascii_colors 2,7,3    🌈 Use custom colors
   leenfetch --list-options          📜 View all available configuration keys
 
 TIPS:
   • Adjust styles in the `flags` section (e.g., ascii_distro, disk_display, battery_display)
-  • Toggle info blocks in the `toggles` section (e.g., show_cpu, show_gpu)
   • Reorder entries in the `modules` array (use "break" for spacing)
+  • Tweak `logo.padding` to add margins around the ASCII art
 
 For more, see the README or run `leenfetch --list-options`.
         "#
@@ -179,7 +179,6 @@ pub fn list_options() {
 
 🗂️  Sections inside config.jsonc:
   • 🖼️ flags — Display and formatting options
-  • 🧩 toggles — Show/hide information blocks
   • 🧱 modules — Output order and custom rows
 ──────────────────────────────────────────────
 🖼️ flags — Display and Formatting Options
@@ -249,30 +248,27 @@ pub fn list_options() {
   
   uptime_shorthand    = "full" | "tiny" | "seconds"
       Uptime format: verbose, compact, or seconds only.
+ 
+  os_age_shorthand    = "full" | "tiny" | "seconds"
+      Format for the OS install age module.
 
 ──────────────────────────────────────────────
-🧩 toggles — Show/Hide Information Blocks
+🖼 logo — ASCII Art Overrides
 ──────────────────────────────────────────────
-  show_titles         = true | false   👤 Show user@host title
-  show_os             = true | false   🖥️  Show base OS name
-  show_distro         = true | false   🏷️  Show distro info
-  show_model          = true | false   💻 Show hardware model
-  show_uptime         = true | false   ⏱️  Show system uptime
-  show_packages       = true | false   📦 Show package info
-  show_shell          = true | false   🐚 Show shell info
-  show_wm             = true | false   🪟 Show window manager
-  show_de             = true | false   🖼️  Show desktop environment
-  show_wm_theme       = true | false   🎨 Show WM theme
-  show_kernel         = true | false   🧬 Show kernel version
-  show_cpu            = true | false   🧠 Show CPU info
-  show_gpu            = true | false   🎮 Show GPU info
-  show_memory         = true | false   🧮 Show memory info
-  show_song           = true | false   🎵 Show currently playing song/media info
-  show_resolution     = true | false   🖵 Show display resolution
-  show_theme          = true | false   🎭 Show GTK/Qt theme
-  show_disks          = true | false   💽 Show disk usage
-  show_battery        = true | false   🔋 Show battery info
-  show_terminal_colors= true | false   🌈 Show terminal color palette
+  type              = "auto" | "file"
+      Select built-in art or load from disk.
+
+  source            = <path>
+      Path to a custom ASCII art file (used when type is "file").
+
+  padding.top       = <number>
+      Add blank lines above the ASCII logo.
+
+  padding.right     = <number>
+      Add spacing between the ASCII logo and information column.
+
+  padding.left      = <number>
+      Indent the ASCII logo horizontally.
 
 ──────────────────────────────────────────────
 🧱 modules — Output Order and Custom Rows
@@ -282,6 +278,7 @@ pub fn list_options() {
     • { "type": <field>, "key": <label>, ... } — render a module
   - type: Matches the collectors listed below under Information Blocks.
   - key: Optional label (set to "" for no label).
+  - keyColor: Optional color name (e.g., blue, bright_magenta).
   - format: When type is "custom", print the string verbatim.
 
 Add, remove, or duplicate modules to customize your output. Mix in "break" strings wherever you want spacing.

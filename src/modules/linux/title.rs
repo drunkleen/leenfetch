@@ -7,12 +7,11 @@ use std::process::Command;
 ///
 /// The length is the sum of the lengths of the username and hostname,
 /// plus one for the '@' separator.
-pub fn get_titles(fqdn: bool) -> (String, String, usize) {
+pub fn get_titles(fqdn: bool) -> (String, String) {
     let user = get_user();
     let host = get_hostname(fqdn);
 
-    let len = user.len() + host.len() + 1;
-    (user, host, len)
+    (user, host)
 }
 
 fn get_user() -> String {

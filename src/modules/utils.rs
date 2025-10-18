@@ -49,18 +49,19 @@ pub fn get_bar(percent: u8) -> String {
 /// The input string `color_blocks` should contain 8 identical block characters
 /// (e.g. █, ░, ▓, ▒, etc.). The output strings will have these blocks
 /// colored with different ANSI colors.
-pub fn get_terminal_color(color_blocks: &str) -> Vec<String> {
+pub fn get_terminal_color(color_blocks: &str) -> String {
     let color_codes: [u8; 8] = [30, 31, 32, 33, 34, 35, 36, 37]; // ANSI foreground colors
 
     let mut normal = Vec::with_capacity(8);
-    let mut bold = Vec::with_capacity(8);
+    // let mut bold = Vec::with_capacity(8);
 
     for &code in &color_codes {
         normal.push(format!("\x1b[{}m{}\x1b[0m", code, color_blocks)); // normal
-        bold.push(format!("\x1b[1;{}m{}\x1b[0m", code, color_blocks)); // bold
+                                                                       // bold.push(format!("\x1b[1;{}m{}\x1b[0m", code, color_blocks)); // bold
     }
 
-    vec![normal.join(""), bold.join("")]
+    // vec![normal.join(""), bold.join("")]
+    normal.join("")
 }
 
 // ---------------------------------
