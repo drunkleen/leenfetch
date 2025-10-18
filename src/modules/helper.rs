@@ -145,8 +145,8 @@ DESCRIPTION:
   🛠️  Configuration:
     • Linux:   ~/.config/leenfetch/config.jsonc
     • Windows: %APPDATA%/leenfetch/config.jsonc
-    One JSONC file with inline comments covering flags, toggles, and layout.
-    Edit it to control appearance, enabled modules, and output order.
+    One JSONC file with inline comments covering flags, toggles, and a Fastfetch-style modules array.
+    Edit it to control appearance, spacing (via "break" entries), and output order.
 
 EXAMPLES:
   leenfetch                         🚀 Run normally with your config
@@ -158,7 +158,7 @@ EXAMPLES:
 TIPS:
   • Adjust styles in the `flags` section (e.g., ascii_distro, disk_display, battery_display)
   • Toggle info blocks in the `toggles` section (e.g., show_cpu, show_gpu)
-  • Reorder lines in the `layout` array to change the output flow
+  • Reorder entries in the `modules` array (use "break" for spacing)
 
 For more, see the README or run `leenfetch --list-options`.
         "#
@@ -180,8 +180,7 @@ pub fn list_options() {
 🗂️  Sections inside config.jsonc:
   • 🖼️ flags — Display and formatting options
   • 🧩 toggles — Show/hide information blocks
-  • 📝 layout — Output order and labels
-
+  • 🧱 modules — Output order and custom rows
 ──────────────────────────────────────────────
 🖼️ flags — Display and Formatting Options
 ──────────────────────────────────────────────
@@ -276,15 +275,16 @@ pub fn list_options() {
   show_terminal_colors= true | false   🌈 Show terminal color palette
 
 ──────────────────────────────────────────────
-📝 layout — Output Order and Labels
+🧱 modules — Output Order and Custom Rows
 ──────────────────────────────────────────────
-  Each entry is a JSON object:
-    { "label": <string>, "field": <field_name> }
-  - label: Text shown before the value (e.g., "CPU:"). Can be empty for no label.
-  - field: Which data block to show. Valid fields:
-      titles, distro, model, kernel, uptime, packages, shell, wm, de, wm_theme, cpu, gpu, memory, disk, resolution, theme, battery, song, colors
+  Each entry is either:
+    • "break" — insert a blank spacer line
+    • { "type": <field>, "key": <label>, ... } — render a module
+  - type: Matches the collectors listed below under Information Blocks.
+  - key: Optional label (set to "" for no label).
+  - format: When type is "custom", print the string verbatim.
 
-You can rearrange, remove, or relabel any section to customize your output.
+Add, remove, or duplicate modules to customize your output. Mix in "break" strings wherever you want spacing.
 
 ──────────────────────────────────────────────
 ✏️  Edit config.jsonc in your favorite text editor. Inline comments explain each option in detail.

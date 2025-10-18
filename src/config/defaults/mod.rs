@@ -110,28 +110,34 @@ pub const DEFAULT_CONFIG: &str = r#"
     },
 
     // -------------------------------
-    // layout - Output order and labels
+    // modules - Output order and custom rows
     // -------------------------------
-    "layout": [
-        { "label": "Titles", "field": "titles" },
-        { "label": "Distro", "field": "distro" },
-        { "label": "Model", "field": "model" },
-        { "label": "Kernel", "field": "kernel" },
-        { "label": "Uptime", "field": "uptime" },
-        { "label": "Packages", "field": "packages" },
-        { "label": "Shell", "field": "shell" },
-        { "label": "WM", "field": "wm" },
-        { "label": "DE", "field": "de" },
-        { "label": "WM theme", "field": "wm_theme" },
-        { "label": "CPU", "field": "cpu" },
-        { "label": "GPU", "field": "gpu" },
-        { "label": "Memory", "field": "memory" },
-        { "label": "Disk", "field": "disk" },
-        { "label": "Resolution", "field": "resolution" },
-        { "label": "Theme", "field": "theme" },
-        { "label": "Battery", "field": "battery" },
-        { "label": "", "field": "song" },
-        { "label": "", "field": "colors" }
+    "modules": [
+        "break",
+        { "type": "custom", "format": "\u001b[90m┌────────────────── System ──────────────────┐" },
+        { "type": "titles", "key": "User" },
+        { "type": "os", "key": "OS" },
+        { "type": "distro", "key": "Distro" },
+        { "type": "model", "key": "Model" },
+        { "type": "kernel", "key": "Kernel" },
+        { "type": "uptime", "key": "Uptime" },
+        { "type": "packages", "key": "Packages" },
+        { "type": "shell", "key": "Shell" },
+        { "type": "wm", "key": "WM" },
+        { "type": "de", "key": "DE" },
+        { "type": "wm_theme", "key": "WM Theme" },
+        { "type": "custom", "format": "\u001b[90m├───────────────── Hardware ─────────────────┤" },
+        { "type": "cpu", "key": "CPU" },
+        { "type": "gpu", "key": "GPU" },
+        { "type": "memory", "key": "Memory" },
+        { "type": "disk", "key": "Disk" },
+        { "type": "resolution", "key": "Resolution" },
+        { "type": "theme", "key": "Theme" },
+        { "type": "battery", "key": "Battery" },
+        { "type": "song", "key": "" },
+        { "type": "colors", "key": "" },
+        { "type": "custom", "format": "\u001b[90m└────────────────────────────────────────────┘" },
+        "break"
     ]
 }
 "#;

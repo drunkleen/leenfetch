@@ -45,7 +45,7 @@ Head over to the [issues](https://github.com/drunkleen/leenfetch/issues) or join
   - [⚙️ Configuration](#️-configuration)
     - [flags section](#flags-section)
     - [toggles section](#toggles-section)
-    - [layout section](#layout-section)
+    - [modules array](#modules-array)
     - [How to Edit](#how-to-edit)
   - [🎯 Roadmap](#-roadmap)
   - [🤝 Contributing](#-contributing)
@@ -233,7 +233,7 @@ The file uses JSON with comments (JSONC), so you can keep inline explanations ne
 
 - `flags` — Controls display and formatting options for each block.
 - `toggles` — Controls which information blocks are shown or hidden.
-- `layout` — Controls the order and labels of blocks in the output.
+- `modules` — Controls the order, headings, and custom rows in the output.
 
 ### flags section
 
@@ -268,21 +268,25 @@ The `toggles` object controls which blocks of information are shown in the outpu
 }
 ```
 
-### layout section
+### modules array
 
-The `layout` array controls the order and labels of each block in the output. Each entry is a JSON object with a `label` and the `field` to display.
+The `modules` array controls the rendering order. Entries can be a literal string (use `"break"` for a blank line) or an object describing a module. Objects accept a `type` (matching LeenFetch modules) and optional properties like `key` for the label or `format` for custom text.
 
 ```jsonc
 {
-  "layout": [
-    { "label": "Titles", "field": "titles" },
-    { "label": "Distro", "field": "distro" },
-    { "label": "", "field": "colors" }
+  "modules": [
+    "break",
+    { "type": "custom", "format": "== System ==" },
+    { "type": "titles", "key": "User" },
+    { "type": "distro", "key": "Distro" },
+    { "type": "cpu", "key": "CPU" },
+    { "type": "memory", "key": "Memory" },
+    { "type": "colors", "key": "" }
   ]
 }
 ```
 
-Rearrange, duplicate, or remove entries to customize your output.
+Rearrange, duplicate, or remove entries to customize your output. Insert `"break"` wherever you want an empty spacer line.
 
 ---
 

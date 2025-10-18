@@ -44,9 +44,9 @@ $XDG_CONFIG_HOME/leenfetch/
 ```
 
 The configuration file is:
-- **config.jsonc**: Combines display flags, module toggles, and layout order into one document. JSONC keeps comments intact so every option is documented in place.
+- **config.jsonc**: Includes `flags`, `toggles`, and a Fastfetch-style `modules` array. Use strings like `"break"` for spacers or objects with `type`/`key` to control the output. JSONC keeps comments intact so every option is documented in place.
 
-Edit the file to adjust appearance, enabled modules, or output order.
+Edit the file to adjust appearance, enabled modules, spacing, or output order.
 
 ## EXAMPLES
 - `leenfetch`  

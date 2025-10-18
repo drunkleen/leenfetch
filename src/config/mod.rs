@@ -3,7 +3,7 @@ pub mod settings;
 
 use self::{
     defaults::DEFAULT_CONFIG,
-    settings::{Config, Flags, Layout, Toggles},
+    settings::{Config, Flags, LayoutItem, Toggles},
 };
 use dirs::config_dir;
 use json5;
@@ -18,16 +18,24 @@ use std::{
 fn load_config() -> Config {
     let path = config_file("config.jsonc");
     let data = fs::read_to_string(path).expect("Failed to read config.jsonc");
-    json5::from_str(&data).expect("Invalid JSONC in config.jsonc")
+    load_config_from_str(&data)
 }
 
-/// Loads the print layout section from `config.jsonc`.
+fn load_config_from_str(data: &str) -> Config {
+    json5::from_str(data).expect("Invalid JSONC in config.jsonc")
+}
+
+/// Loads the modules section from `config.jsonc`.
 ///
 /// # Returns
 ///
-/// A `Vec<Layout>` containing the loaded print layout configuration.
-pub fn load_print_layout() -> Vec<Layout> {
-    load_config().layout
+/// A `Vec<LayoutItem>` containing the loaded module configuration.
+pub fn load_print_layout() -> Vec<LayoutItem> {
+    let mut layout = load_config().layout;
+    if layout.is_empty() {
+        layout = load_config_from_str(DEFAULT_CONFIG).layout;
+    }
+    layout
 }
 
 /// Loads the configuration flags from `config.jsonc`.

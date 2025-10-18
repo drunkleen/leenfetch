@@ -8,7 +8,7 @@
   - [config.jsonc Overview](#configjsonc-overview)
   - [flags section](#flags-section)
   - [toggles section](#toggles-section)
-  - [layout section](#layout-section)
+  - [modules array](#modules-array)
   - [Editing Workflow](#editing-workflow)
 - [Usage](#usage)
 - [Customization](#customization)
@@ -95,13 +95,13 @@ The file uses JSON with comments (JSONC), keeping inline explanations next to ev
 {
   "flags": { /* display & formatting options */ },
   "toggles": { /* show/hide info blocks */ },
-  "layout": [ /* output order and labels */ ]
+  "modules": [ /* ordering, separators, and overrides */ ]
 }
 ```
 
 - **flags** — Controls display and formatting options for each block.
 - **toggles** — Controls which information blocks are shown or hidden.
-- **layout** — Controls the order and labels of blocks in the output.
+- **modules** — Controls the order, headings, and custom rows in the output.
 
 You can edit everything in a single place and keep the helpful comments that ship with the defaults.
 
@@ -198,25 +198,28 @@ Controls which blocks of information are shown in the output. Set each option to
 
 ---
 
-### layout section
+### modules array
 
-Controls the order and labels of each block in the output. Rearrange, remove, or relabel any section to customize your layout.
+Controls ordering, headings, and custom rows. Each entry can be:
+
+- A string. Use `"break"` to insert an empty spacer line.
+- An object with a `type` (matching LeenFetch module names) and optional fields such as `key` (label) or `format` for custom text.
 
 ```jsonc
-// layout — Output order and labels
+// modules — Output order and custom rows
 {
-  "layout": [
-    // The user@host title block (e.g., "snape@archbox").
-    { "label": "Titles", "field": "titles" },
-    // The distribution (distro) information (e.g., "Arch Linux").
-    { "label": "Distro", "field": "distro" },
-    // Terminal color palette preview.
-    { "label": "", "field": "colors" }
+  "modules": [
+    "break",
+    { "type": "custom", "format": "== System ==" },
+    { "type": "titles", "key": "User" },
+    { "type": "distro", "key": "Distro" },
+    { "type": "cpu", "key": "CPU" },
+    { "type": "colors", "key": "" }
   ]
 }
 ```
 
-#### Layout Fields
+#### Module Types
 - `titles`
 - `distro`
 - `model`
@@ -236,6 +239,8 @@ Controls the order and labels of each block in the output. Rearrange, remove, or
 - `battery`
 - `song`
 - `colors`
+
+Rearrange, duplicate, or remove modules to customize your layout. Add `"break"` wherever you want a blank spacer.
 
 ---
 
@@ -285,7 +290,7 @@ This is great for fun dynamic banners or scriptable ASCII output.
 - **ASCII Art:** Use your own by setting `custom_ascii_path` in the `flags` section of `config.jsonc`.
 - **Color Palette:** Set `ascii_colors` to a custom list.
 - **Hide/Show Blocks:** Toggle entries in the `toggles` section.
-- **Order/Labels:** Edit the `layout` array to rearrange or rename blocks.
+- **Order/Labels:** Edit the `modules` array (insert `"break"` for spacing) to rearrange or rename blocks.
 - **Advanced:** Combine config changes for a unique look!
 
 > If input is piped into leenfetch via `stdin`, the `ascii_distro` and `custom_ascii_path` settings are ignored, and the piped content is used as the ASCII logo.
