@@ -1,12 +1,23 @@
 use std::process::Command;
+use crate::modules::windows::utils::run_powershell;
 
 pub fn get_gpus() -> Vec<String> {
-    let output = Command::new("wmic")
+    // WMIC first
+    let mut output = Command::new("wmic")
         .args(["path", "win32_VideoController", "get", "Name"])
         .output()
         .ok()
         .and_then(|o| String::from_utf8(o.stdout).ok())
         .unwrap_or_default();
+
+    // PowerShell fallback
+    if output.trim().is_empty() {
+        if let Some(ps) = run_powershell(
+            "Get-CimInstance Win32_VideoController | Select-Object -ExpandProperty Name",
+        ) {
+            output = ps;
+        }
+    }
 
     let mut gpus = Vec::new();
 

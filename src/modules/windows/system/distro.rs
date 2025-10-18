@@ -1,4 +1,5 @@
 use std::{env, process::Command};
+use crate::modules::windows::utils::run_powershell;
 
 use crate::modules::enums::DistroDisplay;
 
@@ -29,6 +30,11 @@ fn get_product_name() -> String {
                 return line.trim().to_string();
             }
         }
+    }
+
+    if let Some(ps) = run_powershell("(Get-CimInstance Win32_OperatingSystem).Caption") {
+        let s = ps.trim();
+        if !s.is_empty() { return s.to_string(); }
     }
 
     "Windows".into()

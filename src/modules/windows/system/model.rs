@@ -1,22 +1,32 @@
 use std::process::Command;
+use crate::modules::windows::utils::run_powershell_json;
 
 pub fn get_model() -> Option<String> {
-    let output = Command::new("wmic")
+    // Try WMIC first
+    if let Ok(output) = Command::new("wmic")
         .args(["computersystem", "get", "manufacturer,model"])
         .output()
-        .ok()?;
-
-    let stdout = String::from_utf8_lossy(&output.stdout);
-
-    // Find the line after the header row (skip the first)
-    let mut lines = stdout.lines().skip(1);
-
-    if let Some(line) = lines.next() {
-        let cleaned = cleanup_model_string(line);
-        return Some(cleaned);
+    {
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        if let Some(line) = stdout.lines().skip(1).find(|l| !l.trim().is_empty()) {
+            let cleaned = cleanup_model_string(line);
+            return Some(cleaned);
+        }
     }
 
-    None
+    // PowerShell fallback
+    #[derive(serde::Deserialize)]
+    struct Rec { manufacturer: Option<String>, model: Option<String> }
+    let rec: Option<Rec> = run_powershell_json(
+        "Get-CimInstance Win32_ComputerSystem | Select-Object -First 1 Manufacturer,Model",
+    );
+    let rec = rec?;
+    let s = format!(
+        "{} {}",
+        rec.manufacturer.unwrap_or_default(),
+        rec.model.unwrap_or_default()
+    );
+    Some(cleanup_model_string(&s))
 }
 
 fn cleanup_model_string(model: &str) -> String {

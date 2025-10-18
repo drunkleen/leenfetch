@@ -14,7 +14,7 @@ use crate::{
         },
         info::{
             battery::get_battery, cpu::get_cpu, disk::get_disks, gpu::get_gpus, memory::get_memory,
-            os_age::get_os_age, uptime::get_uptime,
+             uptime::get_uptime, os_age::get_os_age,
         },
         packages::get_packages,
         shell::get_shell,

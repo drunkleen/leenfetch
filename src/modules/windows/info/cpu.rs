@@ -1,4 +1,5 @@
 use std::process::Command;
+use crate::modules::windows::utils::run_powershell;
 
 pub fn get_cpu(
     cpu_brand: bool,
@@ -43,25 +44,30 @@ pub fn get_cpu(
 }
 
 fn get_cpu_model(show_brand: bool) -> String {
-    let output = Command::new("wmic").args(["cpu", "get", "Name"]).output();
-
-    if let Ok(output) = output {
+    // Try WMIC first (older systems)
+    if let Ok(output) = Command::new("wmic").args(["cpu", "get", "Name"]).output() {
         let raw = String::from_utf8_lossy(&output.stdout);
         if let Some(line) = raw.lines().skip(1).find(|l| !l.trim().is_empty()) {
             return sanitize_cpu_model(line.trim(), show_brand);
         }
     }
 
-    "Unknown CPU".into()
+    // Fallback to PowerShell CIM on modern Windows (WMIC removed)
+    if let Some(out) = run_powershell(
+        "Get-CimInstance Win32_Processor | Select-Object -First 1 -ExpandProperty Name",
+    ) {
+        let line = out.lines().find(|l| !l.trim().is_empty());
+        if let Some(name) = line {
+            return sanitize_cpu_model(name.trim(), show_brand);
+        }
+    }
+
+    "Unknown CPU".to_string()
 }
 
 fn get_core_count() -> u32 {
-    // fallback to WMIC if num_cpus crate is not allowed
-    let output = Command::new("wmic")
-        .args(["cpu", "get", "NumberOfCores"])
-        .output();
-
-    if let Ok(out) = output {
+    // Try WMIC
+    if let Ok(out) = Command::new("wmic").args(["cpu", "get", "NumberOfCores"]).output() {
         let text = String::from_utf8_lossy(&out.stdout);
         if let Some(line) = text.lines().skip(1).find(|l| !l.trim().is_empty()) {
             if let Ok(val) = line.trim().parse::<u32>() {
@@ -70,44 +76,74 @@ fn get_core_count() -> u32 {
         }
     }
 
-    1 // fallback
+    // Fallback to PowerShell (sum across packages)
+    if let Some(out) = run_powershell(
+        "(Get-CimInstance Win32_Processor | Measure-Object -Property NumberOfCores -Sum).Sum",
+    ) {
+        if let Ok(v) = out.trim().parse::<u32>() {
+            return v;
+        }
+    }
+
+    1
 }
 
 fn get_cpu_speed_mhz() -> Option<u32> {
-    let output = Command::new("wmic")
-        .args(["cpu", "get", "MaxClockSpeed"])
-        .output()
-        .ok()?;
+    // WMIC first
+    if let Ok(output) = Command::new("wmic").args(["cpu", "get", "MaxClockSpeed"]).output() {
+        let raw = String::from_utf8_lossy(&output.stdout);
+        if let Some(val) = raw
+            .lines()
+            .skip(1)
+            .find(|l| !l.trim().is_empty())
+            .and_then(|s| s.trim().parse::<u32>().ok())
+        {
+            return Some(val);
+        }
+    }
 
-    let raw = String::from_utf8_lossy(&output.stdout);
-    raw.lines()
-        .skip(1)
-        .find(|l| !l.trim().is_empty())?
-        .trim()
-        .parse::<u32>()
-        .ok()
+    // PowerShell fallback
+    if let Some(out) = run_powershell(
+        "Get-CimInstance Win32_Processor | Select-Object -First 1 -ExpandProperty MaxClockSpeed",
+    ) {
+        return out.trim().parse::<u32>().ok();
+    }
+
+    None
 }
 
 fn get_cpu_temperature() -> Option<f32> {
-    let output = Command::new("wmic")
-        .args([
-            "/namespace:\\\\root\\wmi",
-            "path",
-            "MSAcpi_ThermalZoneTemperature",
-            "get",
-            "CurrentTemperature",
-        ])
-        .output()
-        .ok()?;
+    // WMIC (legacy)
+    if let Ok(output) = Command::new("wmic").args([
+        "/namespace:\\root\\wmi",
+        "path",
+        "MSAcpi_ThermalZoneTemperature",
+        "get",
+        "CurrentTemperature",
+    ]).output()
+    {
+        let raw = String::from_utf8_lossy(&output.stdout);
+        if let Some(raw_line) = raw
+            .lines()
+            .skip(1)
+            .find(|l| l.trim().parse::<f32>().is_ok())
+        {
+            if let Ok(v) = raw_line.trim().parse::<f32>() {
+                return Some((v - 2732.0) / 10.0);
+            }
+        }
+    }
 
-    let raw = String::from_utf8_lossy(&output.stdout);
-    let line = raw
-        .lines()
-        .skip(1)
-        .find(|l| l.trim().parse::<f32>().is_ok())?;
-    let raw_temp = line.trim().parse::<f32>().ok()?;
+    // PowerShell CIM fallback
+    if let Some(out) = run_powershell(
+        "Get-CimInstance -Namespace root/\"wmi\" MSAcpi_ThermalZoneTemperature | Select-Object -First 1 -ExpandProperty CurrentTemperature",
+    ) {
+        if let Ok(v) = out.trim().parse::<f32>() {
+            return Some((v - 2732.0) / 10.0);
+        }
+    }
 
-    Some((raw_temp - 2732.0) / 10.0) // deciKelvin to Celsius
+    None
 }
 
 fn sanitize_cpu_model(model: &str, show_brand: bool) -> String {
