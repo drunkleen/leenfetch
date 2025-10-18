@@ -2,11 +2,11 @@ pub mod defaults;
 pub mod settings;
 
 use self::{
-    defaults::{DEFAULT_FLAGS, DEFAULT_PRINT_LAYOUT, DEFAULT_TOGGLES},
-    settings::Layout,
+    defaults::DEFAULT_CONFIG,
+    settings::{Config, Flags, Layout, Toggles},
 };
 use dirs::config_dir;
-use ron::de::from_str;
+use json5;
 use std::io::Write;
 use std::path::PathBuf;
 use std::{
@@ -14,73 +14,49 @@ use std::{
     fs::{self, File},
 };
 
-/// Loads the print layout configuration from the "print_layout.ron" file.
-///
-/// If the file does not exist, this function will panic with the message "Failed to read print_order.ron".
-/// If the file exists but contains invalid RON, this function will panic with the message "Invalid RON in print_order".
+/// Loads the unified configuration from `config.jsonc`.
+fn load_config() -> Config {
+    let path = config_file("config.jsonc");
+    let data = fs::read_to_string(path).expect("Failed to read config.jsonc");
+    json5::from_str(&data).expect("Invalid JSONC in config.jsonc")
+}
+
+/// Loads the print layout section from `config.jsonc`.
 ///
 /// # Returns
 ///
 /// A `Vec<Layout>` containing the loaded print layout configuration.
-
 pub fn load_print_layout() -> Vec<Layout> {
-    let path = config_file("print_layout.ron");
-    let data = fs::read_to_string(path).expect("Failed to read print_order.ron");
-    from_str(&data).expect("Invalid RON in print_order")
+    load_config().layout
 }
 
-/// Loads the configuration flags from the "flags.ron" file.
-///
-/// If the file does not exist, this function will panic with the message "Failed to read flags.ron".
-/// If the file exists but contains invalid RON, this function will panic with the message "Invalid RON in settings".
+/// Loads the configuration flags from `config.jsonc`.
 ///
 /// # Returns
 ///
-/// A `settings::Flags` struct containing the loaded configuration.
-pub fn load_flags() -> settings::Flags {
-    let path = config_file("flags.ron");
-    let data = fs::read_to_string(path).expect("Failed to read flags.ron");
-    from_str(&data).expect("Invalid RON in settings")
+/// A `Flags` struct containing the loaded configuration.
+pub fn load_flags() -> Flags {
+    load_config().flags
 }
 
-/// Loads the configuration for which blocks of information to show from the "toggles.ron" file.
-///
-/// If the file does not exist, this function will panic with the message "Failed to read toggles.ron".
-/// If the file exists but contains invalid RON, this function will panic with the message "Invalid RON in toggles".
+/// Loads the info block toggles from `config.jsonc`.
 ///
 /// # Returns
 ///
-/// A `settings::Toggles` struct containing the loaded configuration.
-pub fn load_toggles() -> settings::Toggles {
-    let path = config_file("toggles.ron");
-    let data = fs::read_to_string(path).expect("Failed to read toggles.ron");
-    from_str(&data).expect("Invalid RON in toggles")
+/// A `Toggles` struct containing the loaded configuration.
+pub fn load_toggles() -> Toggles {
+    load_config().toggles
 }
 
-/// Generates the default configuration files.
+/// Generates the default unified configuration file.
 ///
-/// This function iterates over a predefined list of configuration files and their default contents.
-/// It attempts to save each file using `save_to_config_file`, which writes the content to the file
-/// system. The function returns a `HashMap` where the keys are the names of the config files and the
-/// values indicate whether the file was successfully saved.
-///
-/// # Returns
-///
-/// A `HashMap<String, bool>` where each key is a config file name and the value is a boolean indicating
-/// whether the file was successfully saved.
+/// Writes `config.jsonc` with the default contents. Returns a map with the filename
+/// and whether the operation succeeded, matching the previous multi-file API.
 pub fn generate_config_files() -> HashMap<String, bool> {
     let mut results = HashMap::new();
 
-    let files = [
-        ("print_layout.ron", &DEFAULT_PRINT_LAYOUT),
-        ("flags.ron", &DEFAULT_FLAGS),
-        ("toggles.ron", &DEFAULT_TOGGLES),
-    ];
-
-    for (filename, content) in files {
-        let result = save_to_config_file(filename, content).is_ok();
-        results.insert(filename.to_string(), result);
-    }
+    let result = save_to_config_file("config.jsonc", DEFAULT_CONFIG).is_ok();
+    results.insert("config.jsonc".to_string(), result);
 
     results
 }
@@ -115,19 +91,17 @@ fn save_to_config_file(file_name: &str, content: &str) -> std::io::Result<()> {
     Ok(())
 }
 
-/// Deletes all default config files.
+/// Deletes the generated configuration file.
 ///
-/// This function is used in the `--clean-config` flag, and it removes all default config files.
-/// It returns a HashMap where the keys are the names of the config files and the values indicate
+/// This function is used in the `--clean-config` flag, and it removes the default config file.
+/// It returns a HashMap where the key is the config file name and the value indicates
 /// whether the file was deleted.
 pub fn delete_config_files() -> HashMap<String, bool> {
-    let filenames = ["print_layout.ron", "flags.ron", "toggles.ron"];
     let mut results = HashMap::new();
 
-    for file in filenames {
-        let result = delete_config_file(file).is_ok();
-        results.insert(file.to_string(), result);
-    }
+    let file = "config.jsonc";
+    let result = delete_config_file(file).is_ok();
+    results.insert(file.to_string(), result);
 
     results
 }
@@ -159,26 +133,19 @@ fn config_file(name: &str) -> PathBuf {
         .join(name)
 }
 
-/// Ensures that all of the configuration files exist.
+/// Ensures that the configuration file exists.
 ///
-/// This function creates the `leenfetch` directory and all config files if they do not exist.
-/// It will not overwrite existing config files.
+/// This function creates the `leenfetch` directory and the config file if they do not exist.
+/// It will not overwrite an existing config file.
 ///
-/// Returns a `HashMap` where the keys are the names of the config files and the values indicate
+/// Returns a `HashMap` where the key is the config file name and the value indicates
 /// whether the file was created.
 pub fn ensure_config_files_exist() -> HashMap<String, bool> {
-    let files = [
-        ("print_layout.ron", &DEFAULT_PRINT_LAYOUT),
-        ("flags.ron", &DEFAULT_FLAGS),
-        ("toggles.ron", &DEFAULT_TOGGLES),
-    ];
-
     let mut results = HashMap::new();
 
-    for (filename, content) in files {
-        let created = ensure_config_file_exists(filename, content).unwrap_or(false);
-        results.insert(filename.to_string(), created);
-    }
+    let filename = "config.jsonc";
+    let created = ensure_config_file_exists(filename, DEFAULT_CONFIG).unwrap_or(false);
+    results.insert(filename.to_string(), created);
 
     results
 }

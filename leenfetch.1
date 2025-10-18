@@ -83,23 +83,16 @@ Use a custom ASCII art file for this run.
 Read ASCII logo content from standard input instead of using built\-in
 or custom files.
 .SS CONFIGURATION
-leenfetch uses RON files for configuration, typically located at:
+leenfetch uses a single JSONC file for configuration, typically located at:
 .IP
 .EX
 $XDG_CONFIG_HOME/leenfetch/
 \[ti]/.config/leenfetch/
 .EE
 .PP
-The main configuration files are: \- \f[B]flags.ron\f[R]: Controls
-display options, such as which fields to show, formatting, and output
-style.
-\- \f[B]toggles.ron\f[R]: Enables or disables specific modules (e.g.,
-show/hide GPU, battery, song info, etc.).
-\- \f[B]layout.ron\f[R]: Controls the order and grouping of displayed
-information.
+The configuration file is: \- [B]config.jsonc[R]: Combines display flags, module toggles, and layout order into one document. JSONC keeps comments inline so each option is documented in place.
 .PP
-Each config file is heavily commented to explain all available options
-and their effects.
+Edit the file to adjust appearance, enabled modules, or output order.
 .SS EXAMPLES
 .IP \[bu] 2
 \f[CR]leenfetch\f[R]
@@ -118,13 +111,13 @@ Show system info with Debian ASCII art, regardless of detected distro.
 .PD 0
 .P
 .PD
-Create default config files if missing.
+Create the default config file if missing.
 .IP \[bu] 2
 \f[CR]leenfetch \-\-reinit\f[R]
 .PD 0
 .P
 .PD
-Delete and regenerate all config files.
+Delete and regenerate the config file.
 .IP \[bu] 2
 \f[CR]echo \[dq]Rustacean\[dq] | leenfetch\f[R]
 .PD 0
@@ -147,11 +140,7 @@ user\-specific configuration files.
 Defaults to \f[CR]\[ti]/.config\f[R] if not set.
 .SS FILES
 .IP \[bu] 2
-\f[CR]\[ti]/.config/leenfetch/flags.ron\f[R]
-.IP \[bu] 2
-\f[CR]\[ti]/.config/leenfetch/toggles.ron\f[R]
-.IP \[bu] 2
-\f[CR]\[ti]/.config/leenfetch/layout.ron\f[R]
+\f[CR]\[ti]/.config/leenfetch/config.jsonc\f[R]
 .SS BUGS
 Please report bugs or feature requests at:
 .PD 0

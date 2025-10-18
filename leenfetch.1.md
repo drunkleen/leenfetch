@@ -11,7 +11,7 @@ leenfetch [OPTIONS]
 ## DESCRIPTION
 **leenfetch** is a modern, fast, and highly configurable system information tool written in Rust. It displays system information alongside a distribution logo or custom ASCII art, similar to Neofetch, and is designed for both terminal enthusiasts and new users.
 
-Configuration is handled via human-friendly RON files, with detailed comments to guide users through all available options.
+Configuration lives in a single JSON-with-comments file (`config.jsonc`), with inline explanations for every option.
 
 leenfetch can also accept **piped input** to render as ASCII art. This allows users to display custom text logos via standard input.
 
@@ -25,7 +25,7 @@ leenfetch can also accept **piped input** to render as ASCII art. This allows us
 - `-i`, `--init`  
   Create default configuration files in the user config directory if they do not exist.
 - `-r`, `--reinit`  
-  Delete existing configuration files and regenerate them with default values.
+  Delete the configuration file and regenerate it with default values.
 - `--ascii_distro <DISTRO>`  
   Override the ASCII art distribution for this run (e.g., "arch", "ubuntu", "debian").
 - `--ascii_colors <COLORS>`  
@@ -37,18 +37,16 @@ leenfetch can also accept **piped input** to render as ASCII art. This allows us
   
 
 ## CONFIGURATION
-leenfetch uses RON files for configuration, typically located at:
+leenfetch uses a single JSONC file for configuration, typically located at:
 ```
 $XDG_CONFIG_HOME/leenfetch/
 ~/.config/leenfetch/
 ```
 
-The main configuration files are:
-- **flags.ron**: Controls display options, such as which fields to show, formatting, and output style.
-- **toggles.ron**: Enables or disables specific modules (e.g., show/hide GPU, battery, song info, etc.).
-- **layout.ron**: Controls the order and grouping of displayed information.
+The configuration file is:
+- **config.jsonc**: Combines display flags, module toggles, and layout order into one document. JSONC keeps comments intact so every option is documented in place.
 
-Each config file is heavily commented to explain all available options and their effects.
+Edit the file to adjust appearance, enabled modules, or output order.
 
 ## EXAMPLES
 - `leenfetch`  
@@ -56,9 +54,9 @@ Each config file is heavily commented to explain all available options and their
 - `leenfetch --ascii_distro debian`  
   Show system info with Debian ASCII art, regardless of detected distro.
 - `leenfetch --init`  
-  Create default config files if missing.
+  Create the default config file if missing.
 - `leenfetch --reinit`  
-  Delete and regenerate all config files.
+  Delete and regenerate the config file.
 - `echo "Rustacean" | leenfetch`  
   Display system info with a piped ASCII logo generated from the input text.
 - `fortune | cowsay | leenfetch`  
@@ -70,10 +68,8 @@ Each config file is heavily commented to explain all available options and their
 ## ENVIRONMENT
 - **XDG_CONFIG_HOME**: Specifies the base directory for user-specific configuration files. Defaults to `~/.config` if not set.
 
-## FILES
-- `~/.config/leenfetch/flags.ron`
-- `~/.config/leenfetch/toggles.ron`
-- `~/.config/leenfetch/layout.ron`
+## FILE
+- `~/.config/leenfetch/config.jsonc`
 
 ## BUGS
 Please report bugs or feature requests at:  

@@ -116,6 +116,7 @@ pub fn handle_args(args: &mut std::env::Args) -> Result<HashMap<&'static str, St
 
 pub fn print_help() {
     println!(
+        "{}",
         r#"🧠 leenfetch — Minimal, Stylish System Info for Your Terminal
 
 USAGE:
@@ -124,8 +125,8 @@ USAGE:
 OPTIONS:
   -V, --version            Print version information and exit
   -h, --help               Show this help message and exit
-  -i, --init               Create default config files in ~/.config/leenfetch/
-  -r, --reinit             Reinitialize all config files to defaults
+  -i, --init               Create the default config file in ~/.config/leenfetch/
+  -r, --reinit             Reinitialize the config file to defaults
   -l, --list-options       Show all available config options and values
 
   --ascii_distro <s>       Override detected distro (e.g., ubuntu, arch, arch_small)
@@ -142,10 +143,10 @@ DESCRIPTION:
     • Resolution, Battery, Current Song
 
   🛠️  Configuration:
-    • Linux:   ~/.config/leenfetch/flags.ron, toggles.ron, print_layout.ron
-    • Windows: %APPDATA%/leenfetch/
-    Edit these files to customize output, layout, and which blocks are shown.
-    All options are explained with comments in the files themselves.
+    • Linux:   ~/.config/leenfetch/config.jsonc
+    • Windows: %APPDATA%/leenfetch/config.jsonc
+    One JSONC file with inline comments covering flags, toggles, and layout.
+    Edit it to control appearance, enabled modules, and output order.
 
 EXAMPLES:
   leenfetch                         🚀 Run normally with your config
@@ -155,9 +156,9 @@ EXAMPLES:
   leenfetch --list-options          📜 View all available configuration keys
 
 TIPS:
-  • Toggle info blocks in toggles.ron (e.g., show_cpu, show_gpu)
-  • Change display style in flags.ron (e.g., disk_display, battery_display)
-  • Rearrange output in print_layout.ron
+  • Adjust styles in the `flags` section (e.g., ascii_distro, disk_display, battery_display)
+  • Toggle info blocks in the `toggles` section (e.g., show_cpu, show_gpu)
+  • Reorder lines in the `layout` array to change the output flow
 
 For more, see the README or run `leenfetch --list-options`.
         "#
@@ -166,20 +167,23 @@ For more, see the README or run `leenfetch --list-options`.
 
 pub fn list_options() {
     println!(
+        "{}",
         r#"
 
 📄 LeenFetch Configuration Options Reference
 ──────────────────────────────────────────────
 
-📁 LeenFetch uses three config files in RON format:
-  • 🖼️  flags.ron      — Display and formatting options
-  • 🧩 toggles.ron    — Show/hide information blocks
-  • 📝 print_layout.ron — Output order and labels
+📁 LeenFetch stores everything in a single JSONC file:
+  • Linux:   ~/.config/leenfetch/config.jsonc
+  • Windows: %APPDATA%/leenfetch/config.jsonc
 
-📂 All files are in ~/.config/leenfetch/ (Linux) or %APPDATA%/leenfetch/ (Windows).
+🗂️  Sections inside config.jsonc:
+  • 🖼️ flags — Display and formatting options
+  • 🧩 toggles — Show/hide information blocks
+  • 📝 layout — Output order and labels
 
 ──────────────────────────────────────────────
-🖼️  flags.ron — Display and Formatting Options
+🖼️ flags — Display and Formatting Options
 ──────────────────────────────────────────────
   ascii_distro        = "auto" | <name>
       Which ASCII art to use. "auto" detects your distro or specify a distro name (e.g., "arch").
@@ -208,7 +212,7 @@ pub fn list_options() {
   cpu_speed           = true | false
       Show CPU speed.
   
-  cpu_temp            = 'C' | 'F'
+  cpu_temp            = "C" | "F"
       Temperature unit for CPU: Celsius or Fahrenheit.
   
   cpu_show_temp       = true | false
@@ -248,7 +252,7 @@ pub fn list_options() {
       Uptime format: verbose, compact, or seconds only.
 
 ──────────────────────────────────────────────
-🧩 toggles.ron — Show/Hide Information Blocks
+🧩 toggles — Show/Hide Information Blocks
 ──────────────────────────────────────────────
   show_titles         = true | false   👤 Show user@host title
   show_os             = true | false   🖥️  Show base OS name
@@ -272,10 +276,10 @@ pub fn list_options() {
   show_terminal_colors= true | false   🌈 Show terminal color palette
 
 ──────────────────────────────────────────────
-📝 print_layout.ron — Output Order and Labels
+📝 layout — Output Order and Labels
 ──────────────────────────────────────────────
-  Each entry is:
-    (label: <string>, field: <field_name>)
+  Each entry is a JSON object:
+    { "label": <string>, "field": <field_name> }
   - label: Text shown before the value (e.g., "CPU:"). Can be empty for no label.
   - field: Which data block to show. Valid fields:
       titles, distro, model, kernel, uptime, packages, shell, wm, de, wm_theme, cpu, gpu, memory, disk, resolution, theme, battery, song, colors
@@ -283,7 +287,7 @@ pub fn list_options() {
 You can rearrange, remove, or relabel any section to customize your output.
 
 ──────────────────────────────────────────────
-✏️  Edit these files in your favorite text editor. For a full explanation of each option, see the comments in the config files themselves.
+✏️  Edit config.jsonc in your favorite text editor. Inline comments explain each option in detail.
         "#
     );
 }

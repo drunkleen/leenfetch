@@ -104,3 +104,13 @@ pub struct Flags {
     #[serde(default)]
     pub uptime_shorthand: String,     // Uptime display format (see UptimeShorthand enum)
 }
+
+/// Root configuration structure that mirrors the JSONC config file.
+/// Missing sections fall back to their type defaults so that
+/// users can keep only the keys they care about.
+#[derive(Debug, Deserialize, Clone)]
+pub struct Config {
+    pub flags: Flags,
+    pub toggles: Toggles,
+    pub layout: Vec<Layout>,
+}

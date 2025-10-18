@@ -5,9 +5,11 @@
 - [Features](#features)
 - [Installation](#installation)
 - [Configuration](#configuration)
-  - [flags.ron](#flagsron)
-  - [toggles.ron](#togglesron)
-  - [print_layout.ron](#print_layoutron)
+  - [config.jsonc Overview](#configjsonc-overview)
+  - [flags section](#flags-section)
+  - [toggles section](#toggles-section)
+  - [layout section](#layout-section)
+  - [Editing Workflow](#editing-workflow)
 - [Usage](#usage)
 - [Customization](#customization)
   - [Dynamic Logos via Piping](#dynamic-logos-via-piping)
@@ -78,45 +80,54 @@ cp target/release/leenfetch ~/.local/bin/
 
 ## Configuration
 
-On first run, LeenFetch creates three config files:
+On first run, LeenFetch creates a unified configuration file:
 
-- **Linux:** `~/.config/leenfetch/`
-- **Windows:** `C:\Users\<username>\AppData\Roaming\leenfetch\`
+- **Linux:** `~/.config/leenfetch/config.jsonc`
+- **Windows:** `C:\Users\<username>\AppData\Roaming\leenfetch\config.jsonc`
 
-### The Three Config Files
-
-- `flags.ron` — Controls display and formatting options for each block.
-- `toggles.ron` — Controls which information blocks are shown or hidden.
-- `print_layout.ron` — Controls the order and labels of blocks in the output.
-
-All files are in [RON](https://github.com/ron-rs/ron) format and are heavily commented. You can open and edit them in any text editor.
+The file uses JSON with comments (JSONC), keeping inline explanations next to every option. It combines the previous trio of files into three logical sections.
 
 ---
 
-### flags.ron
+### config.jsonc Overview
 
-This file lets you fine-tune how each block of information is displayed. You can:
+```jsonc
+{
+  "flags": { /* display & formatting options */ },
+  "toggles": { /* show/hide info blocks */ },
+  "layout": [ /* output order and labels */ ]
+}
+```
+
+- **flags** — Controls display and formatting options for each block.
+- **toggles** — Controls which information blocks are shown or hidden.
+- **layout** — Controls the order and labels of blocks in the output.
+
+You can edit everything in a single place and keep the helpful comments that ship with the defaults.
+
+---
+
+### flags section
+
+Fine-tune how each block of information is displayed. Choose ASCII art, pick units, and decide how detailed each line should be.
 - Choose which ASCII art and color palette to use
 - Select how battery, disk, memory, and package info are shown
 - Pick units, detail level, and formatting for each section
 - Enable or disable features like CPU brand, temperature, shell version, etc.
 - Accepts piped ASCII input for dynamic text or art (`echo "Hello" | leenfetch`)
 
-
-**Example:**
-```ron
-// flags.ron - Display and formatting options
-// This file controls how each block of information is shown in the leenfetch output.
-// You can customize the look, detail, and formatting of every section.
-// For a full explanation of each option, see the comments above each line.
-(
+```jsonc
+// flags — Display and formatting options
+{
+  "flags": {
     // Select which distribution's ASCII art to display at the top.
-    // Options:
-    //   "auto"   - Automatically detect and use your current distribution's ASCII art.
-    //   <name>   - Use a specific distro's art (e.g., "arch", "ubuntu", "debian").
-    ascii_distro: "auto",
-    // ...
-)
+    "ascii_distro": "auto",
+    // How to show battery info.
+    "battery_display": "barinfo",
+    // Include shell version in the output.
+    "shell_version": true
+  }
+}
 ```
 
 #### All Options Explained
@@ -129,7 +140,7 @@ This file lets you fine-tune how each block of information is displayed. You can
 - **cpu_cores**: Show CPU core count (true/false).
 - **cpu_frequency**: Show CPU frequency (true/false).
 - **cpu_speed**: Show CPU speed (true/false).
-- **cpu_temp**: Temperature unit: `'C'` or `'F'`.
+- **cpu_temp**: Temperature unit: `"C"` or `"F"`.
 - **cpu_show_temp**: Show CPU temperature (true/false).
 - **de_version**: Show desktop environment version (true/false).
 - **distro_display**: Detail level for OS info. `name`, `name_version`, `name_arch`, `name_model`, `name_model_version`, `name_model_arch`, `name_model_version_arch`.
@@ -138,29 +149,29 @@ This file lets you fine-tune how each block of information is displayed. You can
 - **memory_percent**: Show memory as percent (true/false).
 - **memory_unit**: Memory unit: `mib`, `gib`, `kib`.
 - **package_managers**: Package info: `off`, `on`, `tiny`.
-- **refresh_rate**: Show display refresh rate (true/false).
+- **refresh_rate**: Show screen refresh rate (true/false).
 - **shell_path**: Show full shell path (true/false).
 - **shell_version**: Show shell version (true/false).
 - **uptime_shorthand**: Uptime format: `full`, `tiny`, `seconds`.
 
 ---
 
-### toggles.ron
+### toggles section
 
-This file controls which blocks of information are shown in the output. Set each option to `true` to show that block, or `false` to hide it.
+Controls which blocks of information are shown in the output. Set each option to `true` to show that block, or `false` to hide it.
 
-**Example:**
-```ron
-// toggles.ron - Show/hide information blocks
-// This file controls which blocks of information are shown in the leenfetch output.
-// Set each option to true to show that block, or false to hide it.
-(
+```jsonc
+// toggles — Show/hide information blocks
+{
+  "toggles": {
     // Show the user@host title at the top of the output.
-    // true  - Display the title block (e.g., "snape@archbox").
-    // false - Hide the title block.
-    show_titles: true,
-    // ...
-)
+    "show_titles": true,
+    // Show GPU information.
+    "show_gpu": true,
+    // Hide the currently playing song/media info.
+    "show_song": false
+  }
+}
 ```
 
 #### All Toggles Explained
@@ -187,29 +198,54 @@ This file controls which blocks of information are shown in the output. Set each
 
 ---
 
-### print_layout.ron
+### layout section
 
-This file controls the order and labels of each block in the output. You can rearrange, remove, or relabel any section to customize your output.
+Controls the order and labels of each block in the output. Rearrange, remove, or relabel any section to customize your layout.
 
-**Example:**
-```ron
-// print_layout.ron - Output order and labels
-// This file controls the order and labels of each block in the leenfetch output.
-// You can rearrange, remove, or relabel any section to customize your output.
-[
+```jsonc
+// layout — Output order and labels
+{
+  "layout": [
     // The user@host title block (e.g., "snape@archbox").
-    (label: "Titles", field: "titles"),
+    { "label": "Titles", "field": "titles" },
     // The distribution (distro) information (e.g., "Arch Linux").
-    (label: "Distro", field: "distro"),
-    // ...
-]
+    { "label": "Distro", "field": "distro" },
+    // Terminal color palette preview.
+    { "label": "", "field": "colors" }
+  ]
+}
 ```
 
-#### All Fields Explained
-- **label**: The text shown before the value (e.g., `CPU:`). Can be empty for no label.
-- **field**: The data block to show. Valid fields: `titles`, `distro`, `model`, `kernel`, `uptime`, `packages`, `shell`, `wm`, `de`, `wm_theme`, `cpu`, `gpu`, `memory`, `disk`, `resolution`, `theme`, `battery`, `song`, `colors`.
+#### Layout Fields
+- `titles`
+- `distro`
+- `model`
+- `kernel`
+- `uptime`
+- `packages`
+- `shell`
+- `wm`
+- `de`
+- `wm_theme`
+- `cpu`
+- `gpu`
+- `memory`
+- `disk`
+- `resolution`
+- `theme`
+- `battery`
+- `song`
+- `colors`
 
 ---
+
+### Editing Workflow
+
+1. Edit `config.jsonc`.
+2. Save the file.
+3. Run `leenfetch` to see the updated output.
+
+Changes are applied immediately—no restart required.
 
 ## Usage
 
@@ -219,7 +255,7 @@ Simply run:
 leenfetch
 ```
 
-The output will reflect your current configuration. Edit the `.ron` files and re-run to see changes.
+The output will reflect your current configuration. Edit `config.jsonc` and re-run to see changes.
 
 ### Command-Line Options
 
@@ -246,10 +282,10 @@ This is great for fun dynamic banners or scriptable ASCII output.
 
 ## Customization
 
-- **ASCII Art:** Use your own by setting `custom_ascii_path` in `flags.ron`.
+- **ASCII Art:** Use your own by setting `custom_ascii_path` in the `flags` section of `config.jsonc`.
 - **Color Palette:** Set `ascii_colors` to a custom list.
-- **Hide/Show Blocks:** Use `toggles.ron` to control visibility.
-- **Order/Labels:** Edit `print_layout.ron` to rearrange or rename blocks.
+- **Hide/Show Blocks:** Toggle entries in the `toggles` section.
+- **Order/Labels:** Edit the `layout` array to rearrange or rename blocks.
 - **Advanced:** Combine config changes for a unique look!
 
 > If input is piped into leenfetch via `stdin`, the `ascii_distro` and `custom_ascii_path` settings are ignored, and the piped content is used as the ASCII logo.
@@ -283,7 +319,7 @@ This lets you combine other CLI tools with LeenFetch for expressive, interactive
 
 - You can version-control your config files for easy sharing.
 - Use symbolic links to share configs across systems.
-- Explore the comments in each `.ron` file for hidden features and advanced formatting.
+- Explore the inline comments in `config.jsonc` for hidden features and advanced formatting.
 
 ---
 
