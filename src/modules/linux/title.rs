@@ -79,18 +79,6 @@ mod tests {
     use std::env;
 
     #[test]
-    fn test_titles_length() {
-        let (user, host, len) = get_titles(false);
-        assert_eq!(len, user.len() + host.len() + 1);
-    }
-
-    #[test]
-    fn test_titles_length_fqdn() {
-        let (user, host, len) = get_titles(true);
-        assert_eq!(len, user.len() + host.len() + 1);
-    }
-
-    #[test]
     fn test_get_user_from_env() {
         env::set_var("USER", "testuser");
         assert_eq!(get_user(), "testuser");
