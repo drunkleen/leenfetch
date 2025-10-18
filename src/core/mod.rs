@@ -89,6 +89,9 @@ impl Core {
         let mut handles = vec![];
 
         for (index, info) in self.layout.iter().enumerate() {
+            if !Self::should_collect(info.field.as_str(), &self.toggles) {
+                continue;
+            }
             let output = Arc::clone(&output);
             let data = Arc::clone(&data);
             let info = info.clone();
@@ -528,6 +531,32 @@ impl Core {
             None => {
                 output.push_str(format!("${{c1}}{}: ${{reset}}{}\n", label, "Unknown").as_str());
             }
+        }
+    }
+
+    fn should_collect(field: &str, toggles: &settings::Toggles) -> bool {
+        match field {
+            "titles" => toggles.show_titles,
+            "os" => toggles.show_os,
+            "distro" => toggles.show_distro,
+            "model" => toggles.show_model,
+            "kernel" => toggles.show_kernel,
+            "uptime" => toggles.show_uptime,
+            "packages" => toggles.show_packages,
+            "shell" => toggles.show_shell,
+            "wm" => toggles.show_wm,
+            "de" => toggles.show_de,
+            "wm_theme" => toggles.show_wm_theme,
+            "cpu" => toggles.show_cpu,
+            "gpu" => toggles.show_gpu,
+            "memory" => toggles.show_memory,
+            "disk" => toggles.show_disks,
+            "resolution" => toggles.show_resolution,
+            "theme" => toggles.show_theme,
+            "battery" => toggles.show_battery,
+            "song" => toggles.show_song,
+            "colors" => toggles.show_terminal_colors,
+            _ => true,
         }
     }
 }
