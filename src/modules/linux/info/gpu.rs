@@ -17,7 +17,7 @@ pub fn get_gpus() -> Vec<String> {
     entries
         .into_iter()
         .enumerate()
-        .map(|(idx, info)| format!("{idx}: {info}"))
+        .map(|(_, info)| format!("{info}"))
         .collect()
 }
 
@@ -77,20 +77,27 @@ fn describe_device(device_dir: &Path) -> Option<String> {
     let vendor_name = vendor_id.and_then(|id| {
         db.as_ref()
             .and_then(|db| db.vendors.get(&id).cloned())
-            .map(|s| s.trim().to_string())
+            .map(|s| s.trim().to_string().replace(" Corporation", ""))
     });
-    let device_name = if let (Some(vendor_id), Some(device_id)) = (vendor_id, device_id) {
-        db.as_ref()
-            .and_then(|db| db.devices.get(&(vendor_id, device_id)).cloned())
-            .map(|s| s.trim().to_string())
-    } else {
-        None
-    };
+    let device_name: Option<String> =
+        if let (Some(vendor_id), Some(device_id)) = (vendor_id, device_id) {
+            db.as_ref()
+                .and_then(|db| db.devices.get(&(vendor_id, device_id)).cloned())
+                .and_then(|name| {
+                    name.split_once('[')
+                        .and_then(|(_, rest)| rest.split_once(']'))
+                        .map(|(inside, _)| inside.trim().to_owned())
+                })
+        } else {
+            None
+        };
 
     let mut label = match (vendor_name, device_name) {
-        (Some(vendor), Some(model)) => format!("{vendor} {model}"),
-        (Some(vendor), None) => vendor,
-        (None, Some(model)) => model,
+        (Some(vendor), Some(model)) => {
+            format!("{} {}", vendor, model)
+        }
+        (Some(vendor), _) => vendor,
+        (_, Some(model)) => model,
         _ => format!(
             "GPU [{}:{}]",
             vendor_hex.as_deref().unwrap_or("????"),
