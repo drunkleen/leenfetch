@@ -16,7 +16,7 @@ struct MEMORYSTATUSEX {
     ullAvailExtendedVirtual: u64,
 }
 
-extern "system" {
+unsafe extern "system" {
     fn GlobalMemoryStatusEx(lpBuffer: *mut MEMORYSTATUSEX) -> i32;
 }
 

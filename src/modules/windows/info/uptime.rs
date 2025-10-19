@@ -70,6 +70,6 @@ fn read_uptime_seconds() -> u64 {
 }
 
 #[link(name = "kernel32")]
-extern "system" {
+unsafe extern "system" {
     fn GetTickCount64() -> u64;
 }

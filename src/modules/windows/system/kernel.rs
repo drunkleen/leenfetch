@@ -52,6 +52,6 @@ fn to_wide(s: &str) -> Vec<u16> {
 }
 
 #[link(name = "ntdll")]
-extern "system" {
+unsafe extern "system" {
     fn RtlGetVersion(lpVersionInformation: *mut OSVERSIONINFOW) -> i32;
 }
