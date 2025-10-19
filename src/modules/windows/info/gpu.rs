@@ -2,15 +2,20 @@ use std::ptr::null_mut;
 
 use winapi::shared::guiddef::GUID;
 use winapi::um::setupapi::{
-    SetupDiDestroyDeviceInfoList, SetupDiEnumDeviceInfo, SetupDiGetClassDevsW,
-    SetupDiGetDeviceRegistryPropertyW, DIGCF_PRESENT, SPDRP_DEVICEDESC, SP_DEVINFO_DATA,
+    DIGCF_PRESENT, SP_DEVINFO_DATA, SPDRP_DEVICEDESC, SetupDiDestroyDeviceInfoList,
+    SetupDiEnumDeviceInfo, SetupDiGetClassDevsW, SetupDiGetDeviceRegistryPropertyW,
 };
 
 pub fn get_gpus() -> Vec<String> {
     // Enumerate display adapters via SetupAPI (fast, no WMI/PowerShell)
     unsafe {
         let class_guid = GUID_DEVCLASS_DISPLAY;
-        let hdev = SetupDiGetClassDevsW(&class_guid as *const _, null_mut(), null_mut(), DIGCF_PRESENT);
+        let hdev = SetupDiGetClassDevsW(
+            &class_guid as *const _,
+            null_mut(),
+            null_mut(),
+            DIGCF_PRESENT,
+        );
         if hdev.is_null() {
             return vec!["Unknown GPU".to_string()];
         }

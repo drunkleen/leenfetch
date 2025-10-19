@@ -1,9 +1,9 @@
 use std::ffi::OsStr;
 use std::os::windows::ffi::OsStrExt;
-use std::ptr::null_mut;
 use std::process::Command;
+use std::ptr::null_mut;
 use winapi::shared::minwindef::DWORD;
-use winapi::um::winver::{VerQueryValueW, GetFileVersionInfoW, GetFileVersionInfoSizeW};
+use winapi::um::winver::{GetFileVersionInfoSizeW, GetFileVersionInfoW, VerQueryValueW};
 
 /// Desktop Environment enum
 pub fn get_de(show_version: bool, wm: Option<&str>) -> Option<String> {
@@ -54,7 +54,9 @@ fn get_shell_version(shell_exe: &str) -> Option<String> {
     unsafe {
         let mut handle: DWORD = 0;
         let size = GetFileVersionInfoSizeW(wide.as_ptr(), &mut handle);
-        if size == 0 { return None; }
+        if size == 0 {
+            return None;
+        }
 
         let mut buf: Vec<u8> = vec![0u8; size as usize];
         if GetFileVersionInfoW(wide.as_ptr(), 0, size, buf.as_mut_ptr() as *mut _) == 0 {
@@ -85,7 +87,10 @@ fn get_shell_version(shell_exe: &str) -> Option<String> {
         let codepage = *trans.add(1) as u32;
 
         // Query the FileVersion string for this language/codepage
-        let key = format!("\\StringFileInfo\\{:04x}{:04x}\\FileVersion", lang, codepage);
+        let key = format!(
+            "\\StringFileInfo\\{:04x}{:04x}\\FileVersion",
+            lang, codepage
+        );
         let key_w: Vec<u16> = OsStr::new(&key).encode_wide().chain(Some(0)).collect();
         let mut str_ptr: *mut winapi::ctypes::c_void = null_mut();
         let mut str_len: u32 = 0;

@@ -103,7 +103,11 @@ mod tests {
 
         let entries = collect_batteries(&root, BatteryDisplayMode::Off);
         assert_eq!(entries.len(), 1);
-        assert!(entries[0].contains("BAT1"), "unexpected entries: {:?}", entries);
+        assert!(
+            entries[0].contains("BAT1"),
+            "unexpected entries: {:?}",
+            entries
+        );
 
         fs::remove_dir_all(root).unwrap();
     }

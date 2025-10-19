@@ -6,7 +6,7 @@ use std::ffi::OsString;
 use std::os::windows::ffi::{OsStrExt, OsStringExt};
 use winapi::shared::minwindef::DWORD;
 use winapi::um::fileapi::{GetDiskFreeSpaceExW, GetDriveTypeW, GetLogicalDriveStringsW};
-use winapi::um::winbase::{DRIVE_FIXED};
+use winapi::um::winbase::DRIVE_FIXED;
 
 pub fn get_disks(
     subtitle_mode: DiskSubtitle,
@@ -18,7 +18,9 @@ pub fn get_disks(
 
     for root in drives {
         if let Some((total, free)) = query_space(&root) {
-            if total == 0 { continue; }
+            if total == 0 {
+                continue;
+            }
             let used = total.saturating_sub(free);
             let perc = ((used as f64 / total as f64) * 100.0).round() as u8;
             let used_str = format!("{:.1}G", used as f64 / 1024.0 / 1024.0 / 1024.0);
@@ -32,14 +34,21 @@ pub fn get_disks(
                 DiskDisplay::BarInfo => format!("{} {}", bar, usage_display),
                 DiskDisplay::Bar => bar,
             };
-            let mount = root.trim_end_matches('\u{0}').trim_end_matches('\\').to_string();
+            let mount = root
+                .trim_end_matches('\u{0}')
+                .trim_end_matches('\\')
+                .to_string();
             let subtitle = match subtitle_mode {
                 DiskSubtitle::Name => mount.clone(),
                 DiskSubtitle::Dir => mount.trim_end_matches(':').to_string(),
                 DiskSubtitle::Mount => mount.clone(),
                 DiskSubtitle::None => String::new(),
             };
-            let label = if subtitle.is_empty() { "Disk".to_string() } else { format!("Disk ({})", subtitle) };
+            let label = if subtitle.is_empty() {
+                "Disk".to_string()
+            } else {
+                format!("Disk ({})", subtitle)
+            };
             results.push((label, final_str));
         }
     }
@@ -80,7 +89,10 @@ fn query_space(root: &str) -> Option<(u64, u64)> {
         let mut free_avail: u64 = 0;
         let mut total: u64 = 0;
         let mut free_total: u64 = 0;
-        let path_w: Vec<u16> = OsString::from(root).encode_wide().chain(std::iter::once(0)).collect();
+        let path_w: Vec<u16> = OsString::from(root)
+            .encode_wide()
+            .chain(std::iter::once(0))
+            .collect();
         let ok = GetDiskFreeSpaceExW(
             path_w.as_ptr(),
             &mut free_avail as *mut _ as *mut _,

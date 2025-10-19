@@ -2,7 +2,7 @@ use std::ptr::null_mut;
 use winapi::shared::minwindef::DWORD;
 use winapi::shared::winerror::ERROR_SUCCESS;
 use winapi::um::winnt::OSVERSIONINFOW;
-use winapi::um::winreg::{RegGetValueW, HKEY_LOCAL_MACHINE, RRF_RT_REG_DWORD};
+use winapi::um::winreg::{HKEY_LOCAL_MACHINE, RRF_RT_REG_DWORD, RegGetValueW};
 
 #[inline(always)]
 pub fn get_kernel() -> Option<String> {
@@ -12,7 +12,10 @@ pub fn get_kernel() -> Option<String> {
         vi.dwOSVersionInfoSize = std::mem::size_of::<OSVERSIONINFOW>() as u32;
         let status = RtlGetVersion(&mut vi as *mut _);
         if status == 0 {
-            let mut s = format!("{}.{}.{}", vi.dwMajorVersion, vi.dwMinorVersion, vi.dwBuildNumber);
+            let mut s = format!(
+                "{}.{}.{}",
+                vi.dwMajorVersion, vi.dwMinorVersion, vi.dwBuildNumber
+            );
             // Append UBR (revision) if present in registry
             if let Some(ubr) = read_ubr() {
                 s.push('.');
@@ -40,7 +43,11 @@ fn read_ubr() -> Option<DWORD> {
             &mut size,
         )
     };
-    if status == ERROR_SUCCESS as i32 { Some(data) } else { None }
+    if status == ERROR_SUCCESS as i32 {
+        Some(data)
+    } else {
+        None
+    }
 }
 
 fn to_wide(s: &str) -> Vec<u16> {

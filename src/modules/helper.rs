@@ -1,28 +1,34 @@
 use crate::config;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
-/// Parses command-line arguments and returns a map of configuration overrides.
+/// Captures configuration overrides controlled by CLI switches.
+#[derive(Default, Debug)]
+pub struct CliOverrides {
+    pub flags: HashMap<String, String>,
+    pub only_modules: Option<Vec<String>>,
+    pub hide_modules: HashSet<String>,
+    pub config_path: Option<String>,
+    pub use_defaults: bool,
+}
+
+impl CliOverrides {
+    fn set_bool(&mut self, key: &str, value: bool) {
+        self.flags.insert(
+            key.to_string(),
+            if value { "true" } else { "false" }.to_string(),
+        );
+    }
+
+    fn set_string(&mut self, key: &str, value: String) {
+        self.flags.insert(key.to_string(), value);
+    }
+}
+
+/// Parses command-line arguments and returns CLI overrides.
 ///
-/// This function processes a set of command-line arguments and performs actions
-/// based on the provided flags. It supports the following flags:
-///
-/// - `--version` or `-v`: Prints the package name and version, then exits.
-/// - `--help` or `-h`: Displays help information and exits.
-/// - `--list-options` or `-l`: Lists available options and exits.
-/// - `--init` or `-i`: Ensures the configuration file exists, creating it if necessary, and exits.
-/// - `--reinit` or `-r`: Deletes and regenerates the configuration file, then exits.
-/// - `--ascii_distro`: Sets the ASCII distribution to the specified value.
-/// - `--ascii_colors`: Sets the ASCII colors to the specified value.
-/// - `--custom_ascii_path`: Sets the custom ASCII path to the specified value.
-///
-/// Arguments:
-/// - `args`: Mutable reference to the command-line arguments iterator.
-///
-/// Returns:
-/// - `Ok(HashMap<&'static str, String>)`: A map of configuration overrides if successful.
-/// - `Err(())`: If any flag requires an immediate exit after processing.
-pub fn handle_args(args: &mut std::env::Args) -> Result<HashMap<&'static str, String>, ()> {
-    let mut override_map: HashMap<&'static str, String> = HashMap::new();
+/// Exits early (returns `Err(())`) when a flag performs an action such as `--help`.
+pub fn handle_args(args: &mut std::env::Args) -> Result<CliOverrides, ()> {
+    let mut overrides = CliOverrides::default();
 
     while let Some(arg) = args.next() {
         match arg.as_str() {
@@ -77,33 +83,109 @@ pub fn handle_args(args: &mut std::env::Args) -> Result<HashMap<&'static str, St
                 }
                 return Err(());
             }
+            "--config" => {
+                let val = expect_value(args, "--config")?;
+                overrides.use_defaults = false;
+                overrides.config_path = Some(val);
+            }
+            "--no-config" => {
+                overrides.use_defaults = true;
+                overrides.config_path = None;
+            }
             "--ascii_distro" => {
-                if let Some(val) = args.next() {
-                    override_map.insert("ascii_distro", val);
-                } else {
-                    println!("❌ ascii_distro cannot be empty");
-                    println!("⚠️ use --help for more info");
-                    return Err(());
-                }
+                let val = expect_value(args, "--ascii_distro")?;
+                overrides.set_string("ascii_distro", val);
             }
             "--ascii_colors" => {
-                if let Some(val) = args.next() {
-                    override_map.insert("ascii_colors", val);
-                } else {
-                    println!("❌ ascii_colors cannot be empty");
-                    println!("⚠️ use --help for more info");
-                    return Err(());
-                }
+                let val = expect_value(args, "--ascii_colors")?;
+                overrides.set_string("ascii_colors", val);
             }
             "--custom_ascii_path" => {
-                if let Some(val) = args.next() {
-                    override_map.insert("custom_ascii_path", val);
+                let val = expect_value(args, "--custom_ascii_path")?;
+                overrides.set_string("custom_ascii_path", val);
+            }
+            "--battery-display" => {
+                let val = expect_value(args, "--battery-display")?;
+                overrides.set_string("battery_display", val);
+            }
+            "--disk-display" => {
+                let val = expect_value(args, "--disk-display")?;
+                overrides.set_string("disk_display", val);
+            }
+            "--disk-subtitle" => {
+                let val = expect_value(args, "--disk-subtitle")?;
+                overrides.set_string("disk_subtitle", val);
+            }
+            "--memory-unit" => {
+                let val = expect_value(args, "--memory-unit")?;
+                overrides.set_string("memory_unit", val);
+            }
+            "--packages" | "--package-managers" => {
+                let val = expect_value(args, arg.as_str())?;
+                overrides.set_string("package_managers", val);
+            }
+            "--uptime" => {
+                let val = expect_value(args, "--uptime")?;
+                overrides.set_string("uptime_shorthand", val);
+            }
+            "--os-age" => {
+                let val = expect_value(args, "--os-age")?;
+                overrides.set_string("os_age_shorthand", val);
+            }
+            "--distro-display" => {
+                let val = expect_value(args, "--distro-display")?;
+                overrides.set_string("distro_display", val);
+            }
+            "--color-blocks" => {
+                let val = expect_value(args, "--color-blocks")?;
+                overrides.set_string("color_blocks", val);
+            }
+            "--cpu-temp-unit" => {
+                let val = expect_value(args, "--cpu-temp-unit")?;
+                overrides.set_string("cpu_temp", val);
+            }
+            "--only" => {
+                let val = expect_value(args, "--only")?;
+                let modules = val
+                    .split(',')
+                    .map(|item| item.trim().to_string())
+                    .filter(|item| !item.is_empty())
+                    .collect::<Vec<_>>();
+                overrides.only_modules = if modules.is_empty() {
+                    None
                 } else {
-                    println!("❌ custom_ascii_path cannot be empty");
-                    println!("⚠️ use --help for more info");
-                    return Err(());
+                    Some(modules)
+                };
+            }
+            "--hide" => {
+                let val = expect_value(args, "--hide")?;
+                for entry in val.split(',') {
+                    let trimmed = entry.trim();
+                    if !trimmed.is_empty() {
+                        overrides.hide_modules.insert(trimmed.to_string());
+                    }
                 }
             }
+            "--memory-percent" => overrides.set_bool("memory_percent", true),
+            "--no-memory-percent" => overrides.set_bool("memory_percent", false),
+            "--cpu-show-temp" => overrides.set_bool("cpu_show_temp", true),
+            "--no-cpu-show-temp" => overrides.set_bool("cpu_show_temp", false),
+            "--cpu-speed" => overrides.set_bool("cpu_speed", true),
+            "--no-cpu-speed" => overrides.set_bool("cpu_speed", false),
+            "--cpu-frequency" => overrides.set_bool("cpu_frequency", true),
+            "--no-cpu-frequency" => overrides.set_bool("cpu_frequency", false),
+            "--cpu-cores" => overrides.set_bool("cpu_cores", true),
+            "--no-cpu-cores" => overrides.set_bool("cpu_cores", false),
+            "--cpu-brand" => overrides.set_bool("cpu_brand", true),
+            "--no-cpu-brand" => overrides.set_bool("cpu_brand", false),
+            "--shell-path" => overrides.set_bool("shell_path", true),
+            "--no-shell-path" => overrides.set_bool("shell_path", false),
+            "--shell-version" => overrides.set_bool("shell_version", true),
+            "--no-shell-version" => overrides.set_bool("shell_version", false),
+            "--refresh-rate" => overrides.set_bool("refresh_rate", true),
+            "--no-refresh-rate" => overrides.set_bool("refresh_rate", false),
+            "--de-version" => overrides.set_bool("de_version", true),
+            "--no-de-version" => overrides.set_bool("de_version", false),
             _ => {
                 println!("❌ Unknown argument: {}", arg);
                 print_help();
@@ -111,7 +193,18 @@ pub fn handle_args(args: &mut std::env::Args) -> Result<HashMap<&'static str, St
             }
         }
     }
-    Ok(override_map)
+
+    Ok(overrides)
+}
+
+fn expect_value(args: &mut std::env::Args, flag: &str) -> Result<String, ()> {
+    if let Some(val) = args.next() {
+        Ok(val)
+    } else {
+        println!("❌ {flag} requires a value");
+        println!("⚠️ use --help for more info");
+        Err(())
+    }
 }
 
 pub fn print_help() {
@@ -128,12 +221,39 @@ OPTIONS:
   -i, --init               Create the default config file in ~/.config/leenfetch/
   -r, --reinit             Reinitialize the config file to defaults
   -l, --list-options       Show all available config options and values
+      --config <path>      Load configuration from a custom file
+      --no-config          Ignore config files and use built-in defaults
 
   --ascii_distro <s>       Override detected distro (e.g., ubuntu, arch, arch_small)
   --ascii_colors <s>       Override color palette (e.g., 2,7,3 or "distro")
+  --custom_ascii_path <p>  Use ASCII art from the given file path
+
+  --battery-display <mode> Battery output style (off, bar, infobar, barinfo)
+  --disk-display <mode>    Disk output style (info, percentage, infobar, barinfo, bar)
+  --disk-subtitle <mode>   Disk subtitle (name, dir, none, mount)
+  --memory-unit <unit>     Force memory unit (kib, mib, gib)
+  --packages <mode>        Package summary verbosity (off, on, tiny)
+  --uptime <mode>          Uptime shorthand (full, tiny, seconds)
+  --os-age <mode>          OS age shorthand (full, tiny, seconds)
+  --distro-display <mode>  Distro detail level (name, name_version, ...)
+  --color-blocks <glyph>   Glyph used for color swatches
+  --cpu-temp-unit <unit>   CPU temperature unit (C, F, off)
+  --only <list>            Render only listed modules (comma-separated)
+  --hide <list>            Hide listed modules (comma-separated)
+
+  --memory-percent / --no-memory-percent
+  --cpu-show-temp   / --no-cpu-show-temp
+  --cpu-speed       / --no-cpu-speed
+  --cpu-frequency   / --no-cpu-frequency
+  --cpu-cores       / --no-cpu-cores
+  --cpu-brand       / --no-cpu-brand
+  --shell-path      / --no-shell-path
+  --shell-version   / --no-shell-version
+  --refresh-rate    / --no-refresh-rate
+  --de-version      / --no-de-version
 
 DESCRIPTION:
-  leenfetch is a fast, modern, and minimal system info tool,
+  leenfetch is a modern, minimal, and the fastest system info tool,
   written in Rust, designed for terminal enthusiasts.
 
   It fetches and prints system information like:
@@ -153,6 +273,8 @@ EXAMPLES:
   leenfetch --init                  🔧 Create the default config file
   leenfetch --ascii_distro arch     🎨 Use Arch logo manually
   leenfetch --ascii_colors 2,7,3    🌈 Use custom colors
+  leenfetch --packages tiny         📦 Compact package summary for screenshots
+  leenfetch --only cpu,memory       🧩 Focus on specific modules temporarily
   leenfetch --list-options          📜 View all available configuration keys
 
 TIPS:

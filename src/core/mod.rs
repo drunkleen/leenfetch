@@ -132,6 +132,11 @@ impl Core {
     pub fn new() -> Self {
         let flags = config::load_flags();
         let layout = config::load_print_layout();
+        Self::new_with(flags, layout)
+    }
+
+    /// Creates a new `Core` from explicit flags and layout values.
+    pub fn new_with(flags: settings::Flags, layout: Vec<settings::LayoutItem>) -> Self {
         Self {
             output: String::new(),
             flags,
@@ -590,35 +595,23 @@ impl Core {
         output.push_str(format!("${{c1}}{} ${{reset}}{}\n", label, "Unknown").as_str());
     }
 
-    pub fn get_ascii_and_colors(
-        &mut self,
-        override_map: HashMap<&'static str, String>,
-    ) -> (String, HashMap<&str, &str>) {
-        let flags_path = self.flags.custom_ascii_path.as_str();
-        let custom_ascii_path: Option<&str> = override_map
-            .get("custom_ascii_path")
-            .map(String::as_str)
-            // If override exists: empty => use flags_path; non-empty => use override
-            .map(|ov| if ov.is_empty() { flags_path } else { ov })
-            // If override missing: keep flags_path only if non-empty; else None
-            .or_else(|| (!flags_path.is_empty()).then_some(flags_path));
+    pub fn get_ascii_and_colors(&mut self) -> (String, HashMap<&str, &str>) {
+        let custom_ascii_path = {
+            let path = self.flags.custom_ascii_path.trim();
+            if path.is_empty() { None } else { Some(path) }
+        };
 
-        let custom_ascii_colors = override_map
-            .get("ascii_colors")
-            .map(String::as_str)
-            .or(Some(self.flags.ascii_colors.as_str()));
+        let ascii_color_value = {
+            let value = self.flags.ascii_colors.trim();
+            if value.is_empty() { "distro" } else { value }
+        };
 
-        let ascii_distro = override_map
-            .get("ascii_distro")
-            .map(String::as_str)
-            .filter(|s| !s.is_empty())
-            .or_else(|| {
-                let val = self.flags.ascii_distro.as_str();
-                (!val.is_empty()).then_some(val)
-            })
-            .or(Some("distro"));
+        let ascii_distro_value = {
+            let value = self.flags.ascii_distro.trim();
+            if value.is_empty() { "distro" } else { value }
+        };
 
-        let resolved_distro = match ascii_distro.unwrap_or("auto") {
+        let resolved_distro = match ascii_distro_value {
             "auto" => get_distro(DistroDisplay::Name),
             "auto_small" => format!("{}_small", get_distro(DistroDisplay::Name)),
             other => other.to_string(),
@@ -633,10 +626,9 @@ impl Core {
         let distro_colors = if &resolved_distro == "off" {
             get_distro_colors(&get_distro(DistroDisplay::Name))
         } else {
-            match custom_ascii_colors {
-                Some("distro") => get_distro_colors(&resolved_distro),
-                Some(other) => get_custom_colors_order(other),
-                None => get_distro_colors(&resolved_distro),
+            match ascii_color_value {
+                "distro" => get_distro_colors(&resolved_distro),
+                other => get_custom_colors_order(other),
             }
         };
 

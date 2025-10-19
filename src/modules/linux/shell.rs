@@ -151,11 +151,7 @@ mod tests {
         let shell = get_shell(false, false).expect("expected shell string");
         assert_eq!(
             shell,
-            script
-                .file_name()
-                .unwrap()
-                .to_string_lossy()
-                .to_string()
+            script.file_name().unwrap().to_string_lossy().to_string()
         );
 
         drop(env_lock);

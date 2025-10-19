@@ -1,9 +1,7 @@
 use std::env;
 use std::ptr::null_mut;
 use winapi::shared::winerror::ERROR_SUCCESS;
-use winapi::um::winreg::{
-    RegGetValueW, HKEY_LOCAL_MACHINE, RRF_RT_REG_SZ, RRF_SUBKEY_WOW6464KEY,
-};
+use winapi::um::winreg::{HKEY_LOCAL_MACHINE, RRF_RT_REG_SZ, RRF_SUBKEY_WOW6464KEY, RegGetValueW};
 
 use crate::modules::enums::DistroDisplay;
 
@@ -97,11 +95,7 @@ fn read_reg_sz(subkey: &str, value: &str) -> Option<String> {
     let key = to_wide(subkey);
     let val = to_wide(value);
     // Helper to perform a single RegGetValueW read with provided flags
-    fn read_with_flags(
-        key: &[u16],
-        val: &[u16],
-        flags: u32,
-    ) -> Option<String> {
+    fn read_with_flags(key: &[u16], val: &[u16], flags: u32) -> Option<String> {
         // Query buffer size
         let mut size: u32 = 0;
         let status = unsafe {

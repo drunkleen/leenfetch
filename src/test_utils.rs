@@ -19,7 +19,10 @@ impl EnvLock {
             .iter()
             .map(|key| (OsString::from(key), env::var_os(key)))
             .collect();
-        Self { saved, _guard: guard }
+        Self {
+            saved,
+            _guard: guard,
+        }
     }
 
     pub(crate) fn set_var(&self, key: &str, value: &str) {

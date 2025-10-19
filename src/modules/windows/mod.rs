@@ -13,14 +13,17 @@ pub mod title;
 mod tests {
     use super::*;
     use crate::modules::enums::{
-        BatteryDisplayMode, DistroDisplay, DiskDisplay, DiskSubtitle, MemoryUnit, OsAgeShorthand,
+        BatteryDisplayMode, DiskDisplay, DiskSubtitle, DistroDisplay, MemoryUnit, OsAgeShorthand,
         PackageShorthand, UptimeShorthand,
     };
 
     #[test]
     fn kernel_version_reports_something() {
         let ver = system::kernel::get_kernel();
-        assert!(ver.is_some(), "kernel version should be detectable on Windows");
+        assert!(
+            ver.is_some(),
+            "kernel version should be detectable on Windows"
+        );
         assert!(!ver.unwrap().trim().is_empty());
     }
 
@@ -47,12 +50,9 @@ mod tests {
     #[test]
     fn cpu_string_is_returned() {
         let s = info::cpu::get_cpu(
-            /*cpu_brand*/ true,
-            /*show_speed*/ true,
-            /*show_cores*/ true,
+            /*cpu_brand*/ true, /*show_speed*/ true, /*show_cores*/ true,
             /*show_temp*/ false, // robust in environments without temp
-            /*speed_shorthand*/ true,
-            /*temp_unit*/ None,
+            /*speed_shorthand*/ true, /*temp_unit*/ None,
         );
         assert!(s.is_some());
         assert!(!s.unwrap().trim().is_empty());
@@ -140,7 +140,8 @@ mod tests {
     #[test]
     fn titles_obey_env_when_set() {
         // Use test utils to set env vars in a synchronized, restorable way
-        let lock = crate::test_utils::EnvLock::acquire(&["USERNAME", "COMPUTERNAME", "USERDNSDOMAIN"]);
+        let lock =
+            crate::test_utils::EnvLock::acquire(&["USERNAME", "COMPUTERNAME", "USERDNSDOMAIN"]);
         // Ensure no domain leaks into FQDN path for this test
         lock.remove_var("USERDNSDOMAIN");
         lock.set_var("USERNAME", "test_user");

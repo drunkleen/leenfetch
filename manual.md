@@ -164,6 +164,7 @@ LeenFetch stores its settings in a single JSON-with-comments file so you get str
 | ------- | ------- | ---------------- |
 | `flags` | Formatting, measurement units, ASCII art preferences | Switch palettes, change CPU display detail, adjust disk layout |
 | `modules` (`layout`) | Ordering, separators, and custom rows | Reorder modules, add headings, insert breaks |
+| `logo` (optional) | ASCII art source and padding overrides | Point to a custom file, add spacing, nudge the logo
 
 The file is authored in JSONC, which is JSON plus `//` comments. Every default entry includes a brief explanation right in the file.
 
@@ -192,6 +193,37 @@ The `flags` object tunes how each block of information is displayed. Each key ha
 - **os_age_shorthand**: Match `uptime_shorthand` but for the dedicated OS install age module.
 
 Most options are purely visual. If a certain value is unsupported on your system, LeenFetch gracefully falls back to the closest available presentation.
+Piped input (for example `fortune | cowsay | leenfetch`) always overrides `ascii_distro` and `custom_ascii_path`.
+
+**Quick reference for `flags`:**
+
+| Key | Allowed values | Default | Notes |
+| --- | --- | --- | --- |
+| `ascii_distro` | `"auto"` or distro name | `"auto"` | Select bundled ASCII art; piped input overrides it. |
+| `ascii_colors` | `"distro"` or comma list of color IDs | `"distro"` | Palette for ASCII art and color swatches. |
+| `custom_ascii_path` | `""` or file path | `""` | Use your own ASCII art from disk. |
+| `battery_display` | `"off"`, `"bar"`, `"infobar"`, `"barinfo"` | `"off"` | Battery appearance (or hide completely). |
+| `color_blocks` | Any string glyph | `"●"` | Characters drawn in the color swatch. |
+| `cpu_brand` | `true` / `false` | `true` | Include CPU vendor prefix. |
+| `cpu_cores` | `true` / `false` | `true` | Show logical/physical core counts. |
+| `cpu_frequency` | `true` / `false` | `true` | Print advertised CPU frequency. |
+| `cpu_speed` | `true` / `false` | `true` | Print current CPU speed reading. |
+| `cpu_temp` | `"C"` / `"F"` | `"C"` | Temperature unit; any other value disables conversion. |
+| `cpu_show_temp` | `true` / `false` | `false` | Toggle temperature column without touching other CPU data. |
+| `de_version` | `true` / `false` | `true` | Append the desktop-environment version where possible. |
+| `distro_display` | `name`, `name_version`, `name_arch`, `name_model`, `name_model_version`, `name_model_arch`, `name_model_version_arch` | `"name"` | Level of OS detail shown. |
+| `disk_display` | `info`, `percentage`, `infobar`, `barinfo`, `bar` | `"info"` | Disk usage layout. |
+| `disk_subtitle` | `name`, `dir`, `none`, `mount` | `"dir"` | Per-disk subtitle label. |
+| `memory_percent` | `true` / `false` | `true` | Add percentage to the memory row. |
+| `memory_unit` | `kib`, `mib`, `gib` | `"mib"` | Preferred unit for memory. |
+| `package_managers` | `off`, `on`, `tiny` | `"tiny"` | Package counter verbosity. |
+| `refresh_rate` | `true` / `false` | `true` | Append display refresh rate. |
+| `shell_path` | `true` / `false` | `false` | Show full shell path versus just the binary name. |
+| `shell_version` | `true` / `false` | `true` | Append shell version. |
+| `uptime_shorthand` | `full`, `tiny`, `seconds` | `"tiny"` | Session uptime format. |
+| `os_age_shorthand` | `full`, `tiny`, `seconds` | `"tiny"` | Installation age format. |
+
+Every key above can be overridden from the CLI for quick experiments—for example `leenfetch --battery-display barinfo` or `leenfetch --no-shell-version`. See [Command-Line Options](#command-line-options) for the full list.
 
 ```jsonc
 {
@@ -203,26 +235,25 @@ Most options are purely visual. If a certain value is unsupported on your system
 }
 ```
 
-
-```
-
 ### logo section (optional)
 
-The `logo` object controls ASCII art. Use it to point to a file (`source`), adjust spacing (`padding`), or override palette indices (`color`).
+The `logo` object controls ASCII art. Use it to point to a file (`source`), specify how LeenFetch should select art (`type`), or adjust spacing (`padding`). Leave the section out entirely to keep automatic behavior.
 
 ```jsonc
 {
   "logo": {
     "type": "file",
     "source": "~/.config/leenfetch/branding/about.txt",
-    "padding": { "top": 2, "right": 6 }
+    "padding": { "top": 2, "right": 6, "left": 0 }
   }
 }
 ```
 
+Use `type: "auto"` to keep built-in detection. `padding.top`, `.right`, and `.left` accept integers, letting you add leading blank lines, widen the gap between art and text, or nudge the art horizontally.
+
 ### modules array
 
-The `modules` array governs ordering, headings, and custom rows. Entries can be literal strings (use `"break"` for a blank spacer line) or objects describing a module.
+The `modules` array (also accepted as `layout`) governs ordering, headings, and custom rows. Entries can be literal strings (use `"break"` for a blank spacer line) or objects describing a module.
 
 ```jsonc
 {
@@ -418,10 +449,52 @@ Combine with other tools:
 
 ### Command-Line Options
 
-- `leenfetch --list-options` — Prints every configurable key along with short documentation.
-- `leenfetch --help` — Standard usage information.
+- **Core utilities**
+  - `leenfetch -h | --help` — Show usage information.
+  - `leenfetch -V | --version` — Print version and exit.
+  - `leenfetch -i | --init` — Generate default configs in `~/.config/leenfetch/`.
+  - `leenfetch -r | --reinit` — Recreate configs from bundled defaults.
+  - `leenfetch --config <path>` — Load configuration from a custom JSONC file.
+  - `leenfetch --no-config` — Ignore files and boot with compiled-in defaults.
+  - `leenfetch --list-options` — Print every config key with a short description.
 
-LeenFetch intentionally keeps the CLI small; the rich customization story lives inside `config.jsonc`.
+- **ASCII & formatting overrides**
+
+  | Option | Example | Effect |
+  | ------ | ------- | ------ |
+  | `--ascii_distro <name>` | `--ascii_distro arch_small` | Force a specific ASCII logo. |
+  | `--ascii_colors <list>` | `--ascii_colors 1,5,2,4` | Override palette with comma-separated color indices. |
+  | `--custom_ascii_path <file>` | `--custom_ascii_path ~/.config/art.txt` | Load ASCII art from disk. |
+  | `--color-blocks <glyph>` | `--color-blocks ███` | Change the glyph used for the color swatch. |
+  | `--battery-display <mode>` | `--battery-display barinfo` | Swap between `off`, `bar`, `infobar`, and `barinfo`. |
+  | `--disk-display <mode>` | `--disk-display percentage` | Choose disk representation (`info`, `percentage`, `infobar`, `barinfo`, `bar`). |
+  | `--disk-subtitle <mode>` | `--disk-subtitle mount` | Pick disk labels (`name`, `dir`, `none`, `mount`). |
+  | `--memory-unit <unit>` | `--memory-unit gib` | Standardize memory units (`kib`, `mib`, `gib`). |
+  | `--packages <mode>` | `--packages tiny` | Control package summaries (`off`, `on`, `tiny`). |
+  | `--uptime <mode>` | `--uptime seconds` | Set uptime shorthand (`full`, `tiny`, `seconds`). |
+  | `--os-age <mode>` | `--os-age full` | Set OS age shorthand (same accepted values as uptime). |
+  | `--distro-display <mode>` | `--distro-display name_model_arch` | Adjust distro detail level. |
+  | `--cpu-temp-unit <unit>` | `--cpu-temp-unit off` | Choose `C`, `F`, or disable CPU temperature output. |
+
+- **Boolean toggles**
+
+  Every toggle is available as a pair. Examples:
+  - `--memory-percent` / `--no-memory-percent`
+  - `--cpu-show-temp` / `--no-cpu-show-temp`
+  - `--cpu-speed` / `--no-cpu-speed`
+  - `--cpu-frequency` / `--no-cpu-frequency`
+  - `--cpu-cores` / `--no-cpu-cores`
+  - `--cpu-brand` / `--no-cpu-brand`
+  - `--shell-path` / `--no-shell-path`
+  - `--shell-version` / `--no-shell-version`
+  - `--refresh-rate` / `--no-refresh-rate`
+  - `--de-version` / `--no-de-version`
+
+- **Layout helpers**
+  - `--only cpu,memory,shell` — Render only the listed modules (order comes from the config).
+  - `--hide gpu,colors` — Remove specific modules from the current layout.
+
+Use these overrides for quick tests; persistent changes still live in `config.jsonc`.
 
 ### Exit Codes
 

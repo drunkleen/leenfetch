@@ -196,10 +196,7 @@ DISTRIB_DESCRIPTION="ExampleOS 42 Aurora"
     #[test]
     fn parses_name_variants() {
         let data = sample_release();
-        assert_eq!(
-            parse_distro_info(data, DistroDisplay::Name),
-            "ExampleOS"
-        );
+        assert_eq!(parse_distro_info(data, DistroDisplay::Name), "ExampleOS");
         assert_eq!(
             parse_distro_info(data, DistroDisplay::NameVersion),
             "ExampleOS 42"

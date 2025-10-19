@@ -3,7 +3,7 @@ use std::{env, fs, path::Path};
 use std::ptr::null_mut;
 use winapi::shared::minwindef::DWORD;
 use winapi::shared::winerror::ERROR_SUCCESS;
-use winapi::um::winreg::{RegGetValueW, HKEY_CURRENT_USER, RRF_RT_REG_DWORD};
+use winapi::um::winreg::{HKEY_CURRENT_USER, RRF_RT_REG_DWORD, RegGetValueW};
 
 pub fn get_theme(_de: Option<&str>) -> Option<String> {
     let mut result = Vec::new();

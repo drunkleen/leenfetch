@@ -176,16 +176,8 @@ mod tests {
             "[Settings]\ngtk-theme-name=Nordic\n",
         )
         .unwrap();
-        fs::write(
-            temp_home.join(".gtkrc-2.0"),
-            "gtk-theme-name=\"Adwaita\"\n",
-        )
-        .unwrap();
-        fs::write(
-            temp_home.join(".config/qt5ct/qt5ct.conf"),
-            "style=Breeze\n",
-        )
-        .unwrap();
+        fs::write(temp_home.join(".gtkrc-2.0"), "gtk-theme-name=\"Adwaita\"\n").unwrap();
+        fs::write(temp_home.join(".config/qt5ct/qt5ct.conf"), "style=Breeze\n").unwrap();
 
         env_lock.set_var("HOME", temp_home.to_str().unwrap());
 

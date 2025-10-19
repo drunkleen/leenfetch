@@ -104,19 +104,11 @@ mod tests {
         };
         let album = {
             let val = lines.next().unwrap_or("").trim();
-            if val.is_empty() {
-                "Unknown Album"
-            } else {
-                val
-            }
+            if val.is_empty() { "Unknown Album" } else { val }
         };
         let title = {
             let val = lines.next().unwrap_or("").trim();
-            if val.is_empty() {
-                "Unknown Song"
-            } else {
-                val
-            }
+            if val.is_empty() { "Unknown Song" } else { val }
         };
 
         assert_eq!(artist, "Unknown Artist");

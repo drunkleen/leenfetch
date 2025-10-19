@@ -3,7 +3,7 @@ use winapi::shared::minwindef::DWORD;
 use winapi::um::handleapi::CloseHandle;
 use winapi::um::processthreadsapi::OpenProcess;
 use winapi::um::tlhelp32::{
-    CreateToolhelp32Snapshot, Process32FirstW, Process32NextW, PROCESSENTRY32W, TH32CS_SNAPPROCESS,
+    CreateToolhelp32Snapshot, PROCESSENTRY32W, Process32FirstW, Process32NextW, TH32CS_SNAPPROCESS,
 };
 use winapi::um::winbase::QueryFullProcessImageNameW;
 use winapi::um::winnt::PROCESS_QUERY_LIMITED_INFORMATION;
@@ -91,7 +91,11 @@ fn detect_parent_shell() -> Option<String> {
             if Process32FirstW(snapshot2, &mut e2) != 0 {
                 loop {
                     if e2.th32ProcessID == parent_pid {
-                        let end = e2.szExeFile.iter().position(|&c| c == 0).unwrap_or(e2.szExeFile.len());
+                        let end = e2
+                            .szExeFile
+                            .iter()
+                            .position(|&c| c == 0)
+                            .unwrap_or(e2.szExeFile.len());
                         name = Some(String::from_utf16_lossy(&e2.szExeFile[..end]));
                         break;
                     }
@@ -104,7 +108,9 @@ fn detect_parent_shell() -> Option<String> {
             return name.map(|n| n.trim().to_string());
         }
 
-        let path = String::from_utf16_lossy(&buf[..size as usize]).trim().to_string();
+        let path = String::from_utf16_lossy(&buf[..size as usize])
+            .trim()
+            .to_string();
         if path.is_empty() { None } else { Some(path) }
     }
 }

@@ -1,25 +1,27 @@
 use std::ptr::null_mut;
 use winapi::shared::winerror::ERROR_SUCCESS;
-use winapi::um::winreg::{RegGetValueW, HKEY_LOCAL_MACHINE, RRF_RT_REG_SZ};
+use winapi::um::winreg::{HKEY_LOCAL_MACHINE, RRF_RT_REG_SZ, RegGetValueW};
 
 pub fn get_model() -> Option<String> {
     // Read from BIOS registry branch (fast, no WMI):
     // HKLM\HARDWARE\DESCRIPTION\System\BIOS\SystemManufacturer
     // HKLM\HARDWARE\DESCRIPTION\System\BIOS\SystemProductName
-    let manu = read_reg_sz(
-        "HARDWARE\\DESCRIPTION\\System\\BIOS",
-        "SystemManufacturer",
-    )
-    .unwrap_or_default();
-    let prod = read_reg_sz(
-        "HARDWARE\\DESCRIPTION\\System\\BIOS",
-        "SystemProductName",
-    )
-    .unwrap_or_default();
+    let manu = read_reg_sz("HARDWARE\\DESCRIPTION\\System\\BIOS", "SystemManufacturer")
+        .unwrap_or_default();
+    let prod =
+        read_reg_sz("HARDWARE\\DESCRIPTION\\System\\BIOS", "SystemProductName").unwrap_or_default();
     // Prefer product alone when present; most vendors include brand already
-    let raw = if !prod.trim().is_empty() { prod } else { format!("{} {}", manu, prod) };
+    let raw = if !prod.trim().is_empty() {
+        prod
+    } else {
+        format!("{} {}", manu, prod)
+    };
     let cleaned = cleanup_model_string(&raw);
-    if cleaned.is_empty() || cleaned == "Unknown" { None } else { Some(cleaned) }
+    if cleaned.is_empty() || cleaned == "Unknown" {
+        None
+    } else {
+        Some(cleaned)
+    }
 }
 
 fn cleanup_model_string(model: &str) -> String {

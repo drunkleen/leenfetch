@@ -26,22 +26,47 @@ leenfetch can also accept **piped input** to render as ASCII art. This allows us
 - `-v`, `--version`  
   Print version information and exit.
 - `-h`, `--help`  
-  Show a help message and exit.
+  Show usage information and exit.
 - `-l`, `--list-options`  
-  List all available configuration options and their possible values.
+  List all configuration keys and accepted values.
 - `-i`, `--init`  
-  Create the default configuration file in the user config directory if it does not exist.
+  Create the default configuration file if it does not exist.
 - `-r`, `--reinit`  
-  Delete the configuration file and regenerate it with default values.
+  Delete the configuration file and regenerate it with bundled defaults.
+- `--config <PATH>`  
+  Load configuration from a custom JSONC file.
+- `--no-config`  
+  Ignore files and run with built-in defaults.
 - `--ascii_distro <DISTRO>`  
-  Override the ASCII art distribution for this run (e.g., "arch", "ubuntu", "debian").
+  Override the ASCII art distribution for this run (e.g., `arch`, `ubuntu`, `debian`).
 - `--ascii_colors <COLORS>`  
-  Override the ASCII art color palette for this run (comma-separated list, e.g., "1,2,3,4,5,6,7").
+  Override the ASCII palette (comma-separated indices such as `1,2,3,4,5,6,7` or `distro`).
 - `--custom_ascii_path <PATH>`  
   Use a custom ASCII art file for this run.
-- `terminal stdin`  
-  Read ASCII logo content from standard input instead of using built-in or custom files.
-  
+- `--color-blocks <GLYPH>`  
+  Change the glyph used for the color swatch (default: `●`).
+- `--battery-display <MODE>`  
+  Switch battery output between `off`, `bar`, `infobar`, and `barinfo`.
+- `--disk-display <MODE>`  
+  Select disk output (`info`, `percentage`, `infobar`, `barinfo`, `bar`).
+- `--disk-subtitle <MODE>`  
+  Choose disk labels (`name`, `dir`, `none`, `mount`).
+- `--memory-unit <UNIT>`  
+  Force memory units (`kib`, `mib`, `gib`).
+- `--packages <MODE>`  
+  Control package summaries (`off`, `on`, `tiny`).
+- `--uptime <MODE>` / `--os-age <MODE>`  
+  Pick shorthand (`full`, `tiny`, `seconds`).
+- `--distro-display <MODE>`  
+  Set OS detail level (e.g., `name`, `name_version`, `name_model_arch`).
+- `--cpu-temp-unit <UNIT>`  
+  Select CPU temperature units (`C`, `F`, or `off` to hide).
+- `--only <LIST>`  
+  Render only the listed modules (comma-separated).
+- `--hide <LIST>`  
+  Hide specific modules (comma-separated).
+- Boolean toggles follow a paired pattern—use `--cpu-speed` / `--no-cpu-speed`, `--shell-path` / `--no-shell-path`, `--memory-percent` / `--no-memory-percent`, `--refresh-rate` / `--no-refresh-rate`, etc.
+
 
 ## CONFIGURATION
 leenfetch uses a single JSONC file for configuration, typically located at:
