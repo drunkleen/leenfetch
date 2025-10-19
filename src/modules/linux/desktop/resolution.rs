@@ -9,7 +9,7 @@ struct XRRScreenConfiguration {
 
 #[link(name = "X11")]
 #[link(name = "Xrandr")]
-extern "C" {
+unsafe extern "C" {
     fn XOpenDisplay(display_name: *const c_char) -> *mut Display;
     fn XCloseDisplay(display: *mut Display);
     fn XDefaultScreen(display: *mut Display) -> c_int;

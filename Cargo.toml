@@ -1,7 +1,7 @@
 [package]
 name = "leenfetch"
-version = "1.0.2"
-edition = "2021"
+version = "1.0.3"
+edition = "2024"
 description = "Fast, minimal, customizable system info tool in Rust (Neofetch alternative)"
 license = "MIT"
 repository = "https://github.com/drunkleen/leenfetch"

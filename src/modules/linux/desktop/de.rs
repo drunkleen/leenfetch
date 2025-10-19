@@ -149,8 +149,9 @@ fn parse_version(cmd: &str, args: &[&str]) -> Option<String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::test_utils::EnvLock;
 
-    fn clear_env() {
+    fn clear_env() -> EnvLock {
         let vars = [
             "DESKTOP_SESSION",
             "XDG_CURRENT_DESKTOP",
@@ -160,9 +161,11 @@ mod tests {
             "WAYLAND_DISPLAY",
             "DISPLAY",
         ];
+        let env_lock = EnvLock::acquire(&vars);
         for var in vars {
-            env::remove_var(var);
+            env_lock.remove_var(var);
         }
+        env_lock
     }
 
     // #[test]
@@ -215,10 +218,11 @@ mod tests {
 
     #[test]
     fn excludes_wm_that_matches_de() {
-        clear_env();
-        env::set_var("DESKTOP_SESSION", "sway");
+        let env_lock = clear_env();
+        env_lock.set_var("DESKTOP_SESSION", "sway");
         let result = get_de(false, Some("sway"));
         assert_eq!(result, None);
+        drop(env_lock);
     }
 
     // #[test]

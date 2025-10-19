@@ -76,25 +76,31 @@ fn get_hostname(fqdn: bool) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::env;
+    use crate::test_utils::EnvLock;
 
     #[test]
     fn test_get_user_from_env() {
-        env::set_var("USER", "testuser");
+        let env_lock = EnvLock::acquire(&["USER"]);
+        env_lock.set_var("USER", "testuser");
         assert_eq!(get_user(), "testuser");
+        drop(env_lock);
     }
 
     #[test]
     fn test_hostname_from_env() {
-        env::set_var("HOSTNAME", "testhost");
+        let env_lock = EnvLock::acquire(&["HOSTNAME"]);
+        env_lock.set_var("HOSTNAME", "testhost");
         assert_eq!(get_hostname(false), "testhost");
+        drop(env_lock);
     }
 
     #[test]
     fn test_hostname_command_fallback() {
-        env::remove_var("HOSTNAME");
+        let env_lock = EnvLock::acquire(&["HOSTNAME"]);
+        env_lock.remove_var("HOSTNAME");
         let result = get_hostname(false);
         assert!(!result.is_empty(), "Hostname should not be empty");
+        drop(env_lock);
     }
 
     #[test]

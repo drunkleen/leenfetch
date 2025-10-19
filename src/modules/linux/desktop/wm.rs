@@ -131,12 +131,15 @@ const ALL_WMS: &[&str] = &[
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::env;
+    use crate::test_utils::EnvLock;
 
-    fn clear_env() {
-        for var in ["XDG_RUNTIME_DIR", "WAYLAND_DISPLAY", "DISPLAY"] {
-            env::remove_var(var);
+    fn clear_env() -> EnvLock {
+        let vars = ["XDG_RUNTIME_DIR", "WAYLAND_DISPLAY", "DISPLAY"];
+        let env_lock = EnvLock::acquire(&vars);
+        for var in vars {
+            env_lock.remove_var(var);
         }
+        env_lock
     }
 
     #[test]
@@ -176,10 +179,11 @@ mod tests {
 
     #[test]
     fn test_get_wm_fallback_to_none_without_env() {
-        clear_env();
+        let env_lock = clear_env();
 
         // Note: we can't test full get_wm() without actually scanning the system,
         // but we ensure it doesn't crash in a null environment
         let _ = get_wm(); // just call it and ensure no panic
+        drop(env_lock);
     }
 }

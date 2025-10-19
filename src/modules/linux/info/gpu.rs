@@ -265,7 +265,7 @@ fn parse_id(line: &str) -> Option<u16> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::env;
+    use crate::test_utils::EnvLock;
     use std::fs;
     use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -308,12 +308,14 @@ mod tests {
 ";
         let db_path = temp.join("pci.ids");
         fs::write(&db_path, database).unwrap();
-        env::set_var("LEENFETCH_PCI_IDS", db_path.to_str().unwrap());
+        let env_lock = EnvLock::acquire(&["LEENFETCH_PCI_IDS"]);
+        env_lock.set_var("LEENFETCH_PCI_IDS", db_path.to_str().unwrap());
 
         let result = super::collect_from_sysfs_root(temp.as_path());
         assert_eq!(result, vec!["Intel UHD Graphics [Integrated]"]);
 
-        env::remove_var("LEENFETCH_PCI_IDS");
+        env_lock.remove_var("LEENFETCH_PCI_IDS");
+        drop(env_lock);
         fs::remove_dir_all(temp).unwrap();
     }
 }

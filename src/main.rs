@@ -1,6 +1,8 @@
 mod config;
 mod core;
 mod modules;
+#[cfg(test)]
+mod test_utils;
 
 use atty::Stream;
 use core::Core;
