@@ -178,3 +178,46 @@ fn infer_model(name: &str, codename: &Option<String>, description: &Option<Strin
 
     "Unknown".into()
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::modules::enums::DistroDisplay;
+
+    fn sample_release() -> &'static str {
+        r#"NAME="ExampleOS"
+VERSION_ID="42"
+PRETTY_NAME="ExampleOS 42"
+VERSION_CODENAME="Aurora"
+DISTRIB_DESCRIPTION="ExampleOS 42 Aurora"
+"#
+    }
+
+    #[test]
+    fn parses_name_variants() {
+        let data = sample_release();
+        assert_eq!(
+            parse_distro_info(data, DistroDisplay::Name),
+            "ExampleOS"
+        );
+        assert_eq!(
+            parse_distro_info(data, DistroDisplay::NameVersion),
+            "ExampleOS 42"
+        );
+        assert!(
+            parse_distro_info(data, DistroDisplay::NameArch).contains("ExampleOS"),
+            "NameArch should include distro name"
+        );
+    }
+
+    #[test]
+    fn infers_model_from_hints() {
+        let desc = Some("Arch Linux Rolling".to_string());
+        let model = infer_model("Arch Linux", &None, &desc);
+        assert_eq!(model, "Rolling");
+
+        let codename = Some("jammy".to_string());
+        let model = infer_model("Ubuntu", &codename, &None);
+        assert_eq!(model, "LTS");
+    }
+}

@@ -123,26 +123,87 @@ fn clean_shell_string(s: String) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::test_utils::EnvLock;
+    use std::fs;
+    use std::os::unix::fs::PermissionsExt;
+    use std::time::{SystemTime, UNIX_EPOCH};
+
+    fn create_fake_shell() -> std::path::PathBuf {
+        let unique = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let path = std::env::temp_dir().join(format!("leenfetch_fake_shell_{unique}"));
+        let script = "#!/bin/sh\nif [ \"$1\" = \"--version\" ]; then\n  echo \"FakeShell 7.8.9\"\nelse\n  echo \"FakeShell\"\nfi\n";
+        fs::write(&path, script).unwrap();
+        let mut perms = fs::metadata(&path).unwrap().permissions();
+        perms.set_mode(0o755);
+        fs::set_permissions(&path, perms).unwrap();
+        path
+    }
 
     #[test]
     fn test_shell_no_version() {
-        let shell = get_shell(false, false);
-        assert!(shell.is_some());
-        let val = shell.unwrap();
-        assert!(!val.contains("--version"));
+        let script = create_fake_shell();
+        let env_lock = EnvLock::acquire(&["SHELL"]);
+        env_lock.set_var("SHELL", script.to_str().unwrap());
+
+        let shell = get_shell(false, false).expect("expected shell string");
+        assert_eq!(
+            shell,
+            script
+                .file_name()
+                .unwrap()
+                .to_string_lossy()
+                .to_string()
+        );
+
+        drop(env_lock);
+        fs::remove_file(script).unwrap();
     }
 
     #[test]
     fn test_shell_path_on() {
-        let shell = get_shell(true, false);
-        assert!(shell.is_some());
-        let val = shell.unwrap();
-        assert!(val.starts_with("/"));
+        let script = create_fake_shell();
+        let env_lock = EnvLock::acquire(&["SHELL"]);
+        env_lock.set_var("SHELL", script.to_str().unwrap());
+
+        let shell = get_shell(true, false).expect("expected shell string");
+        assert_eq!(shell, script.to_str().unwrap());
+
+        drop(env_lock);
+        fs::remove_file(script).unwrap();
     }
 
     #[test]
     fn test_shell_version_optional() {
-        let shell = get_shell(false, true);
-        assert!(shell.is_some());
+        let script = create_fake_shell();
+        let env_lock = EnvLock::acquire(&["SHELL"]);
+        env_lock.set_var("SHELL", script.to_str().unwrap());
+
+        let shell = get_shell(false, true).expect("expected shell string");
+        assert!(
+            shell.contains("7.8.9"),
+            "expected version in output, got {shell}"
+        );
+
+        drop(env_lock);
+        fs::remove_file(script).unwrap();
+    }
+
+    #[test]
+    fn clean_shell_string_strips_noise() {
+        let raw = "bash, version 5.2.15(1)-release (x86_64-pc-linux-gnu)";
+        let cleaned = clean_shell_string(raw.to_string());
+        assert_eq!(cleaned, "bash 5.2.15");
+    }
+
+    #[test]
+    fn clean_shell_string_handles_xonsh() {
+        let raw = "xonsh/1.2.3 options [something]";
+        let cleaned = clean_shell_string(raw.to_string());
+        assert!(cleaned.starts_with("xonsh 1.2.3"));
+        assert!(!cleaned.contains("options"));
+        assert!(!cleaned.contains("xonsh/"));
     }
 }

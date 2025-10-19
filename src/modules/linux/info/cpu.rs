@@ -195,10 +195,21 @@ processor   : 1
 cpu MHz     : 2200.000
 "#;
 
+    const MOCK_CPUINFO_DECIMAL: &str = r#"
+processor   : 0
+cpu MHz     : 2199.6
+"#;
+
     #[test]
     fn test_extract_cpu_model() {
         let model = extract_cpu_model(MOCK_CPUINFO);
         assert_eq!(model, "Intel(R) Core(TM) i7-8550U CPU @ 1.80GHz");
+    }
+
+    #[test]
+    fn test_extract_cpu_model_unknown() {
+        let empty_info = "";
+        assert_eq!(extract_cpu_model(empty_info), "Unknown CPU");
     }
 
     #[test]
@@ -214,12 +225,27 @@ cpu MHz     : 2200.000
     }
 
     #[test]
+    fn test_extract_speed_rounds_up() {
+        let speed = extract_speed(MOCK_CPUINFO_DECIMAL);
+        assert_eq!(speed, Some(2200));
+    }
+
+    #[test]
     fn test_sanitize_cpu_model_with_brand() {
         let input = "Intel(R) Core(TM) i7-8550U CPU @ 1.80GHz";
         let result = sanitize_cpu_model(input, true);
         assert!(result.contains("Intel"));
         assert!(result.contains("i7-8550U"));
         assert!(!result.contains("CPU"));
+    }
+
+    #[test]
+    fn test_sanitize_cpu_model_strips_noise() {
+        let input = "AMD Ryzen(TM) 5 5600X 6-Core Processor";
+        let result = sanitize_cpu_model(input, true);
+        assert!(!result.contains("(TM)"));
+        assert!(!result.contains("6-Core"));
+        assert!(result.contains("Ryzen"));
     }
 
     #[test]

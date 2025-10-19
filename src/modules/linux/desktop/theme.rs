@@ -136,3 +136,78 @@ pub fn get_theme(de: Option<&str>) -> Option<String> {
         Some(result.join(", "))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::test_utils::EnvLock;
+    use std::fs;
+    use std::time::{SystemTime, UNIX_EPOCH};
+
+    #[test]
+    fn returns_none_without_display() {
+        let env_lock = EnvLock::acquire(&["DISPLAY"]);
+        env_lock.remove_var("DISPLAY");
+        assert!(get_theme(None).is_none());
+        drop(env_lock);
+    }
+
+    #[test]
+    fn collects_theme_from_config_files() {
+        let env_lock = EnvLock::acquire(&["DISPLAY", "HOME", "PATH"]);
+        env_lock.set_var("DISPLAY", ":0");
+        env_lock.set_var("PATH", "/nonexistent"); // avoid spawning host tools
+
+        let unique = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let temp_home = std::env::temp_dir().join(format!("leenfetch_theme_test_{unique}"));
+        fs::create_dir_all(temp_home.join(".config/gtk-4.0")).unwrap();
+        fs::create_dir_all(temp_home.join(".config/qt5ct")).unwrap();
+
+        fs::write(
+            temp_home.join(".config/kdeglobals"),
+            "Name=Catppuccin Plasma\n",
+        )
+        .unwrap();
+        fs::write(
+            temp_home.join(".config/gtk-4.0/settings.ini"),
+            "[Settings]\ngtk-theme-name=Nordic\n",
+        )
+        .unwrap();
+        fs::write(
+            temp_home.join(".gtkrc-2.0"),
+            "gtk-theme-name=\"Adwaita\"\n",
+        )
+        .unwrap();
+        fs::write(
+            temp_home.join(".config/qt5ct/qt5ct.conf"),
+            "style=Breeze\n",
+        )
+        .unwrap();
+
+        env_lock.set_var("HOME", temp_home.to_str().unwrap());
+
+        let result = get_theme(Some("plasma")).expect("expected theme output");
+        assert!(
+            result.contains("[KDE]"),
+            "Expected KDE theme marker in {result}"
+        );
+        assert!(
+            result.contains("[GTK2]") || result.contains("[GTK2/3]"),
+            "Expected GTK theme marker in {result}"
+        );
+        assert!(
+            result.contains("[GTK4]"),
+            "Expected GTK4 theme marker in {result}"
+        );
+        assert!(
+            result.contains("[Qt]"),
+            "Expected Qt theme marker in {result}"
+        );
+
+        fs::remove_dir_all(&temp_home).unwrap();
+        drop(env_lock);
+    }
+}

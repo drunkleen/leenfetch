@@ -14,44 +14,7 @@ pub fn get_os_age(shorthand: OsAgeShorthand) -> Option<String> {
     // Guard against clock skew or unknown/invalid install time
     let seconds = now.saturating_sub(install_epoch);
 
-    let days = seconds / 86_400;
-    let hours = (seconds / 3_600) % 24;
-    let minutes = (seconds / 60) % 60;
-
-    let mut buf = String::with_capacity(32);
-
-    match shorthand {
-        OsAgeShorthand::Full => {
-            if days > 0 {
-                write!(buf, "{} day{}, ", days, if days != 1 { "s" } else { "" }).ok()?;
-            }
-            if hours > 0 {
-                write!(buf, "{} hour{}, ", hours, if hours != 1 { "s" } else { "" }).ok()?;
-            }
-            if minutes > 0 {
-                write!(
-                    buf,
-                    "{} minute{}",
-                    minutes,
-                    if minutes != 1 { "s" } else { "" }
-                )
-                .ok()?;
-            }
-            if buf.is_empty() {
-                write!(buf, "{} seconds", seconds).ok()?;
-            }
-        }
-        OsAgeShorthand::Tiny => {
-            if days > 0 {
-                write!(buf, "{} days", days).ok()?;
-            }
-        }
-        OsAgeShorthand::Seconds => {
-            write!(buf, "{}s", seconds).ok()?;
-        }
-    }
-
-    Some(buf.trim_end_matches([' ', ','].as_ref()).to_string())
+    Some(format_age(seconds, shorthand))
 }
 
 /// Best-effort detection of install time (epoch seconds) of the root filesystem.
@@ -92,4 +55,70 @@ fn read_install_epoch_seconds() -> Option<u64> {
     }
 
     None
+}
+
+fn format_age(seconds: u64, shorthand: OsAgeShorthand) -> String {
+    let days = seconds / 86_400;
+    let hours = (seconds / 3_600) % 24;
+    let minutes = (seconds / 60) % 60;
+
+    let mut buf = String::with_capacity(32);
+
+    match shorthand {
+        OsAgeShorthand::Full => {
+            if days > 0 {
+                let _ = write!(buf, "{} day{}, ", days, if days != 1 { "s" } else { "" });
+            }
+            if hours > 0 {
+                let _ = write!(buf, "{} hour{}, ", hours, if hours != 1 { "s" } else { "" });
+            }
+            if minutes > 0 {
+                let _ = write!(
+                    buf,
+                    "{} minute{}",
+                    minutes,
+                    if minutes != 1 { "s" } else { "" }
+                );
+            }
+            if buf.is_empty() {
+                let _ = write!(buf, "{} seconds", seconds);
+            }
+        }
+        OsAgeShorthand::Tiny => {
+            if days > 0 {
+                let _ = write!(buf, "{} days", days);
+            }
+        }
+        OsAgeShorthand::Seconds => {
+            let _ = write!(buf, "{}s", seconds);
+        }
+    }
+
+    buf.trim_end_matches([' ', ','].as_ref()).to_string()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn formats_full_age() {
+        let result = format_age(86_400 * 2 + 3_600 + 120, OsAgeShorthand::Full);
+        assert!(
+            result.contains("2 days") && result.contains("1 hour") && result.contains("2 minutes"),
+            "unexpected format: {result}"
+        );
+    }
+
+    #[test]
+    fn formats_tiny_age() {
+        let result = format_age(86_400 * 5 + 300, OsAgeShorthand::Tiny);
+        assert_eq!(result, "5 days");
+    }
+
+    #[test]
+    fn formats_seconds_age() {
+        let result = format_age(42, OsAgeShorthand::Seconds);
+        assert_eq!(result, "42s");
+    }
 }

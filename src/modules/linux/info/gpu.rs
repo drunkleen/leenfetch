@@ -277,6 +277,15 @@ mod tests {
     }
 
     #[test]
+    fn test_classify_gpu_by_vendor_and_driver() {
+        assert_eq!(classify_gpu(Some(0x8086), None), Some("Integrated"));
+        assert_eq!(classify_gpu(Some(0x10DE), None), Some("Discrete"));
+        assert_eq!(classify_gpu(Some(0x1234), None), Some("Virtual"));
+        assert_eq!(classify_gpu(None, Some("virtio-pci")), Some("Virtual"));
+        assert_eq!(classify_gpu(None, Some("unknown")), None);
+    }
+
+    #[test]
     fn test_classify_from_name() {
         assert_eq!(
             classify_gpu_from_name("Intel UHD Graphics"),
@@ -288,6 +297,32 @@ mod tests {
         );
         assert_eq!(classify_gpu_from_name("QXL GPU"), Some("Virtual"));
         assert_eq!(classify_gpu_from_name("Mystery Adapter"), None);
+    }
+
+    #[test]
+    fn describe_device_falls_back_to_hex_ids() {
+        let unique = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let temp = std::env::temp_dir().join(format!("leenfetch_gpu_unknown_{unique}"));
+        let device_dir = temp.join("card1/device");
+        fs::create_dir_all(&device_dir).unwrap();
+        fs::write(device_dir.join("vendor"), "0xFFFF\n").unwrap();
+        fs::write(device_dir.join("device"), "0xEEEE\n").unwrap();
+        fs::write(device_dir.join("driver"), "virtio-pci\n").unwrap();
+
+        let line = super::describe_device(&device_dir).expect("device string");
+        assert!(
+            line.contains("FFFF") || line.contains("Illegal Vendor ID"),
+            "unexpected output: {line}"
+        );
+        assert!(
+            line.contains("[Virtual]"),
+            "expected virtual classification tag: {line}"
+        );
+
+        fs::remove_dir_all(&temp).unwrap();
     }
 
     #[test]

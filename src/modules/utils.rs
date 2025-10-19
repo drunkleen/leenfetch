@@ -245,3 +245,44 @@ pub fn get_distro_colors(distro: &str) -> HashMap<&'static str, &'static str> {
 
     get_colors_in_order(dist_color)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn bar_respects_percentage_bounds() {
+        assert_eq!(get_bar(0), "[░░░░░░░░░░░░░░]");
+        assert_eq!(get_bar(100), "[██████████████]");
+        assert!(get_bar(50).contains('█'));
+    }
+
+    #[test]
+    fn terminal_color_emits_expected_blocks() {
+        let visual = get_terminal_color("■");
+        assert_eq!(visual.matches('■').count(), 8);
+        assert!(visual.contains("\x1b[31m"), "missing ANSI escape: {visual}");
+    }
+
+    #[test]
+    fn color_palette_includes_bold_and_reset() {
+        let map = color_palette(&[("c1", "\x1b[0;31m")]);
+        assert_eq!(map.get("c1"), Some(&"\x1b[0;31m"));
+        let bold_key = map
+            .keys()
+            .find(|k| k.starts_with("bold.c1"))
+            .expect("bold variant missing");
+        assert!(map.get(bold_key).unwrap().starts_with("\x1b[1;"));
+        assert_eq!(map.get("reset"), Some(&"\x1b[0m"));
+    }
+
+    #[test]
+    fn colors_in_order_fills_defaults() {
+        let map = get_colors_in_order(&[1, 2, 3]);
+        assert_eq!(map.get("c1"), Some(&DEFAULT_ANSI_ALL_COLORS[1]));
+        assert_eq!(map.get("c2"), Some(&DEFAULT_ANSI_ALL_COLORS[2]));
+        assert_eq!(map.get("c3"), Some(&DEFAULT_ANSI_ALL_COLORS[3]));
+        assert!(map.contains_key("c4"));
+        assert_eq!(map.get("reset"), Some(&"\x1b[0m"));
+    }
+}

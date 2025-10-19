@@ -108,3 +108,18 @@ fn count_via_shell(command: &str) -> Option<u64> {
         .last()
         .and_then(|s| s.parse::<u64>().ok())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::test_utils::EnvLock;
+
+    #[test]
+    fn returns_none_when_no_managers_found() {
+        let env_lock = EnvLock::acquire(&["PATH"]);
+        env_lock.set_var("PATH", "/nonexistent");
+        let result = get_packages(PackageShorthand::Off);
+        assert!(result.is_none());
+        drop(env_lock);
+    }
+}
