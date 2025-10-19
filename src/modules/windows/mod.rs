@@ -136,4 +136,19 @@ mod tests {
         assert!(!user.trim().is_empty());
         assert!(!host.trim().is_empty());
     }
+
+    #[test]
+    fn titles_obey_env_when_set() {
+        // Use test utils to set env vars in a synchronized, restorable way
+        let lock = crate::test_utils::EnvLock::acquire(&["USERNAME", "COMPUTERNAME", "USERDNSDOMAIN"]);
+        // Ensure no domain leaks into FQDN path for this test
+        lock.remove_var("USERDNSDOMAIN");
+        lock.set_var("USERNAME", "test_user");
+        lock.set_var("COMPUTERNAME", "TEST-HOST");
+
+        let (user, host) = title::get_titles(false);
+        assert_eq!(user, "test_user");
+        assert_eq!(host, "TEST-HOST");
+        // EnvLock Drop will restore prior environment
+    }
 }
