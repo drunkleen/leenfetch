@@ -6,9 +6,9 @@ RUNS=100
 WARMUP=5
 
 # Commands (can be overridden positionally)
-CMD1="fastfetch"
-CMD2="neofetch"
-CMD3="./target/release/leenfetch"
+CMD1="neofetch"
+CMD2="fastfetch"
+CMD3="leenfetch"
 
 PREPARE="sleep 0.1"   # small pause between runs; stabilizes CPU scheduler
 AUTO_RERUN=true        # re-run once on detected noise
@@ -193,7 +193,7 @@ table="$(jq -r '
   | sort_by(.mean)
   | (["Rank","Command","Mean(s)","Median(s)","StdDev(s)","Min(s)","Max(s)"]),
     ( to_entries[]
-      | [ (.+1|tostring),
+      | [ (.key + 1 | tostring),
           .value.cmd,
           (.value.mean    // "NaN"),
           (.value.median  // "NaN"),
