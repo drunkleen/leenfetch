@@ -1,35 +1,25 @@
-use crate::modules::windows::utils::run_powershell_json;
-use std::process::Command;
+use std::ptr::null_mut;
+use winapi::shared::winerror::ERROR_SUCCESS;
+use winapi::um::winreg::{RegGetValueW, HKEY_LOCAL_MACHINE, RRF_RT_REG_SZ};
 
 pub fn get_model() -> Option<String> {
-    // Try WMIC first
-    if let Ok(output) = Command::new("wmic")
-        .args(["computersystem", "get", "manufacturer,model"])
-        .output()
-    {
-        let stdout = String::from_utf8_lossy(&output.stdout);
-        if let Some(line) = stdout.lines().skip(1).find(|l| !l.trim().is_empty()) {
-            let cleaned = cleanup_model_string(line);
-            return Some(cleaned);
-        }
-    }
-
-    // PowerShell fallback
-    #[derive(serde::Deserialize)]
-    struct Rec {
-        manufacturer: Option<String>,
-        model: Option<String>,
-    }
-    let rec: Option<Rec> = run_powershell_json(
-        "Get-CimInstance Win32_ComputerSystem | Select-Object -First 1 Manufacturer,Model",
-    );
-    let rec = rec?;
-    let s = format!(
-        "{} {}",
-        rec.manufacturer.unwrap_or_default(),
-        rec.model.unwrap_or_default()
-    );
-    Some(cleanup_model_string(&s))
+    // Read from BIOS registry branch (fast, no WMI):
+    // HKLM\HARDWARE\DESCRIPTION\System\BIOS\SystemManufacturer
+    // HKLM\HARDWARE\DESCRIPTION\System\BIOS\SystemProductName
+    let manu = read_reg_sz(
+        "HARDWARE\\DESCRIPTION\\System\\BIOS",
+        "SystemManufacturer",
+    )
+    .unwrap_or_default();
+    let prod = read_reg_sz(
+        "HARDWARE\\DESCRIPTION\\System\\BIOS",
+        "SystemProductName",
+    )
+    .unwrap_or_default();
+    // Prefer product alone when present; most vendors include brand already
+    let raw = if !prod.trim().is_empty() { prod } else { format!("{} {}", manu, prod) };
+    let cleaned = cleanup_model_string(&raw);
+    if cleaned.is_empty() || cleaned == "Unknown" { None } else { Some(cleaned) }
 }
 
 fn cleanup_model_string(model: &str) -> String {
@@ -54,6 +44,22 @@ fn cleanup_model_string(model: &str) -> String {
         s = s.replace(g, "").trim().to_string();
     }
 
+    // Normalize noisy manufacturer prefixes if they remain
+    let manu_map = [
+        ("ASUSTeK COMPUTER INC.", "ASUS"),
+        ("ASUSTeK COMPUTER INC", "ASUS"),
+        ("ASUSTeK", "ASUS"),
+        ("Hewlett-Packard", "HP"),
+        ("HP Inc.", "HP"),
+        ("Dell Inc.", "Dell"),
+        ("LENOVO", "Lenovo"),
+    ];
+    for (from, to) in manu_map {
+        if s.starts_with(from) {
+            s = s.replacen(from, to, 1).trim().to_string();
+        }
+    }
+
     if s.starts_with("Standard PC") {
         return format!("KVM/QEMU ({})", model.trim());
     }
@@ -67,4 +73,50 @@ fn cleanup_model_string(model: &str) -> String {
     }
 
     s
+}
+
+fn read_reg_sz(subkey: &str, value: &str) -> Option<String> {
+    let key = to_wide(subkey);
+    let val = to_wide(value);
+    let mut size: u32 = 0;
+    let status = unsafe {
+        RegGetValueW(
+            HKEY_LOCAL_MACHINE,
+            key.as_ptr(),
+            val.as_ptr(),
+            RRF_RT_REG_SZ,
+            null_mut(),
+            null_mut(),
+            &mut size,
+        )
+    };
+    if status != ERROR_SUCCESS as i32 || size == 0 {
+        return None;
+    }
+    let mut buf: Vec<u16> = vec![0u16; (size as usize + 1) / 2];
+    let mut size2 = size;
+    let status = unsafe {
+        RegGetValueW(
+            HKEY_LOCAL_MACHINE,
+            key.as_ptr(),
+            val.as_ptr(),
+            RRF_RT_REG_SZ,
+            null_mut(),
+            buf.as_mut_ptr() as *mut _,
+            &mut size2,
+        )
+    };
+    if status != ERROR_SUCCESS as i32 {
+        return None;
+    }
+    let end = buf.iter().position(|&c| c == 0).unwrap_or(buf.len());
+    Some(String::from_utf16_lossy(&buf[..end]).trim().to_string())
+}
+
+fn to_wide(s: &str) -> Vec<u16> {
+    use std::os::windows::ffi::OsStrExt;
+    std::ffi::OsStr::new(s)
+        .encode_wide()
+        .chain(std::iter::once(0))
+        .collect()
 }

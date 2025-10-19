@@ -287,7 +287,7 @@ impl Core {
                                 } else {
                                     for (name, summary) in disks {
                                         let line = format!(
-                                            "${{c1}}{} {}: ${{reset}}{}\n",
+                                            "${{c1}}{} {} ${{reset}}{}\n",
                                             label, name, summary
                                         );
                                         final_output.push_str(&line);

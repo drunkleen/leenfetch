@@ -91,7 +91,7 @@ pub const DEFAULT_CONFIG: &str = r#"// ===============================
 
         // Show the full path to your shell.
         // options: true or false
-        "shell_path": true,
+        "shell_path": false,
 
         // Show the version of your shell.
         // options: true or false

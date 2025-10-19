@@ -3,6 +3,11 @@ use std::process::Command;
 use crate::modules::enums::PackageShorthand;
 
 pub fn get_packages(shorthand: PackageShorthand) -> Option<String> {
+    // If user requested "off", do not scan any managers.
+    if shorthand == PackageShorthand::Off {
+        return None;
+    }
+
     let mut total = 0u64;
     let mut managers = vec![];
     let mut names = vec![];
@@ -38,9 +43,10 @@ pub fn get_packages(shorthand: PackageShorthand) -> Option<String> {
     }
 
     match shorthand {
-        PackageShorthand::Off => Some(format!("{total} total")),
         PackageShorthand::On => Some(managers.join(", ")),
         PackageShorthand::Tiny => Some(format!("{total} ({})", names.join(", "))),
+        // Already handled above, but keep an explicit arm for completeness
+        PackageShorthand::Off => None,
     }
 }
 

@@ -29,7 +29,18 @@ winapi = { version = "0.3.9", features = [
     "winerror",
     "winbase",
     "winnt",
-] }
+    "fileapi",
+    "sysinfoapi",
+    "combaseapi",
+    "unknwnbase",
+    "dxgi",
+    "dxgi1_2",
+    "setupapi",
+    "handleapi",
+    "tlhelp32",
+    "processthreadsapi",
+    "winver",
+ ] }
 
 
 [package.metadata.dist]

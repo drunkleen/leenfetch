@@ -1,4 +1,9 @@
+use std::ffi::OsStr;
+use std::os::windows::ffi::OsStrExt;
+use std::ptr::null_mut;
 use std::process::Command;
+use winapi::shared::minwindef::DWORD;
+use winapi::um::winver::{VerQueryValueW, GetFileVersionInfoW, GetFileVersionInfoSizeW};
 
 /// Desktop Environment enum
 pub fn get_de(show_version: bool, wm: Option<&str>) -> Option<String> {
@@ -43,25 +48,66 @@ fn normalize_de(proc: &str) -> String {
 }
 
 fn get_shell_version(shell_exe: &str) -> Option<String> {
-    let output = Command::new("wmic")
-        .args([
-            "datafile",
-            "where",
-            &format!("name='C:\\\\Windows\\\\System32\\\\{}'", shell_exe),
-            "get",
-            "Version",
-            "/value",
-        ])
-        .output()
-        .ok()?;
+    // Try to read version from the file in System32. This avoids spawning WMIC.
+    let path = format!("C:\\Windows\\System32\\{}", shell_exe);
+    let wide: Vec<u16> = OsStr::new(&path).encode_wide().chain(Some(0)).collect();
+    unsafe {
+        let mut handle: DWORD = 0;
+        let size = GetFileVersionInfoSizeW(wide.as_ptr(), &mut handle);
+        if size == 0 { return None; }
 
-    let out = String::from_utf8_lossy(&output.stdout);
-    for line in out.lines() {
-        if let Some(val) = line.strip_prefix("Version=") {
-            return Some(val.trim().to_string());
+        let mut buf: Vec<u8> = vec![0u8; size as usize];
+        if GetFileVersionInfoW(wide.as_ptr(), 0, size, buf.as_mut_ptr() as *mut _) == 0 {
+            return None;
         }
+
+        // Determine language/codepage from Translation block
+        let mut trans_ptr: *mut winapi::ctypes::c_void = null_mut();
+        let mut trans_len: u32 = 0;
+        let trans_key: Vec<u16> = OsStr::new("\\VarFileInfo\\Translation")
+            .encode_wide()
+            .chain(Some(0))
+            .collect();
+        if VerQueryValueW(
+            buf.as_mut_ptr() as *mut _,
+            trans_key.as_ptr(),
+            &mut trans_ptr,
+            &mut trans_len as *mut _,
+        ) == 0
+            || trans_ptr.is_null()
+            || trans_len < 4
+        {
+            return None;
+        }
+
+        let trans = trans_ptr as *const u16;
+        let lang = *trans as u32;
+        let codepage = *trans.add(1) as u32;
+
+        // Query the FileVersion string for this language/codepage
+        let key = format!("\\StringFileInfo\\{:04x}{:04x}\\FileVersion", lang, codepage);
+        let key_w: Vec<u16> = OsStr::new(&key).encode_wide().chain(Some(0)).collect();
+        let mut str_ptr: *mut winapi::ctypes::c_void = null_mut();
+        let mut str_len: u32 = 0;
+        if VerQueryValueW(
+            buf.as_mut_ptr() as *mut _,
+            key_w.as_ptr(),
+            &mut str_ptr,
+            &mut str_len as *mut _,
+        ) == 0
+            || str_ptr.is_null()
+        {
+            return None;
+        }
+
+        let p = str_ptr as *const u16;
+        let mut end = 0usize;
+        while *p.add(end) != 0 {
+            end += 1;
+        }
+        let slice = std::slice::from_raw_parts(p, end);
+        Some(String::from_utf16_lossy(slice))
     }
-    None
 }
 
 /// Known alternative or default Windows desktop environments / shells

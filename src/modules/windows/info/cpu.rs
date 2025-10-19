@@ -1,5 +1,8 @@
-use crate::modules::windows::utils::run_powershell;
-use std::process::Command;
+use std::ptr::null_mut;
+use winapi::shared::minwindef::DWORD;
+use winapi::shared::winerror::ERROR_SUCCESS;
+use winapi::um::sysinfoapi::{GetSystemInfo, SYSTEM_INFO};
+use winapi::um::winreg::{RegGetValueW, HKEY_LOCAL_MACHINE, RRF_RT_REG_DWORD, RRF_RT_REG_SZ};
 
 pub fn get_cpu(
     cpu_brand: bool,
@@ -44,113 +47,57 @@ pub fn get_cpu(
 }
 
 fn get_cpu_model(show_brand: bool) -> String {
-    // Try WMIC first (older systems)
-    if let Ok(output) = Command::new("wmic").args(["cpu", "get", "Name"]).output() {
-        let raw = String::from_utf8_lossy(&output.stdout);
-        if let Some(line) = raw.lines().skip(1).find(|l| !l.trim().is_empty()) {
-            return sanitize_cpu_model(line.trim(), show_brand);
-        }
-    }
-
-    // Fallback to PowerShell CIM on modern Windows (WMIC removed)
-    if let Some(out) = run_powershell(
-        "Get-CimInstance Win32_Processor | Select-Object -First 1 -ExpandProperty Name",
+    // Read from registry for speed and reliability
+    // HKLM\HARDWARE\DESCRIPTION\System\CentralProcessor\0\ProcessorNameString
+    if let Some(name) = read_reg_sz(
+        HKEY_LOCAL_MACHINE,
+        "HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0",
+        "ProcessorNameString",
     ) {
-        let line = out.lines().find(|l| !l.trim().is_empty());
-        if let Some(name) = line {
-            return sanitize_cpu_model(name.trim(), show_brand);
-        }
+        return sanitize_cpu_model(&name, show_brand);
     }
 
     "Unknown CPU".to_string()
 }
 
 fn get_core_count() -> u32 {
-    // Try WMIC
-    if let Ok(out) = Command::new("wmic")
-        .args(["cpu", "get", "NumberOfCores"])
-        .output()
-    {
-        let text = String::from_utf8_lossy(&out.stdout);
-        if let Some(line) = text.lines().skip(1).find(|l| !l.trim().is_empty()) {
-            if let Ok(val) = line.trim().parse::<u32>() {
-                return val;
-            }
-        }
+    // Use Win32 API to count logical processors across all groups.
+    // This is fast and avoids WMI/PowerShell.
+    unsafe {
+        let mut info: SYSTEM_INFO = std::mem::zeroed();
+        GetSystemInfo(&mut info as *mut _);
+        let n = info.dwNumberOfProcessors;
+        if n == 0 { 1 } else { n }
     }
-
-    // Fallback to PowerShell (sum across packages)
-    if let Some(out) = run_powershell(
-        "(Get-CimInstance Win32_Processor | Measure-Object -Property NumberOfCores -Sum).Sum",
-    ) {
-        if let Ok(v) = out.trim().parse::<u32>() {
-            return v;
-        }
-    }
-
-    1
 }
 
 fn get_cpu_speed_mhz() -> Option<u32> {
-    // WMIC first
-    if let Ok(output) = Command::new("wmic")
-        .args(["cpu", "get", "MaxClockSpeed"])
-        .output()
-    {
-        let raw = String::from_utf8_lossy(&output.stdout);
-        if let Some(val) = raw
-            .lines()
-            .skip(1)
-            .find(|l| !l.trim().is_empty())
-            .and_then(|s| s.trim().parse::<u32>().ok())
-        {
-            return Some(val);
-        }
+    // Read from registry: HKLM\HARDWARE\DESCRIPTION\System\CentralProcessor\0\~MHz
+    let key = "HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0";
+    let name = "~MHz";
+    let mut data: DWORD = 0;
+    let mut data_size = std::mem::size_of::<DWORD>() as u32;
+    let status = unsafe {
+        RegGetValueW(
+            HKEY_LOCAL_MACHINE,
+            to_wide(key).as_ptr(),
+            to_wide(name).as_ptr(),
+            RRF_RT_REG_DWORD,
+            null_mut(),
+            &mut data as *mut _ as *mut _,
+            &mut data_size,
+        )
+    };
+    if status == ERROR_SUCCESS as i32 {
+        Some(data as u32)
+    } else {
+        None
     }
-
-    // PowerShell fallback
-    if let Some(out) = run_powershell(
-        "Get-CimInstance Win32_Processor | Select-Object -First 1 -ExpandProperty MaxClockSpeed",
-    ) {
-        return out.trim().parse::<u32>().ok();
-    }
-
-    None
 }
 
 fn get_cpu_temperature() -> Option<f32> {
-    // WMIC (legacy)
-    if let Ok(output) = Command::new("wmic")
-        .args([
-            "/namespace:\\root\\wmi",
-            "path",
-            "MSAcpi_ThermalZoneTemperature",
-            "get",
-            "CurrentTemperature",
-        ])
-        .output()
-    {
-        let raw = String::from_utf8_lossy(&output.stdout);
-        if let Some(raw_line) = raw
-            .lines()
-            .skip(1)
-            .find(|l| l.trim().parse::<f32>().is_ok())
-        {
-            if let Ok(v) = raw_line.trim().parse::<f32>() {
-                return Some((v - 2732.0) / 10.0);
-            }
-        }
-    }
-
-    // PowerShell CIM fallback
-    if let Some(out) = run_powershell(
-        "Get-CimInstance -Namespace root/\"wmi\" MSAcpi_ThermalZoneTemperature | Select-Object -First 1 -ExpandProperty CurrentTemperature",
-    ) {
-        if let Ok(v) = out.trim().parse::<f32>() {
-            return Some((v - 2732.0) / 10.0);
-        }
-    }
-
+    // Windows does not expose a fast, reliable, non-admin CPU temp API.
+    // Avoid WMI/CIM for performance; skip temperature.
     None
 }
 
@@ -195,4 +142,54 @@ fn sanitize_cpu_model(model: &str, show_brand: bool) -> String {
         .join(" ");
 
     s.trim().to_string()
+}
+
+fn to_wide(s: &str) -> Vec<u16> {
+    use std::os::windows::ffi::OsStrExt;
+    std::ffi::OsStr::new(s)
+        .encode_wide()
+        .chain(std::iter::once(0))
+        .collect()
+}
+
+fn read_reg_sz(root: winapi::shared::minwindef::HKEY, subkey: &str, value: &str) -> Option<String> {
+    let sub = to_wide(subkey);
+    let val = to_wide(value);
+    // First query size
+    let mut size: u32 = 0;
+    let status = unsafe {
+        RegGetValueW(
+            root,
+            sub.as_ptr(),
+            val.as_ptr(),
+            RRF_RT_REG_SZ,
+            null_mut(),
+            null_mut(),
+            &mut size,
+        )
+    };
+    if status != ERROR_SUCCESS as i32 || size == 0 {
+        return None;
+    }
+    // Allocate buffer of u16
+    let len_wchars = (size as usize + 1) / 2; // bytes to wchar count
+    let mut buf: Vec<u16> = vec![0u16; len_wchars];
+    let mut size2 = size;
+    let status = unsafe {
+        RegGetValueW(
+            root,
+            sub.as_ptr(),
+            val.as_ptr(),
+            RRF_RT_REG_SZ,
+            null_mut(),
+            buf.as_mut_ptr() as *mut _,
+            &mut size2,
+        )
+    };
+    if status != ERROR_SUCCESS as i32 {
+        return None;
+    }
+    // Find terminating 0
+    let end = buf.iter().position(|&c| c == 0).unwrap_or(buf.len());
+    Some(String::from_utf16_lossy(&buf[..end]).trim().to_string())
 }

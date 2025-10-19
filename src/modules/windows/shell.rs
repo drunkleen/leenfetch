@@ -1,5 +1,12 @@
-use crate::modules::windows::utils::run_powershell;
-use std::{path::Path, process::Command};
+use std::path::Path;
+use winapi::shared::minwindef::DWORD;
+use winapi::um::handleapi::CloseHandle;
+use winapi::um::processthreadsapi::OpenProcess;
+use winapi::um::tlhelp32::{
+    CreateToolhelp32Snapshot, Process32FirstW, Process32NextW, PROCESSENTRY32W, TH32CS_SNAPPROCESS,
+};
+use winapi::um::winbase::QueryFullProcessImageNameW;
+use winapi::um::winnt::PROCESS_QUERY_LIMITED_INFORMATION;
 
 pub fn get_shell(show_path: bool, show_version: bool) -> Option<String> {
     let parent_shell_path = detect_parent_shell()?;
@@ -20,14 +27,9 @@ pub fn get_shell(show_path: bool, show_version: bool) -> Option<String> {
 
     let version = match shell_name.as_str() {
         "cmd" => Some(get_cmd_version()),
-        "powershell" => run_version_arg(
-            "powershell",
-            "-Command",
-            "$PSVersionTable.PSVersion.ToString()",
-        ),
-        "pwsh" => run_version_arg("pwsh", "-Command", "$PSVersionTable.PSVersion.ToString()"),
-        "nu" => run_version_arg("nu", "--version", ""),
-        "bash" => run_version_arg("bash", "--version", ""),
+        // Avoid spawning PowerShell unless explicitly the parent shell is PowerShell.
+        "powershell" => Some(ps_version()),
+        "pwsh" => Some(ps_version()),
         _ => None,
     };
 
@@ -38,63 +40,77 @@ pub fn get_shell(show_path: bool, show_version: bool) -> Option<String> {
     Some(clean_shell_string(shell))
 }
 
-/// Tries to detect the actual shell that launched this process.
+/// Detect the parent process executable path using Toolhelp and QueryFullProcessImageNameW.
 fn detect_parent_shell() -> Option<String> {
-    // Try WMIC first
-    if let Ok(output) = Command::new("wmic")
-        .args([
-            "process",
-            "where",
-            &format!("ProcessId={}", std::process::id()),
-            "get",
-            "ParentProcessId",
-            "/value",
-        ])
-        .output()
-    {
-        let parent_out = String::from_utf8_lossy(&output.stdout);
-        if let Some(parent_pid_line) = parent_out
-            .lines()
-            .find(|line| line.contains("ParentProcessId="))
-        {
-            if let Some(parent_pid) = parent_pid_line.trim().split('=').nth(1) {
-                if let Ok(parent_output) = Command::new("wmic")
-                    .args([
-                        "process",
-                        "where",
-                        &format!("ProcessId={}", parent_pid.trim()),
-                        "get",
-                        "ExecutablePath",
-                        "/value",
-                    ])
-                    .output()
-                {
-                    let parent_exe = String::from_utf8_lossy(&parent_output.stdout);
-                    if let Some(exe_path_line) = parent_exe
-                        .lines()
-                        .find(|line| line.contains("ExecutablePath="))
-                    {
-                        if let Some(path) = exe_path_line.trim().strip_prefix("ExecutablePath=") {
-                            return Some(path.trim().to_string());
-                        }
-                    }
+    unsafe {
+        let snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+        if snapshot == (-1isize) as _ {
+            return None;
+        }
+
+        let current_pid = std::process::id();
+        let mut entry: PROCESSENTRY32W = std::mem::zeroed();
+        entry.dwSize = std::mem::size_of::<PROCESSENTRY32W>() as DWORD;
+
+        let mut parent_pid: DWORD = 0;
+        if Process32FirstW(snapshot, &mut entry) != 0 {
+            loop {
+                if entry.th32ProcessID == current_pid {
+                    parent_pid = entry.th32ParentProcessID;
+                    break;
+                }
+                if Process32NextW(snapshot, &mut entry) == 0 {
+                    break;
                 }
             }
         }
-    }
+        CloseHandle(snapshot);
 
-    // PowerShell CIM fallback
-    let ps = run_powershell(&format!(
-        "$ppid = (Get-CimInstance Win32_Process -Filter 'ProcessId={pid}').ParentProcessId; \
-        (Get-CimInstance Win32_Process -Filter \"ProcessId=$ppid\").ExecutablePath",
-        pid = std::process::id()
-    ))?;
-    let line = ps.lines().find(|l| !l.trim().is_empty())?;
-    Some(line.trim().to_string())
+        if parent_pid == 0 {
+            return None;
+        }
+
+        let hproc = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, 0, parent_pid);
+        if hproc.is_null() {
+            return None;
+        }
+
+        let mut buf: Vec<u16> = vec![0u16; 32768];
+        let mut size: DWORD = buf.len() as DWORD;
+        let ok = QueryFullProcessImageNameW(hproc, 0, buf.as_mut_ptr(), &mut size);
+        CloseHandle(hproc);
+        if ok == 0 {
+            // Fallback to just the exe name from PROCESSENTRY32W (re-scan to find parent entry)
+            let snapshot2 = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+            if snapshot2 == (-1isize) as _ {
+                return None;
+            }
+            let mut e2: PROCESSENTRY32W = std::mem::zeroed();
+            e2.dwSize = std::mem::size_of::<PROCESSENTRY32W>() as DWORD;
+            let mut name = None;
+            if Process32FirstW(snapshot2, &mut e2) != 0 {
+                loop {
+                    if e2.th32ProcessID == parent_pid {
+                        let end = e2.szExeFile.iter().position(|&c| c == 0).unwrap_or(e2.szExeFile.len());
+                        name = Some(String::from_utf16_lossy(&e2.szExeFile[..end]));
+                        break;
+                    }
+                    if Process32NextW(snapshot2, &mut e2) == 0 {
+                        break;
+                    }
+                }
+            }
+            CloseHandle(snapshot2);
+            return name.map(|n| n.trim().to_string());
+        }
+
+        let path = String::from_utf16_lossy(&buf[..size as usize]).trim().to_string();
+        if path.is_empty() { None } else { Some(path) }
+    }
 }
 
 fn get_cmd_version() -> String {
-    let output = Command::new("cmd")
+    let output = std::process::Command::new("cmd")
         .args(["/C", "ver"])
         .output()
         .ok()
@@ -111,15 +127,23 @@ fn get_cmd_version() -> String {
         .to_string()
 }
 
-fn run_version_arg(shell: &str, arg1: &str, arg2: &str) -> Option<String> {
-    let output = Command::new(shell).args([arg1, arg2]).output().ok()?;
-
-    if !output.status.success() {
-        return None;
+// Lightweight PowerShell version probe: tries pwsh then powershell and returns version string.
+fn ps_version() -> String {
+    // Only attempt the first one found in PATH to avoid multiple spawns.
+    for (exe, arg) in [("pwsh", "-Command"), ("powershell", "-Command")] {
+        if let Ok(out) = std::process::Command::new(exe)
+            .args([arg, "$PSVersionTable.PSVersion.ToString()"])
+            .output()
+        {
+            if out.status.success() {
+                let s = String::from_utf8_lossy(&out.stdout);
+                if let Some(first) = s.lines().next() {
+                    return first.trim().to_string();
+                }
+            }
+        }
     }
-
-    let out = String::from_utf8_lossy(&output.stdout);
-    Some(out.lines().next().unwrap_or("").trim().to_string())
+    String::new()
 }
 
 fn clean_shell_string(s: String) -> String {
