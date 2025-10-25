@@ -120,7 +120,7 @@ fn main() {
 /// info lines starting at a column determined by the maximum visible
 /// width of the ASCII art block.
 fn print_ascii_and_info(ascii: &str, info_lines: &[String]) {
-    println!();
+    // println!();
     let ascii_lines: Vec<&str> = ascii.lines().collect();
     let info_lines = info_lines.iter().map(|s| s.as_str()).collect::<Vec<_>>();
 

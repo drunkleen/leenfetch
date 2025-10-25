@@ -111,8 +111,8 @@ pub const DEFAULT_CONFIG: &str = r#"// ===============================
     // modules - Output order and custom rows
     // -------------------------------
     "modules": [
-        { "type": "custom", "format": "${reset}┌─────────────────────${c1}System${reset}─────────────────────┐" },
-        { "type": "titles", "key": "${reset}│${c1} ┌:"},
+        { "type": "custom", "format": "${reset}╭─────────────────────${c1}System${reset}─────────────────────╮" },
+        { "type": "titles", "key": "${reset}│${c1} ╭:"},
         // { "type": "os", "key": "${c16}│${c1} ├OS"},
         { "type": "distro", "key": "${reset}│${c1} ├:"},
         { "type": "kernel", "key": "${reset}│${c1} ├:"},
@@ -122,23 +122,23 @@ pub const DEFAULT_CONFIG: &str = r#"// ===============================
         { "type": "de", "key": "${reset}│${c1} ├󰇄:"},
             { "type": "song", "key": "${reset}│${c1} ├"},
         { "type": "theme", "key": "${reset}│${c1} ├󰸌:"},
-        { "type": "colors", "key": "${reset}│${c1} └:"},
-        { "type": "custom", "format": "${reset}└────────────────────────────────────────────────┘" },
+        { "type": "colors", "key": "${reset}│${c1} ╰:"},
+        { "type": "custom", "format": "${reset}╰────────────────────────────────────────────────╯" },
         // "break",
-        { "type": "custom", "format": "${reset}┌────────────────────${c1}Hardware${reset}────────────────────┐" },
-        { "type": "model", "key": "${reset}│${c1} ┌:"},
+        { "type": "custom", "format": "${reset}╭────────────────────${c1}Hardware${reset}────────────────────╮" },
+        { "type": "model", "key": "${reset}│${c1} ╭:"},
         { "type": "cpu", "key": "${reset}│${c1} ├:"},
         { "type": "gpu", "key": "${reset}│${c1} ├:"},
         { "type": "disk", "key": "${reset}│${c1} ├󰋊:"},
         { "type": "resolution", "key": "${reset}│${c1} ├󱄄:"},
         // { "type": "battery", "key": "${reset}│${c1} ├:"},
-        { "type": "memory", "key": "${reset}│${c1} └:"},
-        { "type": "custom", "format": "${reset}└────────────────────────────────────────────────┘" },
+        { "type": "memory", "key": "${reset}│${c1} ╰:"},
+        { "type": "custom", "format": "${reset}╰────────────────────────────────────────────────╯" },
         // "break",
-        { "type": "custom", "format": "${reset}┌───────────────────${c1}Age/Uptime${reset}───────────────────┐" },
-        { "type": "os_age", "key": "${reset}│${c1} ┌󱦟 OS Age"},
-        { "type": "uptime", "key": "${reset}│${c1} └󱫐 Uptime"},
-        { "type": "custom", "format": "${reset}└────────────────────────────────────────────────┘" }
+        { "type": "custom", "format": "${reset}╭───────────────────${c1}Age/Uptime${reset}───────────────────╮" },
+        { "type": "os_age", "key": "${reset}│${c1} ╭󱦟 OS Age"},
+        { "type": "uptime", "key": "${reset}│${c1} ╰󱫐 Uptime"},
+        { "type": "custom", "format": "${reset}╰────────────────────────────────────────────────╯" }
     ]
 }
 
