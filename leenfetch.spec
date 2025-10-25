@@ -8,8 +8,6 @@ URL:            https://github.com/drunkleen/leenfetch
 Source0:        %{url}/archive/refs/tags/v%{version}.tar.gz
 BuildRequires:  cargo
 BuildRequires:  rust-packaging
-# If man page is included in the repo
-Source1:        leenfetch.1
 
 %description
 Leenfetch is a fast and modern Neofetch alternative written in Rust,
@@ -27,7 +25,8 @@ cargo build --release
 install -Dm0755 target/release/leenfetch %{buildroot}%{_bindir}/leenfetch
 
 # Install man page
-install -Dm0644 %{SOURCE1} %{buildroot}%{_mandir}/man1/leenfetch.1
+install -Dm0644 leenfetch.1 %{buildroot}%{_mandir}/man1/leenfetch.1
+
 
 %files
 %license LICENSE
