@@ -345,11 +345,9 @@ Run `leenfetch --help` to see the complete list of overrides.
 | GPU/CPU/Mem/DE/WM detection | ✅ Done       |
 | Linux support               | ✅ Done       |
 | Windows support             | ✅ Done       |
+| Multi-Threading             | ✅ Done    |
 | CLI override options        | 🔁 Basic      |
 | ASCII art & theming         | 🔁 Basic      |
-| Multi-Threading             | 🔄 Planned    |
-| macOS support               | 🔄 Planned    |
-| OpenBSD support             | 🔄 Planned    |
 | Plugin/module system        | ❓ Maybe      |
 | Fetch info over SSH         | ❓ Maybe      |
 

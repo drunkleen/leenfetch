@@ -2,13 +2,13 @@
 title: leenfetch
 section: 1
 header: Manual
-footer: Leenfetch 1.0.2
+footer: Leenfetch 1.0.3
 ---
 
 # leenfetch — User Commands
 
 ## NAME
-leenfetch — a fast, customizable system information tool (Neofetch clone)
+leenfetch — a modern, minimal, and the fastest system info tool, written in Rust.
 
 ## SYNOPSIS
 ```
