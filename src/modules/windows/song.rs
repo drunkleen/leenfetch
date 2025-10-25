@@ -1,4 +1,5 @@
 use std::process::Command;
+use crate::modules::windows::process::process_names_lower;
 
 use crate::modules::enums::SongInfo;
 
@@ -38,16 +39,13 @@ fn run_powershell(cmd: &[&str]) -> Option<String> {
 }
 
 fn detect_player() -> Option<String> {
-    let players = ["Spotify", "vlc", "groove"];
-
-    let output = Command::new("tasklist").output().ok()?;
-    let list = String::from_utf8_lossy(&output.stdout);
-
-    for player in players {
-        if list.contains(player) {
-            return Some(player.to_lowercase());
+    let players = ["spotify.exe", "vlc.exe", "groove.exe"];
+    let names = process_names_lower();
+    for p in players {
+        if names.iter().any(|n| n.contains(p)) {
+            // Return normalized base name without extension
+            return Some(p.trim_end_matches(".exe").to_string());
         }
     }
-
     None
 }

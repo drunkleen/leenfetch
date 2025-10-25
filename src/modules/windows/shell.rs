@@ -1,4 +1,6 @@
 use std::path::Path;
+use crate::modules::windows::is_safe_mode;
+use crate::modules::windows::process::process_names_lower;
 use winapi::shared::minwindef::DWORD;
 use winapi::um::handleapi::CloseHandle;
 use winapi::um::processthreadsapi::OpenProcess;
@@ -6,10 +8,16 @@ use winapi::um::tlhelp32::{
     CreateToolhelp32Snapshot, PROCESSENTRY32W, Process32FirstW, Process32NextW, TH32CS_SNAPPROCESS,
 };
 use winapi::um::winbase::QueryFullProcessImageNameW;
+use std::process::{Command as Cmd, Stdio};
+use std::time::{Duration, Instant};
 use winapi::um::winnt::PROCESS_QUERY_LIMITED_INFORMATION;
 
 pub fn get_shell(show_path: bool, show_version: bool) -> Option<String> {
-    let parent_shell_path = detect_parent_shell()?;
+    let parent_shell_path = if is_safe_mode() {
+        detect_shell_safe_guess()?
+    } else {
+        detect_parent_shell()?
+    };
     let shell_name = Path::new(&parent_shell_path)
         .file_stem()?
         .to_string_lossy()
@@ -137,19 +145,61 @@ fn get_cmd_version() -> String {
 fn ps_version() -> String {
     // Only attempt the first one found in PATH to avoid multiple spawns.
     for (exe, arg) in [("pwsh", "-Command"), ("powershell", "-Command")] {
-        if let Ok(out) = std::process::Command::new(exe)
+        if let Ok(mut child) = Cmd::new(exe)
             .args([arg, "$PSVersionTable.PSVersion.ToString()"])
-            .output()
+            .stdout(Stdio::piped())
+            .stderr(Stdio::null())
+            .spawn()
         {
-            if out.status.success() {
-                let s = String::from_utf8_lossy(&out.stdout);
-                if let Some(first) = s.lines().next() {
-                    return first.trim().to_string();
+            let deadline = Instant::now() + Duration::from_millis(300);
+            loop {
+                if let Ok(Some(_)) = child.try_wait() { break; }
+                if Instant::now() > deadline { let _ = child.kill(); let _ = child.wait(); break; }
+                std::thread::sleep(Duration::from_millis(10));
+            }
+            if let Ok(out) = child.wait_with_output() {
+                if out.status.success() {
+                    let s = String::from_utf8_lossy(&out.stdout);
+                    if let Some(first) = s.lines().next() { return first.trim().to_string(); }
                 }
             }
         }
     }
     String::new()
+}
+
+// Heuristic, AV-friendly shell detection without process introspection.
+// Priority:
+// 1) COMSPEC env (typical for cmd)
+// 2) Presence of PowerShell env vars
+// 3) Fall back to known process list via tasklist (safe-mode path only)
+fn detect_shell_safe_guess() -> Option<String> {
+    if let Ok(comspec) = std::env::var("ComSpec") {
+        let p = Path::new(&comspec);
+        if p.exists() {
+            return Some(p.to_string_lossy().to_string());
+        }
+    }
+    // Detect PowerShell via typical env hints
+    if std::env::var_os("PSModulePath").is_some()
+        || std::env::var_os("POWERSHELL_DISTRIBUTION_CHANNEL").is_some()
+    {
+        // Prefer pwsh when on PATH; otherwise generic name
+        return Some("pwsh".to_string());
+    }
+    // Last resort: check process list names via tasklist (safe mode uses tasklist only)
+    let names = process_names_lower();
+    if names.iter().any(|n| n.contains("pwsh.exe")) {
+        return Some("pwsh".to_string());
+    }
+    if names.iter().any(|n| n.contains("powershell.exe")) {
+        return Some("powershell".to_string());
+    }
+    if names.iter().any(|n| n.contains("cmd.exe")) {
+        return Some("cmd".to_string());
+    }
+    // Fallback
+    Some("cmd".to_string())
 }
 
 fn clean_shell_string(s: String) -> String {

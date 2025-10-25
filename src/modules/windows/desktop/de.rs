@@ -1,17 +1,16 @@
 use std::ffi::OsStr;
 use std::os::windows::ffi::OsStrExt;
-use std::process::Command;
+use crate::modules::windows::process::process_names_lower;
 use std::ptr::null_mut;
 use winapi::shared::minwindef::DWORD;
 use winapi::um::winver::{GetFileVersionInfoSizeW, GetFileVersionInfoW, VerQueryValueW};
 
 /// Desktop Environment enum
 pub fn get_de(show_version: bool, wm: Option<&str>) -> Option<String> {
-    let tasklist = Command::new("tasklist").output().ok()?;
-    let list = String::from_utf8_lossy(&tasklist.stdout).to_lowercase();
+    let names = process_names_lower();
 
     for &entry in KNOWN_DES {
-        if list.contains(entry) {
+        if names.iter().any(|p| p.contains(entry)) {
             let mut de = normalize_de(entry);
 
             // Avoid WM = DE collision

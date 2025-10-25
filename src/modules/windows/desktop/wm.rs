@@ -1,18 +1,13 @@
-use std::process::Command;
+use crate::modules::windows::process::process_names_lower;
 
 pub fn get_wm() -> Option<String> {
-    // Use `tasklist` to get running processes (works on all Windows versions)
-    let output = Command::new("tasklist").output().ok()?;
-    let list = String::from_utf8_lossy(&output.stdout);
-
-    for line in list.lines() {
-        for &wm in KNOWN_WMS {
-            if line.to_lowercase().contains(wm) {
-                return Some(normalize_wm(wm));
-            }
+    let names = process_names_lower();
+    for &wm in KNOWN_WMS {
+        let needle = wm;
+        if names.iter().any(|p| p.contains(needle)) {
+            return Some(normalize_wm(wm));
         }
     }
-
     None
 }
 

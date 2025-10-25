@@ -5,6 +5,21 @@ pub mod shell;
 pub mod song;
 pub mod system;
 pub mod title;
+pub mod process;
+
+/// Returns true when "safe mode" is enabled.
+/// Safe mode avoids certain Win32 process-inspection APIs (e.g., Toolhelp/OpenProcess)
+/// and favors parsing `tasklist` or environment-based heuristics. This can help reduce
+/// AV false-positives at the cost of slight accuracy or speed.
+pub fn is_safe_mode() -> bool {
+    match std::env::var("LEENFETCH_SAFE_MODE") {
+        Ok(v) => {
+            let v = v.trim();
+            v == "1" || v.eq_ignore_ascii_case("true") || v.eq_ignore_ascii_case("on")
+        }
+        Err(_) => false,
+    }
+}
 
 // Windows-only universal smoke tests for the Windows modules.
 // These tests favor robustness in diverse environments (CI, VMs, headless),
