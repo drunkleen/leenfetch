@@ -2,7 +2,7 @@
 title: leenfetch
 section: 1
 header: Manual
-footer: Leenfetch 1.0.5
+footer: Leenfetch 1.1.0
 ---
 
 # leenfetch — User Commands

@@ -58,13 +58,20 @@ jobs:
 
           case "${{ matrix.target }}" in
             x86_64-pc-windows-gnu)
-              cross build --release --target ${{ matrix.target }} --target-dir target/${{ matrix.target }}
+              cross build --release --target ${{ matrix.target }}
               cp target/${{ matrix.target }}/release/leenfetch.exe dist/leenfetch-${VERSION}-windows-x86_64.exe
               (cd dist && zip leenfetch-${VERSION}-windows-x86_64.zip leenfetch-${VERSION}-windows-x86_64.exe)
               ;;
             x86_64-unknown-linux-gnu)
-              cargo build --release --target ${{ matrix.target }} --target-dir target/${{ matrix.target }}
-              cp target/${{ matrix.target }}/release/leenfetch dist/leenfetch
+              cargo build --release --target ${{ matrix.target }}
+              HOST_TRIPLE=$(rustc -vV | awk '/host/ {print $2}')
+              if [[ "${{ matrix.target }}" == "$HOST_TRIPLE" ]]; then
+                BIN_PATH=target/release/leenfetch
+              else
+                BIN_PATH=target/${{ matrix.target }}/release/leenfetch
+              fi
+
+              cp "$BIN_PATH" dist/leenfetch
               tar -czvf dist/leenfetch-${VERSION}-linux-x86_64.tar.gz -C dist leenfetch
               rm dist/leenfetch
 
@@ -79,7 +86,7 @@ jobs:
               cp target/${{ matrix.target }}/release/bundle/appimage/*.AppImage dist/leenfetch-${VERSION}-linux-x86_64.AppImage
               ;;
             aarch64-unknown-linux-gnu)
-              cross build --release --target ${{ matrix.target }} --target-dir target/${{ matrix.target }}
+              cross build --release --target ${{ matrix.target }}
               cp target/${{ matrix.target }}/release/leenfetch dist/leenfetch
               tar -czvf dist/leenfetch-${VERSION}-linux-aarch64.tar.gz -C dist leenfetch
               rm dist/leenfetch
