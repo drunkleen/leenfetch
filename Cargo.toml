@@ -10,6 +10,10 @@ categories = ["command-line-utilities", "visualization", "os"]
 keywords = ["neofetch", "system", "terminal", "info", "leenfetch"]
 authors = ["DrunkLeen <snape@drunkleen.com>"]
 
+[features]
+default = ["x11"]
+x11 = []
+
 [lib]
 name = "leenfetch_core"
 path = "src/lib.rs"

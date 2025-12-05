@@ -176,7 +176,19 @@ fn run_remote(core: &Core, overrides: &CliOverrides, pipe_input: &str) -> Result
         }
         println!("=== Remote: {host} ===");
         let info = fetch_remote_system_info(host)?;
-        let data = Data::from(&info);
+        let mut data = Data::from(&info);
+
+        if let Some(parsed) = parse_ssh_target_parts(host) {
+            if let Some(ssh_user) = parsed.user {
+                if !ssh_user.is_empty() {
+                    data.username = Some(ssh_user.to_string());
+                }
+            }
+            if !parsed.host.is_empty() {
+                data.hostname = Some(parsed.host.to_string());
+            }
+        }
+
         let info_layout = core.render_layout(&data);
         let info_lines = colorize_text(info_layout, &colors)
             .lines()
@@ -191,8 +203,30 @@ fn run_remote(core: &Core, overrides: &CliOverrides, pipe_input: &str) -> Result
 
 fn fetch_remote_system_info(target: &str) -> Result<SystemInfo> {
     let ssh_bin = detect_ssh_binary();
-    let output = Command::new(ssh_bin)
-        .arg(target)
+    let parsed = parse_ssh_target_parts(target).unwrap_or_else(|| ParsedSshTarget {
+        user: None,
+        host: target,
+        port: None,
+    });
+
+    let mut cmd = Command::new(ssh_bin);
+    cmd.arg("-o")
+        .arg("BatchMode=yes") // avoid interactive password prompts
+        .arg("-o")
+        .arg("ConnectTimeout=5");
+
+    if let Some(port) = parsed.port {
+        cmd.arg("-p").arg(port);
+    }
+
+    let destination = if let Some(user) = parsed.user {
+        format!("{user}@{}", parsed.host)
+    } else {
+        parsed.host.to_string()
+    };
+
+    let output = cmd
+        .arg(destination)
         .arg("leenfetch")
         .arg("--format")
         .arg("json")
@@ -226,6 +260,56 @@ fn detect_ssh_binary() -> &'static str {
 #[cfg(not(target_os = "windows"))]
 fn detect_ssh_binary() -> &'static str {
     "ssh"
+}
+
+struct ParsedSshTarget<'a> {
+    user: Option<&'a str>,
+    host: &'a str,
+    port: Option<&'a str>,
+}
+
+fn parse_ssh_target_parts(target: &str) -> Option<ParsedSshTarget<'_>> {
+    if target.is_empty() {
+        return None;
+    }
+
+    let (user, host_port) = if let Some((u, rest)) = target.split_once('@') {
+        (Some(u), rest)
+    } else {
+        (None, target)
+    };
+
+    // Handle [ipv6]:port
+    if let Some(stripped) = host_port.strip_prefix('[') {
+        if let Some(end) = stripped.find(']') {
+            let host = &stripped[..end];
+            let port = stripped[end + 1..].strip_prefix(':');
+            return Some(ParsedSshTarget { user, host, port });
+        }
+    }
+
+    // Handle host:port (avoid false split on bare IPv6 without brackets)
+    if let Some((host, port)) = host_port.rsplit_once(':') {
+        if host.contains(':') {
+            // Likely bare IPv6 address without brackets; treat whole as host
+            return Some(ParsedSshTarget {
+                user,
+                host: host_port,
+                port: None,
+            });
+        }
+        return Some(ParsedSshTarget {
+            user,
+            host,
+            port: Some(port),
+        });
+    }
+
+    Some(ParsedSshTarget {
+        user,
+        host: host_port,
+        port: None,
+    })
 }
 
 /// Prints the ASCII art block and info lines side-by-side.

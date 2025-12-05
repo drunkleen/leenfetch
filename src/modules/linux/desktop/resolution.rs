@@ -7,8 +7,11 @@ struct XRRScreenConfiguration {
     _private: [u8; 0],
 }
 
+#[cfg(feature = "x11")]
 #[link(name = "X11")]
+#[cfg(feature = "x11")]
 #[link(name = "Xrandr")]
+#[cfg(feature = "x11")]
 unsafe extern "C" {
     fn XOpenDisplay(display_name: *const c_char) -> *mut Display;
     fn XCloseDisplay(display: *mut Display);
@@ -30,6 +33,7 @@ type Window = c_ulong;
 
 pub fn get_resolution(refresh_rate: bool) -> Option<String> {
     // X11 path
+    #[cfg(feature = "x11")]
     if env::var("DISPLAY").is_ok() {
         if let Some(res) = try_x11(refresh_rate) {
             return Some(res);
@@ -54,6 +58,7 @@ pub fn get_resolution(refresh_rate: bool) -> Option<String> {
     None
 }
 
+#[cfg(feature = "x11")]
 fn try_x11(refresh_rate: bool) -> Option<String> {
     unsafe {
         let display = XOpenDisplay(ptr::null());
@@ -79,6 +84,11 @@ fn try_x11(refresh_rate: bool) -> Option<String> {
         XCloseDisplay(display);
         Some(result)
     }
+}
+
+#[cfg(not(feature = "x11"))]
+fn try_x11(_refresh_rate: bool) -> Option<String> {
+    None
 }
 
 fn try_drm(refresh_rate: bool) -> Option<String> {
