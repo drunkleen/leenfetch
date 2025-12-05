@@ -565,6 +565,13 @@ impl Core {
     }
 
     pub fn get_ascii_and_colors(&self) -> (String, HashMap<&str, &str>) {
+        self.get_ascii_and_colors_for_distro(None)
+    }
+
+    pub fn get_ascii_and_colors_for_distro(
+        &self,
+        distro_override: Option<&str>,
+    ) -> (String, HashMap<&str, &str>) {
         let custom_ascii_path = {
             let path = self.flags.custom_ascii_path.trim();
             if path.is_empty() { None } else { Some(path) }
@@ -581,8 +588,15 @@ impl Core {
         };
 
         let resolved_distro = match ascii_distro_value {
-            "auto" => get_distro(DistroDisplay::Name),
-            "auto_small" => format!("{}_small", get_distro(DistroDisplay::Name)),
+            "auto" => distro_override
+                .map(|s| s.to_string())
+                .unwrap_or_else(|| get_distro(DistroDisplay::Name)),
+            "auto_small" => {
+                let base = distro_override
+                    .map(|s| s.to_string())
+                    .unwrap_or_else(|| get_distro(DistroDisplay::Name));
+                format!("{}_small", base)
+            }
             other => other.to_string(),
         };
 

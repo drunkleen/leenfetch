@@ -163,13 +163,6 @@ fn run() -> Result<()> {
 }
 
 fn run_remote(core: &Core, overrides: &CliOverrides, pipe_input: &str) -> Result<()> {
-    let (ascii, colors) = core.get_ascii_and_colors();
-    let ascii_block = if !pipe_input.is_empty() {
-        pipe_input.to_string()
-    } else {
-        colorize_text(ascii.clone(), &colors)
-    };
-
     for (index, host) in overrides.ssh_hosts.iter().enumerate() {
         if index > 0 {
             println!();
@@ -177,6 +170,14 @@ fn run_remote(core: &Core, overrides: &CliOverrides, pipe_input: &str) -> Result
         println!("=== Remote: {host} ===");
         let info = fetch_remote_system_info(host)?;
         let mut data = Data::from(&info);
+
+        let distro_hint = info.distro.as_deref().or(info.os.as_deref());
+        let (ascii, colors) = core.get_ascii_and_colors_for_distro(distro_hint);
+        let ascii_block = if !pipe_input.is_empty() {
+            pipe_input.to_string()
+        } else {
+            colorize_text(ascii.clone(), &colors)
+        };
 
         if let Some(parsed) = parse_ssh_target_parts(host) {
             if let Some(ssh_user) = parsed.user {

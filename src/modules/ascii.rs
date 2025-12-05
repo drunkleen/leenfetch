@@ -137,8 +137,8 @@ pub fn get_builtin_ascii_art(ascii_distro: &str) -> &'static str {
 
         ("dahlia", _) => DAHLIA,
 
-        ("debian", true) | ("Debian GNU/Linux", true) => DEBIAN_SMALL,
-        ("debian", false) | ("Debian GNU/Linux", false) => DEBIAN,
+        ("debian", true) | ("debian gnu/linux", true) => DEBIAN_SMALL,
+        ("debian", false) | ("debian gnu/linux", false) => DEBIAN,
 
         ("deepin", _) => DEEPIN,
 
