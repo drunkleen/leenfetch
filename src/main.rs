@@ -1,11 +1,12 @@
 use anyhow::{Context, Result, anyhow};
 use atty::Stream;
+use clap::Parser;
 use leenfetch_core::{
-    config,
+    SystemInfo, config,
     core::{Core, Data},
     gather_system_info,
     modules::{
-        helper::{CliOverrides, OutputFormat, handle_args},
+        helper::{Args, CliOverrides, OutputFormat, list_options, print_custom_help},
         utils::colorize_text,
     },
 };
@@ -14,6 +15,7 @@ use regex::Regex;
 use std::{
     collections::HashSet,
     io::{self, Read},
+    process::Command,
 };
 use unicode_width::UnicodeWidthStr;
 
@@ -28,13 +30,57 @@ fn main() {
 }
 
 fn run() -> Result<()> {
-    let mut args = std::env::args();
-    args.next(); // skip binary name
+    let args = Args::parse();
 
-    let overrides = match handle_args(&mut args) {
-        Ok(map) => map,
-        Err(_) => return Ok(()),
-    };
+    if args.help {
+        print_custom_help();
+        return Ok(());
+    }
+    if args.list_options {
+        list_options();
+        return Ok(());
+    }
+    if args.init {
+        let results = config::ensure_config_files_exist();
+        for (file, created) in results {
+            if created {
+                println!("✅ Created missing config: {file}");
+            } else {
+                println!("✔️ Config already exists: {file}");
+            }
+        }
+        return Ok(());
+    }
+    if args.reinit {
+        let result = config::delete_config_files();
+        for (file, ok) in result {
+            println!(
+                "{} {}\n use --help for more info",
+                if ok {
+                    "🗑️ Deleted"
+                } else {
+                    "⚠️ Failed to delete"
+                },
+                file
+            );
+        }
+
+        let result = config::generate_config_files();
+        for (file, ok) in result {
+            println!(
+                "{} {}\n use --help for more info",
+                if ok {
+                    "✅ Generated"
+                } else {
+                    "⚠️ Failed to generate"
+                },
+                file
+            );
+        }
+        return Ok(());
+    }
+
+    let overrides = args.into_overrides();
 
     if !overrides.use_defaults && overrides.config_path.is_none() {
         let results = config::ensure_config_files_exist();
@@ -78,6 +124,10 @@ fn run() -> Result<()> {
 
     let core = Core::new_with(flags, layout);
 
+    if !overrides.ssh_hosts.is_empty() {
+        return run_remote(&core, &overrides, &pipe_input);
+    }
+
     let system_info = gather_system_info(&config).context("Failed to gather system information")?;
 
     if matches!(overrides.output_format, OutputFormat::Json) {
@@ -110,6 +160,72 @@ fn run() -> Result<()> {
     }
 
     Ok(())
+}
+
+fn run_remote(core: &Core, overrides: &CliOverrides, pipe_input: &str) -> Result<()> {
+    let (ascii, colors) = core.get_ascii_and_colors();
+    let ascii_block = if !pipe_input.is_empty() {
+        pipe_input.to_string()
+    } else {
+        colorize_text(ascii.clone(), &colors)
+    };
+
+    for (index, host) in overrides.ssh_hosts.iter().enumerate() {
+        if index > 0 {
+            println!();
+        }
+        println!("=== Remote: {host} ===");
+        let info = fetch_remote_system_info(host)?;
+        let data = Data::from(&info);
+        let info_layout = core.render_layout(&data);
+        let info_lines = colorize_text(info_layout, &colors)
+            .lines()
+            .map(|l| l.to_string())
+            .collect::<Vec<_>>();
+
+        print_ascii_and_info(&ascii_block, &info_lines);
+    }
+
+    Ok(())
+}
+
+fn fetch_remote_system_info(target: &str) -> Result<SystemInfo> {
+    let ssh_bin = detect_ssh_binary();
+    let output = Command::new(ssh_bin)
+        .arg(target)
+        .arg("leenfetch")
+        .arg("--format")
+        .arg("json")
+        .output()
+        .with_context(|| format!("Failed to spawn ssh for target {target}"))?;
+
+    if !output.status.success() {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        return Err(anyhow!(
+            "ssh to {target} failed (status {}): {stderr}",
+            output
+                .status
+                .code()
+                .map(|c| c.to_string())
+                .unwrap_or_else(|| "unknown".into())
+        ));
+    }
+
+    let stdout = String::from_utf8(output.stdout)
+        .with_context(|| format!("Invalid UTF-8 in ssh output from {target}"))?;
+    let info: SystemInfo = serde_json::from_str(&stdout)
+        .with_context(|| format!("Failed to parse JSON from {target}: {}", stdout.trim()))?;
+    Ok(info)
+}
+
+#[cfg(target_os = "windows")]
+fn detect_ssh_binary() -> &'static str {
+    "ssh.exe"
+}
+
+#[cfg(not(target_os = "windows"))]
+fn detect_ssh_binary() -> &'static str {
+    "ssh"
 }
 
 /// Prints the ASCII art block and info lines side-by-side.
