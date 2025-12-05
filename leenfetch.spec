@@ -1,5 +1,5 @@
 Name:           leenfetch
-Version:        1.0.4
+Version:        1.0.5
 Release:        1%{?dist}
 Summary:        a modern, minimal, and the fastest system info tool, written in Rust.
 
@@ -39,5 +39,5 @@ install -Dm0644 leenfetch.1 %{buildroot}%{_mandir}/man1/leenfetch.1
 %{_mandir}/man1/leenfetch.1.gz
 
 %changelog
-* Sat Oct 25 2025 DrunkLeen <snape@drunkleen.com> - 1.0.4-1
+* Sat Oct 25 2025 DrunkLeen <snape@drunkleen.com> - 1.0.5
 - Initial COPR release
