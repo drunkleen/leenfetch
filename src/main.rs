@@ -163,6 +163,33 @@ fn run() -> Result<()> {
 }
 
 fn run_remote(core: &Core, overrides: &CliOverrides, pipe_input: &str) -> Result<()> {
+    let is_json = matches!(overrides.output_format, OutputFormat::Json);
+
+    if is_json {
+        for (index, host) in overrides.ssh_hosts.iter().enumerate() {
+            if index > 0 {
+                println!();
+            }
+            let info = fetch_remote_system_info(host)?;
+            let mut data = Data::from(&info);
+            if let Some(parsed) = parse_ssh_target_parts(host) {
+                if let Some(ssh_user) = parsed.user {
+                    if !ssh_user.is_empty() {
+                        data.username = Some(ssh_user.to_string());
+                    }
+                }
+                if !parsed.host.is_empty() {
+                    data.hostname = Some(parsed.host.to_string());
+                }
+            }
+            // Emit JSON per host
+            let json = serde_json::to_string_pretty(&SystemInfo::from(data))
+                .context("Failed to serialize remote system info to JSON")?;
+            println!("{json}");
+        }
+        return Ok(());
+    }
+
     for (index, host) in overrides.ssh_hosts.iter().enumerate() {
         if index > 0 {
             println!();
@@ -211,8 +238,9 @@ fn fetch_remote_system_info(target: &str) -> Result<SystemInfo> {
     });
 
     let mut cmd = Command::new(ssh_bin);
-    cmd.arg("-o")
-        .arg("BatchMode=yes") // avoid interactive password prompts
+    cmd
+        // .arg("-o")
+        // .arg("BatchMode=yes") // avoid interactive password prompts
         .arg("-o")
         .arg("ConnectTimeout=5");
 

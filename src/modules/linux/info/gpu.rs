@@ -98,11 +98,17 @@ fn describe_device(device_dir: &Path) -> Option<String> {
         }
         (Some(vendor), _) => vendor,
         (_, Some(model)) => model,
-        _ => format!(
-            "GPU [{}:{}]",
-            vendor_hex.as_deref().unwrap_or("????"),
-            device_hex.as_deref().unwrap_or("????")
-        ),
+        _ => {
+            if let Some(driver) = driver.as_deref() {
+                driver.to_string()
+            } else {
+                format!(
+                    "GPU [{}:{}]",
+                    vendor_hex.as_deref().unwrap_or("????"),
+                    device_hex.as_deref().unwrap_or("????")
+                )
+            }
+        }
     };
 
     if let Some(role) = classify_gpu(vendor_id, driver.as_deref()) {
@@ -182,6 +188,7 @@ fn classify_gpu(vendor: Option<u16>, driver: Option<&str>) -> Option<&'static st
         _ => match driver {
             Some("i915") | Some("xe") => Some("Integrated"),
             Some("amdgpu") | Some("radeon") | Some("nvidia") => Some("Discrete"),
+            Some("vc4") | Some("v3d") => Some("Integrated"),
             Some("virtio-pci") | Some("bochs-drm") => Some("Virtual"),
             _ => None,
         },
