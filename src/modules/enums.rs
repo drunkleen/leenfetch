@@ -1,3 +1,4 @@
+use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
 /// Holds information about the currently playing song, if available.
@@ -6,7 +7,7 @@ use std::str::FromStr;
 /// - `artist`: Name of the artist (e.g., "Radiohead")
 /// - `album`: Name of the album (e.g., "OK Computer")
 /// - `title`: Title of the song (e.g., "Paranoid Android")
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
 #[allow(dead_code)]
 pub struct SongInfo {
     pub artist: String,

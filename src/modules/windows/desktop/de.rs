@@ -1,6 +1,6 @@
+use crate::modules::windows::process::process_names_lower;
 use std::ffi::OsStr;
 use std::os::windows::ffi::OsStrExt;
-use crate::modules::windows::process::process_names_lower;
 use std::ptr::null_mut;
 use winapi::shared::minwindef::DWORD;
 use winapi::um::winver::{GetFileVersionInfoSizeW, GetFileVersionInfoW, VerQueryValueW};

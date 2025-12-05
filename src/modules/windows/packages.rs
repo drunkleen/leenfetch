@@ -15,7 +15,7 @@ pub fn get_packages(shorthand: PackageShorthand) -> Option<String> {
 
     let mut total = 0u64;
     let mut managers = vec![]; // detailed entries for On mode
-    let mut names = vec![];    // just names for Tiny mode
+    let mut names = vec![]; // just names for Tiny mode
 
     // Prefer fast filesystem counts for choco/scoop
     if let Some(count) = count_choco_fs() {
@@ -41,7 +41,10 @@ pub fn get_packages(shorthand: PackageShorthand) -> Option<String> {
         managers.push(format!("{count} (scoop)"));
         names.push("scoop");
     } else if is_installed("scoop") {
-        if let Some(count) = count_lines_timeout(Command::new("scoop").arg("list"), Duration::from_millis(400)) {
+        if let Some(count) = count_lines_timeout(
+            Command::new("scoop").arg("list"),
+            Duration::from_millis(400),
+        ) {
             total += count;
             managers.push(format!("{count} (scoop)"));
             names.push("scoop");
@@ -53,7 +56,10 @@ pub fn get_packages(shorthand: PackageShorthand) -> Option<String> {
 
     // winget is frequently slow; try briefly and otherwise only record presence
     if is_installed("winget") {
-        if let Some(count) = count_lines_timeout(Command::new("winget").arg("list"), Duration::from_millis(1000)) {
+        if let Some(count) = count_lines_timeout(
+            Command::new("winget").arg("list"),
+            Duration::from_millis(1000),
+        ) {
             total += count;
             managers.push(format!("{count} (winget)"));
             names.push("winget");
@@ -76,7 +82,10 @@ pub fn get_packages(shorthand: PackageShorthand) -> Option<String> {
 
 fn is_installed(cmd: &str) -> bool {
     // Avoid spawning external processes; search PATH with PATHEXT
-    let path = match env::var_os("PATH") { Some(p) => p, None => return false };
+    let path = match env::var_os("PATH") {
+        Some(p) => p,
+        None => return false,
+    };
     let pathext = env::var_os("PATHEXT").unwrap_or_else(|| ".COM;.EXE;.BAT;.CMD".into());
     let exts: Vec<String> = pathext
         .to_string_lossy()
@@ -85,10 +94,14 @@ fn is_installed(cmd: &str) -> bool {
         .map(|s| s.trim().to_string())
         .collect();
     for dir in env::split_paths(&path) {
-        if dir.as_os_str().is_empty() { continue; }
+        if dir.as_os_str().is_empty() {
+            continue;
+        }
         // Try exact filename (in case caller provided full name with extension)
         let candidate = dir.join(cmd);
-        if candidate.is_file() { return true; }
+        if candidate.is_file() {
+            return true;
+        }
         // Try with PATHEXT suffixes
         for ext in &exts {
             let mut name = cmd.to_string();
@@ -98,14 +111,17 @@ fn is_installed(cmd: &str) -> bool {
             }
             name.push_str(ext.trim_start_matches('.'));
             let c = dir.join(&name);
-            if c.is_file() { return true; }
+            if c.is_file() {
+                return true;
+            }
         }
     }
     false
 }
 
 fn count_choco_fs() -> Option<u64> {
-    let programdata = env::var_os("PROGRAMDATA").unwrap_or_else(|| PathBuf::from(r"C:\\ProgramData").into());
+    let programdata =
+        env::var_os("PROGRAMDATA").unwrap_or_else(|| PathBuf::from(r"C:\\ProgramData").into());
     let lib = PathBuf::from(programdata).join("chocolatey").join("lib");
     let entries = fs::read_dir(&lib).ok()?;
     let mut count = 0u64;
@@ -119,9 +135,9 @@ fn count_choco_fs() -> Option<u64> {
 }
 
 fn count_scoop_fs() -> Option<u64> {
-    let root = env::var_os("SCOOP").map(PathBuf::from).or_else(|| {
-        env::var_os("USERPROFILE").map(|u| PathBuf::from(u).join("scoop"))
-    })?;
+    let root = env::var_os("SCOOP")
+        .map(PathBuf::from)
+        .or_else(|| env::var_os("USERPROFILE").map(|u| PathBuf::from(u).join("scoop")))?;
     let apps = root.join("apps");
     let entries = fs::read_dir(&apps).ok()?;
     let mut count = 0u64;
@@ -129,7 +145,9 @@ fn count_scoop_fs() -> Option<u64> {
         let p = e.path();
         if p.is_dir() {
             let name = p.file_name().and_then(|s| s.to_str()).unwrap_or("");
-            if name.eq_ignore_ascii_case("scoop") { continue; }
+            if name.eq_ignore_ascii_case("scoop") {
+                continue;
+            }
             count += 1;
         }
     }

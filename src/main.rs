@@ -1,14 +1,13 @@
-mod config;
-mod core;
-mod modules;
-#[cfg(test)]
-mod test_utils;
-
+use anyhow::{Context, Result, anyhow};
 use atty::Stream;
-use core::Core;
-use modules::{
-    helper::{CliOverrides, handle_args},
-    utils::colorize_text,
+use leenfetch_core::{
+    config,
+    core::{Core, Data},
+    gather_system_info,
+    modules::{
+        helper::{CliOverrides, OutputFormat, handle_args},
+        utils::colorize_text,
+    },
 };
 use once_cell::sync::Lazy;
 use regex::Regex;
@@ -22,12 +21,19 @@ static ANSI_REGEX: Lazy<Regex> =
     Lazy::new(|| Regex::new(r"\x1b\[[0-9;]*m").expect("valid ANSI regex"));
 
 fn main() {
+    if let Err(err) = run() {
+        eprintln!("{err:?}");
+        std::process::exit(1);
+    }
+}
+
+fn run() -> Result<()> {
     let mut args = std::env::args();
     args.next(); // skip binary name
 
     let overrides = match handle_args(&mut args) {
         Ok(map) => map,
-        Err(_) => return,
+        Err(_) => return Ok(()),
     };
 
     if !overrides.use_defaults && overrides.config_path.is_none() {
@@ -43,47 +49,46 @@ fn main() {
     if !atty::is(Stream::Stdin) {
         io::stdin()
             .read_to_string(&mut pipe_input)
-            .expect("Failed to read from stdin");
+            .context("Failed to read from stdin")?;
     }
 
-    let simple_run = overrides.flags.is_empty()
-        && overrides.only_modules.is_none()
-        && overrides.hide_modules.is_empty()
-        && overrides.config_path.is_none()
-        && !overrides.use_defaults;
-
-    let mut core = if simple_run {
-        Core::new()
+    let mut config = if overrides.use_defaults {
+        config::default_config()
     } else {
-        let config = if overrides.use_defaults {
-            config::default_config()
-        } else {
-            match config::load_config_at(overrides.config_path.as_deref()) {
-                Ok(cfg) => cfg,
-                Err(err) => {
-                    eprintln!("{err}");
-                    return;
-                }
-            }
-        };
-
-        let mut flags = config.flags.clone();
-        let mut layout = if config.layout.is_empty() {
-            config::default_layout()
-        } else {
-            config.layout.clone()
-        };
-
-        if let Err(err) = apply_flag_overrides(&mut flags, &overrides) {
-            eprintln!("{err}");
-            return;
+        match config::load_config_at(overrides.config_path.as_deref()) {
+            Ok(cfg) => cfg,
+            Err(err) => return Err(anyhow!(err)),
         }
-        apply_layout_overrides(&mut layout, &overrides);
-
-        Core::new_with(flags, layout)
     };
 
-    let info_layout = core.get_info_layout();
+    let mut flags = config.flags.clone();
+    let mut layout = if config.layout.is_empty() {
+        config::default_layout()
+    } else {
+        config.layout.clone()
+    };
+
+    if let Err(err) = apply_flag_overrides(&mut flags, &overrides) {
+        return Err(anyhow!(err));
+    }
+    apply_layout_overrides(&mut layout, &overrides);
+
+    config.flags = flags.clone();
+    config.layout = layout.clone();
+
+    let core = Core::new_with(flags, layout);
+
+    let system_info = gather_system_info(&config).context("Failed to gather system information")?;
+
+    if matches!(overrides.output_format, OutputFormat::Json) {
+        let json = serde_json::to_string_pretty(&system_info)
+            .context("Failed to serialize system info to JSON")?;
+        println!("{json}");
+        return Ok(());
+    }
+
+    let data = Data::from(&system_info);
+    let info_layout = core.render_layout(&data);
     let (ascii, colors) = core.get_ascii_and_colors();
 
     if !pipe_input.is_empty() {
@@ -103,6 +108,8 @@ fn main() {
                 .collect::<Vec<_>>(),
         );
     }
+
+    Ok(())
 }
 
 /// Prints the ASCII art block and info lines side-by-side.

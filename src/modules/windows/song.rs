@@ -1,5 +1,5 @@
-use std::process::Command;
 use crate::modules::windows::process::process_names_lower;
+use std::process::Command;
 
 use crate::modules::enums::SongInfo;
 

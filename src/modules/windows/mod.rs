@@ -1,11 +1,11 @@
 pub mod desktop;
 pub mod info;
 pub mod packages;
+pub mod process;
 pub mod shell;
 pub mod song;
 pub mod system;
 pub mod title;
-pub mod process;
 
 /// Returns true when "safe mode" is enabled.
 /// Safe mode avoids certain Win32 process-inspection APIs (e.g., Toolhelp/OpenProcess)

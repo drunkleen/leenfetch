@@ -1,6 +1,28 @@
 use crate::config;
 use std::collections::{HashMap, HashSet};
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum OutputFormat {
+    Pretty,
+    Json,
+}
+
+impl OutputFormat {
+    fn from_str(value: &str) -> Result<Self, String> {
+        match value.to_ascii_lowercase().as_str() {
+            "pretty" => Ok(OutputFormat::Pretty),
+            "json" => Ok(OutputFormat::Json),
+            other => Err(format!("Invalid format: {other}. Use 'pretty' or 'json'.")),
+        }
+    }
+}
+
+impl Default for OutputFormat {
+    fn default() -> Self {
+        OutputFormat::Pretty
+    }
+}
+
 /// Captures configuration overrides controlled by CLI switches.
 #[derive(Default, Debug)]
 pub struct CliOverrides {
@@ -9,6 +31,7 @@ pub struct CliOverrides {
     pub hide_modules: HashSet<String>,
     pub config_path: Option<String>,
     pub use_defaults: bool,
+    pub output_format: OutputFormat,
 }
 
 impl CliOverrides {
@@ -91,6 +114,17 @@ pub fn handle_args(args: &mut std::env::Args) -> Result<CliOverrides, ()> {
             "--no-config" => {
                 overrides.use_defaults = true;
                 overrides.config_path = None;
+            }
+            "--format" => {
+                let val = expect_value(args, "--format")?;
+                match OutputFormat::from_str(&val) {
+                    Ok(fmt) => overrides.output_format = fmt,
+                    Err(err) => {
+                        println!("❌ {err}");
+                        println!("⚠️ use --help for more info");
+                        return Err(());
+                    }
+                }
             }
             "--ascii_distro" => {
                 let val = expect_value(args, "--ascii_distro")?;
@@ -223,6 +257,7 @@ OPTIONS:
   -l, --list-options       Show all available config options and values
       --config <path>      Load configuration from a custom file
       --no-config          Ignore config files and use built-in defaults
+      --format <kind>      Output format: pretty (default) or json
 
   --ascii_distro <s>       Override detected distro (e.g., ubuntu, arch, arch_small)
   --ascii_colors <s>       Override color palette (e.g., 2,7,3 or "distro")

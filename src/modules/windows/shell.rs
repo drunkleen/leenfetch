@@ -1,6 +1,8 @@
-use std::path::Path;
 use crate::modules::windows::is_safe_mode;
 use crate::modules::windows::process::process_names_lower;
+use std::path::Path;
+use std::process::{Command as Cmd, Stdio};
+use std::time::{Duration, Instant};
 use winapi::shared::minwindef::DWORD;
 use winapi::um::handleapi::CloseHandle;
 use winapi::um::processthreadsapi::OpenProcess;
@@ -8,8 +10,6 @@ use winapi::um::tlhelp32::{
     CreateToolhelp32Snapshot, PROCESSENTRY32W, Process32FirstW, Process32NextW, TH32CS_SNAPPROCESS,
 };
 use winapi::um::winbase::QueryFullProcessImageNameW;
-use std::process::{Command as Cmd, Stdio};
-use std::time::{Duration, Instant};
 use winapi::um::winnt::PROCESS_QUERY_LIMITED_INFORMATION;
 
 pub fn get_shell(show_path: bool, show_version: bool) -> Option<String> {
@@ -153,14 +153,22 @@ fn ps_version() -> String {
         {
             let deadline = Instant::now() + Duration::from_millis(300);
             loop {
-                if let Ok(Some(_)) = child.try_wait() { break; }
-                if Instant::now() > deadline { let _ = child.kill(); let _ = child.wait(); break; }
+                if let Ok(Some(_)) = child.try_wait() {
+                    break;
+                }
+                if Instant::now() > deadline {
+                    let _ = child.kill();
+                    let _ = child.wait();
+                    break;
+                }
                 std::thread::sleep(Duration::from_millis(10));
             }
             if let Ok(out) = child.wait_with_output() {
                 if out.status.success() {
                     let s = String::from_utf8_lossy(&out.stdout);
-                    if let Some(first) = s.lines().next() { return first.trim().to_string(); }
+                    if let Some(first) = s.lines().next() {
+                        return first.trim().to_string();
+                    }
                 }
             }
         }
