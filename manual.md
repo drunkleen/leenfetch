@@ -81,8 +81,10 @@
 - Modular design: enable or disable any information block independently.
 - Fully customizable output layout, labels, and color palette.
 - Rich ASCII art support with distro detection and custom artwork.
+- Remote fetching over SSH with pretty or JSON output.
 - Tracks packages, shell, GPU, DE/WM, theme, and more per platform.
 - Commented configuration file shipped in human-readable JSONC format.
+- Machine-readable JSON output for scripting (`--format json`).
 - Works on Linux and Windows with feature-aware fallbacks (macOS in progress).
 - Plays nicely in scripts, status bars, and login shells.
 
@@ -428,6 +430,26 @@ Tips:
 
 Run LeenFetch directly from the terminal. It reads configs, gathers data, and prints the decorated output in one pass.
 
+### Remote over SSH
+
+LeenFetch can gather data from remote hosts and render it locally. It runs `leenfetch --format json` on the remote side over SSH, parses the result, and prints a pretty block per host.
+
+```bash
+# Pretty output for one host (leverages your SSH config/agent)
+leenfetch --ssh user@server.example.com
+
+# Multiple hosts
+leenfetch --ssh user@server1 user@server2
+
+# Script-friendly JSON
+leenfetch --ssh server --format json
+```
+
+Notes:
+- The remote host must have `leenfetch` installed and in `PATH`.
+- SSH options are inherited from your usual SSH configuration; the flag accepts one or more hosts.
+- ASCII logo and colors reflect the remote distro for each host.
+
 ### Interactive Examples
 
 ```bash
@@ -475,6 +497,10 @@ Combine with other tools:
   | `--os-age <mode>` | `--os-age full` | Set OS age shorthand (same accepted values as uptime). |
   | `--distro-display <mode>` | `--distro-display name_model_arch` | Adjust distro detail level. |
   | `--cpu-temp-unit <unit>` | `--cpu-temp-unit off` | Choose `C`, `F`, or disable CPU temperature output. |
+  | `--format <pretty|json>` | `--format json` | Choose machine-readable JSON or the default pretty output. |
+
+- **Remote fetch**
+  - `--ssh <host>...` — Fetch info from one or more hosts over SSH. Each host is queried via `leenfetch --format json` remotely; output is rendered locally using the chosen `--format`.
 
 - **Boolean toggles**
 

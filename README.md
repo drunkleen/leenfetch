@@ -10,7 +10,7 @@
 **** -->
 
 
-##### A fast, minimal, and customizable system information tool built in Rust — your alternative to Neofetch, for real power users.
+##### A fast, minimal, and customizable system information tool built in Rust — your alternative to Neofetch, for real power users. Includes JSON output and remote fetching over SSH.
 
 
 > ⚠️ **LeenFetch is under active development. Expect bugs and improvements regularly!**
@@ -73,6 +73,8 @@ Head over to the [issues](https://github.com/drunkleen/leenfetch/issues) or join
 - 🎨 Supports theme-based color profiles (`ascii_colors=distro`, etc.)
 - 🔌 Single JSONC config: `~/.config/leenfetch/config.jsonc`
 - 🧵 Accepts piped ASCII input — use `fortune | cowsay | leenfetch` for dynamic text logos
+- 🌐 Fetch remote system info over SSH (`--ssh <host>...`) and reuse pretty output per host
+- 🧾 Machine-readable JSON output via `--format json` for scripting and dashboards
 
 
 ## ▨ Packaging Status
@@ -213,6 +215,28 @@ LeenFetch will detect piped input via `stdin` and render the ASCII art above you
 
 If no piped input is provided, it will fall back to your configured or auto-detected ASCII art.
 
+---
+
+## 🌐 Remote fetch over SSH
+
+Query other machines directly and render their info locally. LeenFetch runs `leenfetch --format json` over SSH, parses it, and prints a pretty block for each host.
+
+```bash
+# Pretty output for a remote host (uses your SSH config)
+leenfetch --ssh user@server.example.com
+
+# Multiple hosts at once
+leenfetch --ssh user@server1 user@server2
+
+# JSON only (scripting)
+leenfetch --ssh server --format json
+```
+
+Notes:
+- The remote host needs `leenfetch` installed and available in `PATH`.
+- ASCII logo and colors reflect the remote distro; each host renders separately.
+- SSH options come from your standard SSH config/agent (no custom flags are parsed).
+
 
 ---
 
@@ -349,7 +373,7 @@ Run `leenfetch --help` to see the complete list of overrides.
 | CLI override options        | 🔁 Basic      |
 | ASCII art & theming         | 🔁 Basic      |
 | Plugin/module system        | ❓ Maybe      |
-| Fetch info over SSH         | ❓ Maybe      |
+| Fetch info over SSH         | ✅ Done       |
 
 ---
 

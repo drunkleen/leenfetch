@@ -16,7 +16,7 @@ leenfetch [OPTIONS]
 ```
 
 ## DESCRIPTION
-**leenfetch** is a modern, fast, and highly configurable system information tool written in Rust. It displays system information alongside a distribution logo or custom ASCII art, similar to Neofetch, and is designed for both terminal enthusiasts and new users.
+**leenfetch** is a modern, fast, and highly configurable system information tool written in Rust. It displays system information alongside a distribution logo or custom ASCII art, similar to Neofetch, and is designed for both terminal enthusiasts and new users. It can also fetch data from remote hosts over SSH and render it locally in pretty or JSON form.
 
 Configuration lives in a single JSON-with-comments file (`config.jsonc`), with inline explanations for every option.
 
@@ -61,6 +61,10 @@ leenfetch can also accept **piped input** to render as ASCII art. This allows us
   Set OS detail level (e.g., `name`, `name_version`, `name_model_arch`).
 - `--cpu-temp-unit <UNIT>`  
   Select CPU temperature units (`C`, `F`, or `off` to hide).
+- `--format <pretty|json>`  
+  Choose human-readable pretty output (default) or machine-readable JSON.
+- `--ssh <HOST>...`  
+  Fetch system info from one or more hosts via SSH, then render locally. Each host runs `leenfetch --format json` remotely; the output is printed locally using the requested format.
 - `--only <LIST>`  
   Render only the listed modules (comma-separated).
 - `--hide <LIST>`  
@@ -89,6 +93,8 @@ Edit the file to adjust appearance, enabled modules, spacing, or output order.
   Create the default config file if missing.
 - `leenfetch --reinit`  
   Delete and regenerate the config file.
+- `leenfetch --ssh user@server`  
+  Fetch system info from a remote host over SSH and render locally.
 - `echo "Rustacean" | leenfetch`  
   Display system info with a piped ASCII logo generated from the input text.
 - `fortune | cowsay | leenfetch`  

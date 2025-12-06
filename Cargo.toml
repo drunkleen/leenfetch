@@ -11,7 +11,7 @@ keywords = ["neofetch", "system", "terminal", "info", "leenfetch"]
 authors = ["DrunkLeen <snape@drunkleen.com>"]
 
 [features]
-default = ["x11"]
+default = []
 x11 = []
 
 [lib]

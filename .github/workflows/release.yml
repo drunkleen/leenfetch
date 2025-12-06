@@ -41,19 +41,18 @@ jobs:
 
       - name: Install system dependencies (Linux hosts)
         if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y libx11-dev libxrandr-dev zip rpm gcc-aarch64-linux-gnu
+        run: sudo apt-get update && sudo apt-get install -y libx11-dev libxrandr-dev zip rpm gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu
 
       - name: Install packaging tools
         run: |
           cargo install cargo-deb
           cargo install cargo-rpm
-          cargo install cargo-appimage
           cargo install cross
 
       - name: Build artifacts
         shell: bash
         run: |
-          set -euo pipefail
+          set -euxo pipefail
           mkdir -p dist
 
           case "${{ matrix.target }}" in
@@ -63,43 +62,57 @@ jobs:
               (cd dist && zip leenfetch-${VERSION}-windows-x86_64.zip leenfetch-${VERSION}-windows-x86_64.exe)
               ;;
             x86_64-unknown-linux-gnu)
-              cargo build --release --target ${{ matrix.target }}
-              HOST_TRIPLE=$(rustc -vV | awk '/host/ {print $2}')
-              if [[ "${{ matrix.target }}" == "$HOST_TRIPLE" ]]; then
-                BIN_PATH=target/release/leenfetch
-              else
-                BIN_PATH=target/${{ matrix.target }}/release/leenfetch
-              fi
-
+              cargo build --release --target ${{ matrix.target }} --features x11
+              BIN_PATH=target/${{ matrix.target }}/release/leenfetch
               cp "$BIN_PATH" dist/leenfetch
               tar -czvf dist/leenfetch-${VERSION}-linux-x86_64.tar.gz -C dist leenfetch
               rm dist/leenfetch
 
-              cargo deb
+              cargo deb --features x11
               mv target/debian/*.deb dist/leenfetch-${VERSION}-debian-x86_64.deb
 
               cargo rpm init || true
-              cargo rpm build
+              CARGO_BUILD_FLAGS="--features x11" cargo rpm build
               cp target/release/rpmbuild/RPMS/x86_64/*.rpm dist/leenfetch-${VERSION}-rhel-x86_64.rpm
 
-              cargo appimage --target ${{ matrix.target }} --release
-              cp target/${{ matrix.target }}/release/bundle/appimage/*.AppImage dist/leenfetch-${VERSION}-linux-x86_64.AppImage
               ;;
             aarch64-unknown-linux-gnu)
-              cross build --release --target ${{ matrix.target }}
-              cp target/${{ matrix.target }}/release/leenfetch dist/leenfetch
+              BIN_DIR="target/${{ matrix.target }}/release"
+
+              cross build --release --target ${{ matrix.target }} --no-default-features
+              BIN_PATH="$BIN_DIR/leenfetch"
+              cp "$BIN_PATH" dist/leenfetch
               tar -czvf dist/leenfetch-${VERSION}-linux-aarch64.tar.gz -C dist leenfetch
               rm dist/leenfetch
 
-              cross build --release --target ${{ matrix.target }}
-              cargo deb --no-build --no-strip --target ${{ matrix.target }}
+              cross build --release --target ${{ matrix.target }} --no-default-features
+              cargo deb --no-strip --target ${{ matrix.target }} --no-default-features
               cp target/${{ matrix.target }}/debian/*.deb dist/leenfetch-${VERSION}-debian-aarch64.deb
 
-              cargo rpm build --target ${{ matrix.target }} --no-build
-              cp target/${{ matrix.target }}/release/rpmbuild/RPMS/aarch64/*.rpm dist/leenfetch-${VERSION}-rhel-aarch64.rpm
+              echo "Contents of $BIN_DIR:"
+              ls -l "$BIN_DIR" || true
+              echo "All leenfetch binaries under target:"
+              find target -type f -name "leenfetch" -print
 
-              cargo appimage --target ${{ matrix.target }} --release
-              cp target/${{ matrix.target }}/release/bundle/appimage/*.AppImage dist/leenfetch-${VERSION}-linux-aarch64.AppImage
+              cargo rpm init || true
+              export STRIP=aarch64-linux-gnu-strip
+              RPM_TOP="target/${{ matrix.target }}/release/rpmbuild"
+              mkdir -p "$RPM_TOP"/{SOURCES,SPECS,BUILD,BUILDROOT,RPMS,SRPMS}
+              export CARGO_RPM_TOPDIR="$RPM_TOP"
+              mkdir -p target/release
+              RUST_BACKTRACE=1 CARGO_LOG=cargo::ops::cargo_rpm=trace CARGO_BUILD_FLAGS="--no-default-features" cargo rpm build --target ${{ matrix.target }} -v
+              echo "Searching for RPMs under target..."
+              find target -maxdepth 6 -type f -name "*.rpm" -print
+              RPM_PATHS=$(find target -type f -path "*rpmbuild/RPMS/*/*.rpm")
+              if [ -z "$RPM_PATHS" ]; then
+                echo "RPM not found under target; contents:"
+                find target -maxdepth 6 -type d -print
+                exit 1
+              fi
+              RPM_PATH=$(printf "%s\n" "$RPM_PATHS" | head -n1)
+              echo "Using RPM at: $RPM_PATH"
+              cp "$RPM_PATH" dist/leenfetch-${VERSION}-rhel-aarch64.rpm
+
               ;;
           esac
 
@@ -117,15 +130,72 @@ jobs:
         with:
           path: dist
 
+      - name: Flatten downloaded artifacts
+        run: |
+          set -euxo pipefail
+          # Move artifact files from nested download dirs into dist/
+          find dist -mindepth 2 -type f -exec mv -f {} dist/ \;
+          find dist -mindepth 1 -type d -empty -delete
+
+      - name: Extract tag name
+        run: echo "VERSION=${GITHUB_REF##*/}" >> $GITHUB_ENV
+
       - name: Generate checksums
         run: |
           cd dist
           find . -type f ! -name "SHA256SUMS.txt" -print0 | xargs -0 sha256sum > SHA256SUMS.txt
 
+      - name: Build release notes body
+        env:
+          REPO: ${{ github.repository }}
+        run: |
+          set -euxo pipefail
+          cat > dist/RELEASE.md <<'EOF'
+          # 🐧 LeenFetch ${{ env.VERSION }}
+
+          ## 📦 Available Downloads
+
+          Archlinux users can install LeenFetch from the AUR: [leenfetch](https://aur.archlinux.org/packages/leenfetch)
+          ```yay -S leenfetch``` or ```paru -S leenfetch```
+
+          | File | Platform | Format | Install Instructions |
+          |------|----------|--------|----------------------|
+          | [leenfetch-${{ env.VERSION }}-linux-x86_64.tar.gz](https://github.com/drunkleen/leenfetch/releases/download/${{ env.VERSION }}/leenfetch-${{ env.VERSION }}-linux-x86_64.tar.gz) | Linux (x86_64) | tar.gz | `tar -xzvf` and run `./leenfetch` |
+          | [leenfetch-${{ env.VERSION }}-linux-aarch64.tar.gz](https://github.com/drunkleen/leenfetch/releases/download/${{ env.VERSION }}/leenfetch-${{ env.VERSION }}-linux-aarch64.tar.gz) | Linux (ARM64) | tar.gz | `tar -xzvf` and run `./leenfetch` |
+          | [leenfetch-${{ env.VERSION }}-debian-x86_64.deb](https://github.com/drunkleen/leenfetch/releases/download/${{ env.VERSION }}/leenfetch-${{ env.VERSION }}-debian-x86_64.deb) | Debian/Ubuntu (x86_64) | .deb | `sudo dpkg -i` |
+          | [leenfetch-${{ env.VERSION }}-debian-aarch64.deb](https://github.com/drunkleen/leenfetch/releases/download/${{ env.VERSION }}/leenfetch-${{ env.VERSION }}-debian-aarch64.deb) | Debian/Ubuntu (ARM64) | .deb | `sudo dpkg -i` |
+          | [leenfetch-${{ env.VERSION }}-rhel-x86_64.rpm](https://github.com/drunkleen/leenfetch/releases/download/${{ env.VERSION }}/leenfetch-${{ env.VERSION }}-rhel-x86_64.rpm) | RHEL/CentOS/Fedora (x86_64) | .rpm | `sudo rpm -i` |
+          | [leenfetch-${{ env.VERSION }}-rhel-aarch64.rpm](https://github.com/drunkleen/leenfetch/releases/download/${{ env.VERSION }}/leenfetch-${{ env.VERSION }}-rhel-aarch64.rpm) | RHEL/CentOS/Fedora (ARM64) | .rpm | `sudo rpm -i` |
+          | [leenfetch-${{ env.VERSION }}-windows-x86_64.zip](https://github.com/drunkleen/leenfetch/releases/download/${{ env.VERSION }}/leenfetch-${{ env.VERSION }}-windows-x86_64.zip) | Windows (x86_64) | .zip | Extract and run `leenfetch-${{ env.VERSION }}-windows-x86_64.exe` |
+          | [leenfetch-${{ env.VERSION }}-windows-x86_64.exe](https://github.com/drunkleen/leenfetch/releases/download/${{ env.VERSION }}/leenfetch-${{ env.VERSION }}-windows-x86_64.exe) | Windows (x86_64) | .exe | Run `leenfetch-${{ env.VERSION }}-windows-x86_64.exe` |
+
+          ## 🔐 Checksums
+          ```
+          EOF
+          cat dist/SHA256SUMS.txt >> dist/RELEASE.md
+          echo '```' >> dist/RELEASE.md
+
+      - name: Append autogenerated release notes (changes & commits)
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euxo pipefail
+          NOTES=$(gh api -X POST repos/$REPO/releases/generate-notes -f tag_name=${VERSION} --jq '.body')
+          {
+            cat dist/RELEASE.md
+            echo
+            echo "## ♻️ Changes & Commits"
+            echo
+            echo "$NOTES"
+          } > dist/RELEASE_WITH_NOTES.md
+          mv dist/RELEASE_WITH_NOTES.md dist/RELEASE.md
+
       - name: Upload Release Assets
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/**/* 
-          generate_release_notes: true
+          files: dist/* 
+          generate_release_notes: false
+          body_path: dist/RELEASE.md
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
