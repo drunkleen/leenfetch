@@ -71,6 +71,15 @@ leenfetch can also accept **piped input** to render as ASCII art. This allows us
   Hide specific modules (comma-separated).
 - Boolean toggles follow a paired pattern—use `--cpu-speed` / `--no-cpu-speed`, `--shell-path` / `--no-shell-path`, `--memory-percent` / `--no-memory-percent`, `--refresh-rate` / `--no-refresh-rate`, etc.
 
+## REMOTE FETCHING OVER SSH
+
+`--ssh` lets you pull data from remote hosts and render it locally. LeenFetch connects with your system SSH client, runs `leenfetch --format json` on each target, parses the output, and prints either pretty text (default) or JSON (`--format json`).
+
+- Requirements: the remote host must have `leenfetch` in `PATH`.
+- Uses your SSH config/agent, honoring usernames/ports in the target string; a short connect timeout is applied.
+- Per-host ASCII art/colors come from the remote distro while layout comes from your local config.
+- JSON mode prints one JSON object per host (separated by blank lines).
+
 
 ## CONFIGURATION
 leenfetch uses a single JSONC file for configuration, typically located at:
@@ -94,6 +103,8 @@ Edit the file to adjust appearance, enabled modules, spacing, or output order.
 - `leenfetch --reinit`  
   Delete and regenerate the config file.
 - `leenfetch --ssh user@server`  
+- `leenfetch --ssh user@server:port`  
+- `leenfetch --ssh user@server:port --ssh user@server:port`  
   Fetch system info from a remote host over SSH and render locally.
 - `echo "Rustacean" | leenfetch`  
   Display system info with a piped ASCII logo generated from the input text.

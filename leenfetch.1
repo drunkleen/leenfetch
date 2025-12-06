@@ -180,6 +180,24 @@ Boolean toggles follow a paired pattern\[em]use
 \f[CR]\-\-shell\-path\f[R] / \f[CR]\-\-no\-shell\-path\f[R],
 \f[CR]\-\-memory\-percent\f[R] / \f[CR]\-\-no\-memory\-percent\f[R],
 \f[CR]\-\-refresh\-rate\f[R] / \f[CR]\-\-no\-refresh\-rate\f[R], etc.
+.SS REMOTE FETCHING OVER SSH
+\f[CR]\-\-ssh\f[R] lets you pull data from remote hosts and render it
+locally.
+LeenFetch connects with your system SSH client, runs
+\f[CR]leenfetch \-\-format json\f[R] on each target, parses the output,
+and prints either pretty text (default) or JSON
+(\f[CR]\-\-format json\f[R]).
+.IP \[bu] 2
+Requirements: the remote host must have \f[CR]leenfetch\f[R] in
+\f[CR]PATH\f[R].
+.IP \[bu] 2
+Uses your SSH config/agent, honoring usernames/ports in the target
+string; a short connect timeout is applied.
+.IP \[bu] 2
+Per\-host ASCII art/colors come from the remote distro while layout
+comes from your local config.
+.IP \[bu] 2
+JSON mode prints one JSON object per host (separated by blank lines).
 .SS CONFIGURATION
 leenfetch uses a single JSONC file for configuration, typically located
 at:
@@ -225,6 +243,16 @@ Create the default config file if missing.
 Delete and regenerate the config file.
 .IP \[bu] 2
 \f[CR]leenfetch \-\-ssh user\[at]server\f[R]
+.PD 0
+.P
+.PD
+.IP \[bu] 2
+\f[CR]leenfetch \-\-ssh user\[at]server:port\f[R]
+.PD 0
+.P
+.PD
+.IP \[bu] 2
+\f[CR]leenfetch \-\-ssh user\[at]server:port \-\-ssh user\[at]server:port\f[R]
 .PD 0
 .P
 .PD
