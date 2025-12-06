@@ -73,12 +73,33 @@ pub fn get_cpu(
 
 fn extract_cpu_model(cpuinfo: &str) -> String {
     for line in cpuinfo.lines() {
-        if line.contains("model name") || line.contains("Hardware") || line.contains("Processor") {
+        if line.contains("model name")
+            || line.contains("Model")
+            || line.contains("Hardware")
+            || line.contains("Processor")
+        {
             if let Some((_, val)) = line.split_once(':') {
                 return val.trim().to_string();
             }
         }
     }
+
+    // Fallback to device tree model
+    if let Ok(model) = fs::read_to_string("/proc/device-tree/model") {
+        let trimmed = model.trim_matches(char::from(0)).trim();
+        if !trimmed.is_empty() {
+            return trimmed.to_string();
+        }
+    }
+
+    // Fallback to SoC machine name
+    if let Ok(machine) = fs::read_to_string("/sys/devices/soc0/machine") {
+        let trimmed = machine.trim();
+        if !trimmed.is_empty() {
+            return trimmed.to_string();
+        }
+    }
+
     "Unknown CPU".to_string()
 }
 

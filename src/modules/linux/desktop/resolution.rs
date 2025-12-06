@@ -1,32 +1,73 @@
-use libc::{c_char, c_int, c_ulong};
-use std::ptr;
 use std::{env, fs};
 
-#[repr(C)]
-struct XRRScreenConfiguration {
-    _private: [u8; 0],
+#[cfg(feature = "x11")]
+mod x11 {
+    use libc::{c_char, c_int, c_ulong};
+    use std::ptr;
+
+    #[repr(C)]
+    struct XRRScreenConfiguration {
+        _private: [u8; 0],
+    }
+
+    #[repr(C)]
+    pub struct Display {
+        _private: [u8; 0],
+    }
+
+    type Window = c_ulong;
+
+    #[link(name = "X11")]
+    #[link(name = "Xrandr")]
+    unsafe extern "C" {
+        fn XOpenDisplay(display_name: *const c_char) -> *mut Display;
+        fn XCloseDisplay(display: *mut Display);
+        fn XDefaultScreen(display: *mut Display) -> c_int;
+        fn XDisplayWidth(display: *mut Display, screen_number: c_int) -> c_int;
+        fn XDisplayHeight(display: *mut Display, screen_number: c_int) -> c_int;
+
+        fn XRRGetScreenInfo(display: *mut Display, window: Window) -> *mut XRRScreenConfiguration;
+        fn XRRFreeScreenConfigInfo(config: *mut XRRScreenConfiguration);
+        fn XRRConfigCurrentRate(config: *mut XRRScreenConfiguration) -> i16;
+        fn XRootWindow(display: *mut Display, screen_number: c_int) -> Window;
+    }
+
+    pub fn try_x11(refresh_rate: bool) -> Option<String> {
+        unsafe {
+            let display = XOpenDisplay(ptr::null());
+            if display.is_null() {
+                return None;
+            }
+
+            let screen = XDefaultScreen(display);
+            let width = XDisplayWidth(display, screen);
+            let height = XDisplayHeight(display, screen);
+            let mut result = format!("{}x{}", width, height);
+
+            if refresh_rate {
+                let root = XRootWindow(display, screen);
+                let config = XRRGetScreenInfo(display, root);
+                if !config.is_null() {
+                    let rate = XRRConfigCurrentRate(config);
+                    result = format!("{} @ {}Hz", result, rate);
+                    XRRFreeScreenConfigInfo(config);
+                }
+            }
+
+            XCloseDisplay(display);
+            Some(result)
+        }
+    }
 }
 
-#[link(name = "X11")]
-#[link(name = "Xrandr")]
-unsafe extern "C" {
-    fn XOpenDisplay(display_name: *const c_char) -> *mut Display;
-    fn XCloseDisplay(display: *mut Display);
-    fn XDefaultScreen(display: *mut Display) -> c_int;
-    fn XDisplayWidth(display: *mut Display, screen_number: c_int) -> c_int;
-    fn XDisplayHeight(display: *mut Display, screen_number: c_int) -> c_int;
-
-    fn XRRGetScreenInfo(display: *mut Display, window: Window) -> *mut XRRScreenConfiguration;
-    fn XRRFreeScreenConfigInfo(config: *mut XRRScreenConfiguration);
-    fn XRRConfigCurrentRate(config: *mut XRRScreenConfiguration) -> i16;
-    fn XRootWindow(display: *mut Display, screen_number: c_int) -> Window;
+#[cfg(not(feature = "x11"))]
+mod x11 {
+    pub fn try_x11(_refresh_rate: bool) -> Option<String> {
+        None
+    }
 }
 
-#[repr(C)]
-pub struct Display {
-    _private: [u8; 0],
-}
-type Window = c_ulong;
+use x11::try_x11;
 
 pub fn get_resolution(refresh_rate: bool) -> Option<String> {
     // X11 path
@@ -52,33 +93,6 @@ pub fn get_resolution(refresh_rate: bool) -> Option<String> {
     }
 
     None
-}
-
-fn try_x11(refresh_rate: bool) -> Option<String> {
-    unsafe {
-        let display = XOpenDisplay(ptr::null());
-        if display.is_null() {
-            return None;
-        }
-
-        let screen = XDefaultScreen(display);
-        let width = XDisplayWidth(display, screen);
-        let height = XDisplayHeight(display, screen);
-        let mut result = format!("{}x{}", width, height);
-
-        if refresh_rate {
-            let root = XRootWindow(display, screen);
-            let config = XRRGetScreenInfo(display, root);
-            if !config.is_null() {
-                let rate = XRRConfigCurrentRate(config);
-                result = format!("{} @ {}Hz", result, rate);
-                XRRFreeScreenConfigInfo(config);
-            }
-        }
-
-        XCloseDisplay(display);
-        Some(result)
-    }
 }
 
 fn try_drm(refresh_rate: bool) -> Option<String> {

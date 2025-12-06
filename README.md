@@ -10,7 +10,7 @@
 **** -->
 
 
-##### A fast, minimal, and customizable system information tool built in Rust — your alternative to Neofetch, for real power users.
+##### A fast, minimal, and customizable system information tool built in Rust — your alternative to Neofetch, for real power users. Includes JSON output and remote fetching over SSH.
 
 
 > ⚠️ **LeenFetch is under active development. Expect bugs and improvements regularly!**
@@ -73,6 +73,8 @@ Head over to the [issues](https://github.com/drunkleen/leenfetch/issues) or join
 - 🎨 Supports theme-based color profiles (`ascii_colors=distro`, etc.)
 - 🔌 Single JSONC config: `~/.config/leenfetch/config.jsonc`
 - 🧵 Accepts piped ASCII input — use `fortune | cowsay | leenfetch` for dynamic text logos
+- 🌐 Fetch remote system info over SSH (`--ssh <user>@<host>:<port>...`) and reuse pretty output per host
+- 🧾 Machine-readable JSON output via `--format json` for scripting and dashboards
 
 
 ## ▨ Packaging Status
@@ -106,14 +108,14 @@ If you're on Debian, Ubuntu, or a Debian-based distribution, you can download an
 
 - AMD64 (x86_64)
 ```bash
-wget https://github.com/drunkleen/leenfetch/releases/download/v0.2.1/leenfetch-v0.2.1-debian-x86_64.deb
+wget https://github.com/drunkleen/leenfetch/releases/download/v1.1.0/leenfetch-v1.1.0-debian-x86_64.deb
 sudo dpkg -i leenfetch-*.deb
 ```
 
 
 - AArch64 (ARM64)
 ```bash
-wget https://github.com/drunkleen/leenfetch/releases/download/v0.2.1/leenfetch-v0.2.1-debian-aarch64.deb
+wget https://github.com/drunkleen/leenfetch/releases/download/v1.1.0/leenfetch-v1.1.0-debian-aarch64.deb
 sudo dpkg -i leenfetch-*.deb
 ```
 
@@ -125,7 +127,13 @@ If you're using Fedora, RHEL, or another RPM-based distro, you can install LeenF
 
 - AMD64 (x86_64)
 ```bash
-wget https://github.com/drunkleen/leenfetch/releases/download/v0.2.1/leenfetch-v0.2.1-REHL-x86_64.rpm
+wget https://github.com/drunkleen/leenfetch/releases/download/v1.1.0/leenfetch-v1.1.0-REHL-x86_64.rpm
+sudo rpm -i leenfetch-*.rpm
+```
+
+- AArch64 (ARM64)
+```bash
+wget https://github.com/drunkleen/leenfetch/releases/download/v1.1.0/leenfetch-v1.1.0-REHL-aarch64.rpm
 sudo rpm -i leenfetch-*.rpm
 ```
 
@@ -139,35 +147,21 @@ powershell:
 
 - AMD64 (x86_64)
 ```powershell
-Invoke-WebRequest -Uri "https://github.com/drunkleen/leenfetch/releases/download/v0.2.1/leenfetch-v0.2.1-windows-x86_64.zip" -OutFile "leenfetch-win.zip"
+Invoke-WebRequest -Uri "https://github.com/drunkleen/leenfetch/releases/download/v1.1.0/leenfetch-v1.1.0-windows-x86_64.zip" -OutFile "leenfetch-win.zip"
 Expand-Archive .\leenfetch-win.zip -DestinationPath .
 
-.\leenfetch-v0.2.1-windows-x86_64.exe
+.\leenfetch-v1.1.0-windows-x86_64.exe
+```
+
+- AArch64 (ARM64)
+```powershell
+Invoke-WebRequest -Uri "https://github.com/drunkleen/leenfetch/releases/download/v1.1.0/leenfetch-v1.1.0-windows-aarch64.zip" -OutFile "leenfetch-win.zip"
+Expand-Archive .\leenfetch-win.zip -DestinationPath .
+
+.\leenfetch-v1.1.0-windows-aarch64.exe
 ```
 
 > Make sure you're in the same directory as `leenfetch.exe` when running the command.
-
----
-
-### Install from crates.io
-
-Make sure you have [Rust & Cargo](https://rustup.rs/) installed:
-
-```bash
-cargo install leenfetch
-````
-
-After that, just run:
-
-```bash
-leenfetch
-```
-
-If you hit issues with `PATH`, try adding `~/.cargo/bin` to your shell:
-
-```bash
-export PATH="$HOME/.cargo/bin:$PATH"
-```
 
 ---
 
@@ -193,6 +187,26 @@ leenfetch
 
 ---
 
+### Install from crates.io (fallback)
+
+If you prefer installing from crates.io, make sure you have [Rust & Cargo](https://rustup.rs/) installed:
+
+```bash
+cargo install leenfetch
+```
+
+After that, just run:
+
+```bash
+leenfetch
+```
+
+If you hit issues with `PATH`, try adding `~/.cargo/bin` to your shell:
+
+```bash
+export PATH="$HOME/.cargo/bin:$PATH"
+```
+
 ## 📥 Using Piped Input
 
 LeenFetch can accept piped input to use as the ASCII logo.
@@ -212,6 +226,31 @@ fortune | cowsay | leenfetch
 LeenFetch will detect piped input via `stdin` and render the ASCII art above your system information.
 
 If no piped input is provided, it will fall back to your configured or auto-detected ASCII art.
+
+---
+
+## 🌐 Remote fetch over SSH
+
+Query other machines directly and render their info locally. LeenFetch runs `leenfetch --format json` over SSH, parses it, and prints a pretty block for each host.
+
+```bash
+# Pretty output for one host (leverages your SSH config/agent)
+leenfetch --ssh user@server.example.com
+leenfetch --ssh user@server.example.com:port
+
+# Multiple hosts
+leenfetch --ssh user@server1 --ssh user@server2:port ...
+
+# Script-friendly JSON
+leenfetch --ssh user@server --format json
+leenfetch --ssh user@server:port --format json
+```
+
+Notes:
+- The remote host needs `leenfetch` installed and available in `PATH`.
+- ASCII logo and colors reflect the remote distro; each host renders separately using the local layout.
+- SSH options come from your standard SSH config/agent (no custom flags are parsed) and a short connect timeout is used.
+- You can mix `--format json` with `--ssh` to script against multiple hosts (one JSON object per host).
 
 
 ---
@@ -327,10 +366,10 @@ For advanced details, see the comments in `config.jsonc` or check the [wiki](htt
 
 Need a temporary tweak for screenshots or testing? LeenFetch now mirrors most `flags` settings on the CLI so you can adjust the output without touching `config.jsonc`.
 
-- `--config <path>` loads an alternate JSONC file. `--no-config` ignores files altogether and runs with the built-in defaults.
+- Core controls: `--help`, `--version`, `--list-options`, `--init`, `--reinit`, `--config <path>`, and `--no-config` (ignore files, use built-in defaults).
 - ASCII controls: `--ascii_distro <name>`, `--ascii_colors <list>`, `--custom_ascii_path <file>`, and `--color-blocks <glyph>`.
-- Formatting knobs: `--battery-display`, `--disk-display`, `--disk-subtitle`, `--memory-unit`, `--packages`, `--uptime`, `--os-age`, `--distro-display`, `--cpu-temp-unit`.
-- Layout helpers: `--only cpu,memory,shell` renders just the listed modules; `--hide gpu` removes modules from the current layout.
+- Formatting knobs: `--battery-display`, `--disk-display`, `--disk-subtitle`, `--memory-unit`, `--packages`, `--uptime`, `--os-age`, `--distro-display`, `--cpu-temp-unit`, and `--format <pretty|json>` for output style.
+- Remote + layout: `--ssh <host>[,<host>...]` to fetch via SSH, `--only cpu,memory,shell` to render a subset, `--hide gpu` to drop modules from the current layout.
 - Boolean toggles come in pairs—use `--cpu-speed` / `--no-cpu-speed`, `--shell-path` / `--no-shell-path`, `--memory-percent` / `--no-memory-percent`, etc., for quick on/off control of individual fields.
 
 Run `leenfetch --help` to see the complete list of overrides.
@@ -345,11 +384,11 @@ Run `leenfetch --help` to see the complete list of overrides.
 | GPU/CPU/Mem/DE/WM detection | ✅ Done       |
 | Linux support               | ✅ Done       |
 | Windows support             | ✅ Done       |
-| Multi-Threading             | ✅ Done    |
+| Multi-Threading             | ✅ Done       |
 | CLI override options        | 🔁 Basic      |
 | ASCII art & theming         | 🔁 Basic      |
 | Plugin/module system        | ❓ Maybe      |
-| Fetch info over SSH         | ❓ Maybe      |
+| Fetch info over SSH         | ✅ Done       |
 
 ---
 

@@ -1,5 +1,7 @@
 mod data;
 
+pub use data::Data;
+
 use std::{
     collections::{HashMap, HashSet},
     str::FromStr,
@@ -8,8 +10,6 @@ use std::{
 
 use once_cell::sync::OnceCell;
 use rayon::prelude::*;
-
-use data::Data;
 
 use crate::{
     config::{self, settings},
@@ -118,10 +118,8 @@ impl CollectContext {
 }
 
 pub struct Core {
-    output: String,
     flags: settings::Flags,
     layout: Vec<settings::LayoutItem>,
-    data: Data,
 }
 
 impl Core {
@@ -137,26 +135,25 @@ impl Core {
 
     /// Creates a new `Core` from explicit flags and layout values.
     pub fn new_with(flags: settings::Flags, layout: Vec<settings::LayoutItem>) -> Self {
-        Self {
-            output: String::new(),
-            flags,
-            layout,
-            data: Data::default(),
-        }
+        Self { flags, layout }
     }
 
     /// Builds the final colorized layout output using the loaded configuration.
     ///
     /// Each entry in the layout is resolved against the configured flags. Module data is collected
-    /// in parallel, cached in `self.data`, and rendered in the configured order so that expensive
-    /// lookups overlap without changing how the output is composed.
+    /// in parallel and rendered in the configured order so that expensive lookups overlap without
+    /// changing how the output is composed.
     ///
     /// # Returns
     ///
     /// A single colorized `String` containing the assembled module output.
-    pub fn get_info_layout(&mut self) -> String {
-        self.data = self.collect_data_parallel();
+    pub fn get_info_layout(&self) -> String {
+        let data = self.collect_data_parallel();
+        self.render_layout(&data)
+    }
 
+    /// Renders the layout using pre-collected data.
+    pub fn render_layout(&self, data: &Data) -> String {
         let mut final_output = String::new();
 
         for item in &self.layout {
@@ -195,8 +192,8 @@ impl Core {
 
                     match ModuleKind::from_field_name(&field_name) {
                         Some(ModuleKind::Titles) => {
-                            let username = self.data.username.as_deref().unwrap_or("Unknown");
-                            let hostname = self.data.hostname.as_deref().unwrap_or("Unknown");
+                            let username = data.username.as_deref().unwrap_or("Unknown");
+                            let hostname = data.hostname.as_deref().unwrap_or("Unknown");
                             let titles_line = format!(
                                 "${{c1}}{}${{reset}} {}${{c1}}@${{reset}}{}${{reset}}\n",
                                 label, username, hostname,
@@ -204,59 +201,39 @@ impl Core {
                             final_output.push_str(&titles_line);
                         }
                         Some(ModuleKind::Os) => {
-                            Self::is_some_add_to_output(label, &self.data.os, &mut final_output);
+                            Self::is_some_add_to_output(label, &data.os, &mut final_output);
                         }
                         Some(ModuleKind::Distro) => {
-                            Self::is_some_add_to_output(
-                                label,
-                                &self.data.distro,
-                                &mut final_output,
-                            );
+                            Self::is_some_add_to_output(label, &data.distro, &mut final_output);
                         }
                         Some(ModuleKind::Model) => {
-                            Self::is_some_add_to_output(label, &self.data.model, &mut final_output);
+                            Self::is_some_add_to_output(label, &data.model, &mut final_output);
                         }
                         Some(ModuleKind::Kernel) => {
-                            Self::is_some_add_to_output(
-                                label,
-                                &self.data.kernel,
-                                &mut final_output,
-                            );
+                            Self::is_some_add_to_output(label, &data.kernel, &mut final_output);
                         }
                         Some(ModuleKind::OsAge) => {
-                            Self::is_some_add_to_output(
-                                label,
-                                &self.data.os_age,
-                                &mut final_output,
-                            );
+                            Self::is_some_add_to_output(label, &data.os_age, &mut final_output);
                         }
                         Some(ModuleKind::Uptime) => {
-                            Self::is_some_add_to_output(
-                                label,
-                                &self.data.uptime,
-                                &mut final_output,
-                            );
+                            Self::is_some_add_to_output(label, &data.uptime, &mut final_output);
                         }
                         Some(ModuleKind::Packages) => {
-                            Self::is_some_add_to_output(
-                                label,
-                                &self.data.packages,
-                                &mut final_output,
-                            );
+                            Self::is_some_add_to_output(label, &data.packages, &mut final_output);
                         }
                         Some(ModuleKind::Shell) => {
-                            Self::is_some_add_to_output(label, &self.data.shell, &mut final_output);
+                            Self::is_some_add_to_output(label, &data.shell, &mut final_output);
                         }
                         Some(ModuleKind::Wm) => {
-                            Self::is_some_add_to_output(label, &self.data.wm, &mut final_output);
+                            Self::is_some_add_to_output(label, &data.wm, &mut final_output);
                         }
                         Some(ModuleKind::De) => {
-                            Self::is_some_add_to_output(label, &self.data.de, &mut final_output);
+                            Self::is_some_add_to_output(label, &data.de, &mut final_output);
                         }
                         Some(ModuleKind::Cpu) => {
-                            Self::is_some_add_to_output(label, &self.data.cpu, &mut final_output);
+                            Self::is_some_add_to_output(label, &data.cpu, &mut final_output);
                         }
-                        Some(ModuleKind::Gpu) => match self.data.gpu.as_ref() {
+                        Some(ModuleKind::Gpu) => match data.gpu.as_ref() {
                             Some(gpus) if gpus.is_empty() => {
                                 let line =
                                     format!("${{c1}}{} ${{reset}}{}\n", label, "No GPU found");
@@ -275,13 +252,9 @@ impl Core {
                             None => Self::push_unknown(label, &mut final_output),
                         },
                         Some(ModuleKind::Memory) => {
-                            Self::is_some_add_to_output(
-                                label,
-                                &self.data.memory,
-                                &mut final_output,
-                            );
+                            Self::is_some_add_to_output(label, &data.memory, &mut final_output);
                         }
-                        Some(ModuleKind::Disk) => match self.data.disk.as_ref() {
+                        Some(ModuleKind::Disk) => match data.disk.as_ref() {
                             Some(disks) => {
                                 if disks.is_empty() {
                                     let line = format!(
@@ -306,16 +279,12 @@ impl Core {
                             }
                         },
                         Some(ModuleKind::Resolution) => {
-                            Self::is_some_add_to_output(
-                                label,
-                                &self.data.resolution,
-                                &mut final_output,
-                            );
+                            Self::is_some_add_to_output(label, &data.resolution, &mut final_output);
                         }
                         Some(ModuleKind::Theme) => {
-                            Self::is_some_add_to_output(label, &self.data.theme, &mut final_output);
+                            Self::is_some_add_to_output(label, &data.theme, &mut final_output);
                         }
-                        Some(ModuleKind::Battery) => match self.data.battery.as_ref() {
+                        Some(ModuleKind::Battery) => match data.battery.as_ref() {
                             Some(batteries) if batteries.is_empty() => {
                                 let line =
                                     format!("${{c1}}{} ${{reset}}{}\n", label, "No Battery found");
@@ -341,7 +310,7 @@ impl Core {
                             }
                         },
                         Some(ModuleKind::Song) => {
-                            if let Some(music) = self.data.song.as_ref() {
+                            if let Some(music) = data.song.as_ref() {
                                 let line = format!(
                                     "${{c1}}Playing${{reset}}\n    {}\n    {}\n",
                                     music.title, music.artist
@@ -350,11 +319,7 @@ impl Core {
                             }
                         }
                         Some(ModuleKind::Colors) => {
-                            Self::is_some_add_to_output(
-                                label,
-                                &self.data.colors,
-                                &mut final_output,
-                            );
+                            Self::is_some_add_to_output(label, &data.colors, &mut final_output);
                         }
                         None => {
                             let fallback_line =
@@ -366,8 +331,12 @@ impl Core {
             }
         }
 
-        self.output = final_output.clone();
-        self.output.clone()
+        final_output
+    }
+
+    /// Collects data for all modules referenced in the configured layout.
+    pub fn collect_data(&self) -> Data {
+        self.collect_data_parallel()
     }
 
     fn collect_data_parallel(&self) -> Data {
@@ -595,7 +564,14 @@ impl Core {
         output.push_str(format!("${{c1}}{} ${{reset}}{}\n", label, "Unknown").as_str());
     }
 
-    pub fn get_ascii_and_colors(&mut self) -> (String, HashMap<&str, &str>) {
+    pub fn get_ascii_and_colors(&self) -> (String, HashMap<&str, &str>) {
+        self.get_ascii_and_colors_for_distro(None)
+    }
+
+    pub fn get_ascii_and_colors_for_distro(
+        &self,
+        distro_override: Option<&str>,
+    ) -> (String, HashMap<&str, &str>) {
         let custom_ascii_path = {
             let path = self.flags.custom_ascii_path.trim();
             if path.is_empty() { None } else { Some(path) }
@@ -612,8 +588,15 @@ impl Core {
         };
 
         let resolved_distro = match ascii_distro_value {
-            "auto" => get_distro(DistroDisplay::Name),
-            "auto_small" => format!("{}_small", get_distro(DistroDisplay::Name)),
+            "auto" => distro_override
+                .map(|s| s.to_string())
+                .unwrap_or_else(|| get_distro(DistroDisplay::Name)),
+            "auto_small" => {
+                let base = distro_override
+                    .map(|s| s.to_string())
+                    .unwrap_or_else(|| get_distro(DistroDisplay::Name));
+                format!("{}_small", base)
+            }
             other => other.to_string(),
         };
 

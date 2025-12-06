@@ -1,10 +1,10 @@
 use once_cell::sync::OnceCell;
 use std::process::{Command, Stdio};
 use winapi::shared::minwindef::DWORD;
-use winapi::um::tlhelp32::{
-    CreateToolhelp32Snapshot, Process32FirstW, Process32NextW, PROCESSENTRY32W, TH32CS_SNAPPROCESS,
-};
 use winapi::um::handleapi::CloseHandle;
+use winapi::um::tlhelp32::{
+    CreateToolhelp32Snapshot, PROCESSENTRY32W, Process32FirstW, Process32NextW, TH32CS_SNAPPROCESS,
+};
 
 // Cache process names (lowercased) for the duration of a single run to avoid repeated scans.
 static PROCESS_NAMES: OnceCell<Vec<String>> = OnceCell::new();
@@ -40,8 +40,8 @@ fn enumerate_processes_lower() -> Vec<String> {
                     .position(|&c| c == 0)
                     .unwrap_or(entry.szExeFile.len());
                 if end > 0 {
-                    let name = String::from_utf16_lossy(&entry.szExeFile[..end])
-                        .to_ascii_lowercase();
+                    let name =
+                        String::from_utf16_lossy(&entry.szExeFile[..end]).to_ascii_lowercase();
                     names.push(name);
                 }
 
@@ -63,15 +63,21 @@ fn enumerate_processes_via_tasklist_lower() -> Vec<String> {
         .stderr(Stdio::null())
         .output();
     let Ok(output) = out else { return Vec::new() };
-    if !output.status.success() { return Vec::new(); }
+    if !output.status.success() {
+        return Vec::new();
+    }
     let s = String::from_utf8_lossy(&output.stdout).to_lowercase();
     // Extract the image name column; simplest approach is to take token before first whitespace per line.
     let mut names = Vec::with_capacity(128);
     for line in s.lines() {
         // Skip headers/empty
-        if !line.contains(".exe") { continue; }
+        if !line.contains(".exe") {
+            continue;
+        }
         let first = line.split_whitespace().next().unwrap_or("");
-        if !first.is_empty() { names.push(first.to_string()); }
+        if !first.is_empty() {
+            names.push(first.to_string());
+        }
     }
     names
 }

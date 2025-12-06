@@ -9,8 +9,11 @@
   - [Architecture](#architecture)
   - [Installation](#installation)
     - [From crates.io (Recommended)](#from-cratesio-recommended)
+    - [Arch Linux (AUR)](#arch-linux-aur)
+    - [Debian / Ubuntu (.deb)](#debian--ubuntu-deb)
+    - [Fedora / RHEL (.rpm)](#fedora--rhel-rpm)
+    - [Windows (.zip)](#windows-zip)
     - [Build from Source](#build-from-source)
-    - [Binary Releases](#binary-releases)
     - [Shell Completions](#shell-completions)
   - [Configuration](#configuration)
     - [Configuration Overview](#configuration-overview)
@@ -81,8 +84,10 @@
 - Modular design: enable or disable any information block independently.
 - Fully customizable output layout, labels, and color palette.
 - Rich ASCII art support with distro detection and custom artwork.
+- Remote fetching over SSH with pretty or JSON output.
 - Tracks packages, shell, GPU, DE/WM, theme, and more per platform.
 - Commented configuration file shipped in human-readable JSONC format.
+- Machine-readable JSON output for scripting (`--format json`).
 - Works on Linux and Windows with feature-aware fallbacks (macOS in progress).
 - Plays nicely in scripts, status bars, and login shells.
 
@@ -101,9 +106,99 @@ Collectors rely on platform-specific backends where necessary. When a value cann
 
 ## Installation
 
-### From crates.io (Recommended)
+### Arch Linux (AUR)
 
-Make sure you have [Rust & Cargo](https://rustup.rs/) installed:
+Install from the AUR with your preferred helper:
+
+```bash
+yay -S leenfetch
+# or
+paru -S leenfetch
+```
+
+Manual AUR build:
+
+```bash
+git clone https://aur.archlinux.org/leenfetch.git
+cd leenfetch
+makepkg -si
+```
+
+### Debian / Ubuntu (.deb)
+
+Download the `.deb` from GitHub Releases and install with `dpkg` (replace `v1.1.0` with the latest tag if needed):
+
+- AMD64 (x86_64)
+```bash
+wget https://github.com/drunkleen/leenfetch/releases/download/v1.1.0/leenfetch-v1.1.0-debian-x86_64.deb
+sudo dpkg -i leenfetch-*.deb
+```
+
+- AArch64 (ARM64)
+```bash
+wget https://github.com/drunkleen/leenfetch/releases/download/v1.1.0/leenfetch-v1.1.0-debian-aarch64.deb
+sudo dpkg -i leenfetch-*.deb
+```
+
+### Fedora / RHEL (.rpm)
+
+Grab the `.rpm` from GitHub Releases (update the tag as needed):
+
+- AMD64 (x86_64)
+```bash
+wget https://github.com/drunkleen/leenfetch/releases/download/v1.1.0/leenfetch-v1.1.0-REHL-x86_64.rpm
+sudo rpm -i leenfetch-*.rpm
+```
+
+- AArch64 (ARM64)
+```bash
+wget https://github.com/drunkleen/leenfetch/releases/download/v1.1.0/leenfetch-v1.1.0-REHL-aarch64.rpm
+sudo rpm -i leenfetch-*.rpm
+```
+
+### Windows (.zip)
+
+Download the zip for your architecture from GitHub Releases and extract it (update the tag as needed):
+
+- AMD64 (x86_64)
+```powershell
+Invoke-WebRequest -Uri "https://github.com/drunkleen/leenfetch/releases/download/v1.1.0/leenfetch-v1.1.0-windows-x86_64.zip" -OutFile "leenfetch-win.zip"
+Expand-Archive .\leenfetch-win.zip -DestinationPath .
+.\leenfetch-v1.1.0-windows-x86_64.exe
+```
+
+- AArch64 (ARM64)
+```powershell
+Invoke-WebRequest -Uri "https://github.com/drunkleen/leenfetch/releases/download/v1.1.0/leenfetch-v1.1.0-windows-aarch64.zip" -OutFile "leenfetch-win.zip"
+Expand-Archive .\leenfetch-win.zip -DestinationPath .
+.\leenfetch-v1.1.0-windows-aarch64.exe
+```
+
+> Run the executable from the same directory you extracted to, or move it into a directory on your `PATH`.
+
+### Build from Source
+
+```bash
+git clone https://github.com/drunkleen/leenfetch.git
+cd leenfetch
+cargo build --release
+```
+
+Add to PATH:
+
+```bash
+cp target/release/leenfetch ~/.local/bin/
+```
+
+Then run:
+
+```bash
+leenfetch
+```
+
+### From crates.io (fallback)
+
+If you prefer installing from crates.io, make sure you have [Rust & Cargo](https://rustup.rs/) installed:
 
 ```bash
 cargo install leenfetch
@@ -120,28 +215,6 @@ If you have issues with `PATH`, add Cargo's bin directory:
 ```bash
 export PATH="$HOME/.cargo/bin:$PATH"
 ```
-
-### Build from Source
-
-```bash
-git clone https://github.com/drunkleen/leenfetch.git
-cd leenfetch
-cargo build --release
-```
-
-Add to PATH:
-
-```bash
-cp target/release/leenfetch ~/.local/bin/
-```
-
-### Binary Releases
-
-If prebuilt archives are provided on the releases page:
-
-1. Download the archive for your architecture.
-2. Extract the binary into a directory that is in your `PATH`.
-3. Optionally rename the binary to `leenfetch` for consistency.
 
 ### Shell Completions
 
@@ -428,6 +501,30 @@ Tips:
 
 Run LeenFetch directly from the terminal. It reads configs, gathers data, and prints the decorated output in one pass.
 
+### Remote over SSH
+
+LeenFetch can gather data from remote hosts and render it locally. It runs `leenfetch --format json` on the remote side over SSH, parses the result, and prints a pretty block per host.
+
+```bash
+# Pretty output for one host (leverages your SSH config/agent)
+leenfetch --ssh user@server.example.com
+leenfetch --ssh user@server.example.com:port
+
+# Multiple hosts
+leenfetch --ssh user@server1 --ssh user@server2:port ...
+
+# Script-friendly JSON
+leenfetch --ssh user@server --format json
+leenfetch --ssh user@server:port --format json
+```
+
+Notes:
+- The remote host must have `leenfetch` installed and in `PATH`.
+- SSH options are inherited from your usual SSH configuration; the flag accepts one or more hosts.
+- ASCII logo and colors reflect the remote distro for each host while using your local layout.
+- A short SSH connect timeout is used; authentication is handled by your existing SSH config/agent.
+- Combine with `--format json` to get one JSON object per host for scripting.
+
 ### Interactive Examples
 
 ```bash
@@ -475,6 +572,10 @@ Combine with other tools:
   | `--os-age <mode>` | `--os-age full` | Set OS age shorthand (same accepted values as uptime). |
   | `--distro-display <mode>` | `--distro-display name_model_arch` | Adjust distro detail level. |
   | `--cpu-temp-unit <unit>` | `--cpu-temp-unit off` | Choose `C`, `F`, or disable CPU temperature output. |
+  | `--format <pretty|json>` | `--format json` | Choose machine-readable JSON or the default pretty output. |
+
+- **Remote fetch**
+  - `--ssh <host>...` — Fetch info from one or more hosts over SSH. Each host is queried via `leenfetch --format json` remotely; output is rendered locally using the chosen `--format`.
 
 - **Boolean toggles**
 
