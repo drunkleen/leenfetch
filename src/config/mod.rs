@@ -7,12 +7,16 @@ use self::{
 };
 use dirs::config_dir;
 use json5;
+use once_cell::sync::Lazy;
 use std::io::Write;
 use std::path::PathBuf;
 use std::{
     collections::HashMap,
     fs::{self, File},
 };
+
+static DEFAULT_CONFIG_CACHE: Lazy<Config> =
+    Lazy::new(|| json5::from_str(DEFAULT_CONFIG).expect("Invalid JSONC in default config"));
 
 /// Loads the unified configuration from `config.jsonc`.
 fn load_config() -> Config {
@@ -39,7 +43,7 @@ pub fn load_config_at(path: Option<&str>) -> Result<Config, String> {
 
 /// Returns the built-in default configuration.
 pub fn default_config() -> Config {
-    load_config_from_str(DEFAULT_CONFIG)
+    DEFAULT_CONFIG_CACHE.clone()
 }
 
 /// Returns the built-in default layout section.
