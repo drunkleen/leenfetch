@@ -3,7 +3,7 @@ mod data;
 pub use data::Data;
 
 use std::{
-    collections::{HashMap, HashSet},
+    collections::HashMap,
     str::FromStr,
     sync::Arc,
 };
@@ -340,7 +340,8 @@ impl Core {
     }
 
     fn collect_data_parallel(&self) -> Data {
-        let mut required = HashSet::new();
+        let mut required = Vec::new();
+        let mut seen = std::collections::HashSet::new();
 
         for item in &self.layout {
             if let settings::LayoutItem::Module(module) = item {
@@ -350,7 +351,9 @@ impl Core {
 
                 if let Some(field_name) = module.field_name() {
                     if let Some(kind) = ModuleKind::from_field_name(field_name) {
-                        required.insert(kind);
+                        if seen.insert(kind) {
+                            required.push(kind);
+                        }
                     }
                 }
             }
@@ -360,6 +363,7 @@ impl Core {
             return Data::default();
         }
 
+        // Use rayon for parallel execution
         let context = Arc::new(CollectContext::new(self.flags.clone()));
         let modules: Vec<_> = required.into_iter().collect();
 
