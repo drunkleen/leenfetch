@@ -126,17 +126,17 @@ makepkg -si
 
 ### Debian / Ubuntu (.deb)
 
-Download the `.deb` from GitHub Releases and install with `dpkg` (replace `v1.1.0` with the latest tag if needed):
+Download the `.deb` from GitHub Releases and install with `dpkg` (replace `v1.2.0` with the latest tag if needed):
 
 - AMD64 (x86_64)
 ```bash
-wget https://github.com/drunkleen/leenfetch/releases/download/v1.1.0/leenfetch-v1.1.0-debian-x86_64.deb
+wget https://github.com/drunkleen/leenfetch/releases/download/v1.2.0/leenfetch-v1.2.0-debian-x86_64.deb
 sudo dpkg -i leenfetch-*.deb
 ```
 
 - AArch64 (ARM64)
 ```bash
-wget https://github.com/drunkleen/leenfetch/releases/download/v1.1.0/leenfetch-v1.1.0-debian-aarch64.deb
+wget https://github.com/drunkleen/leenfetch/releases/download/v1.2.0/leenfetch-v1.2.0-debian-aarch64.deb
 sudo dpkg -i leenfetch-*.deb
 ```
 
@@ -146,13 +146,13 @@ Grab the `.rpm` from GitHub Releases (update the tag as needed):
 
 - AMD64 (x86_64)
 ```bash
-wget https://github.com/drunkleen/leenfetch/releases/download/v1.1.0/leenfetch-v1.1.0-REHL-x86_64.rpm
+wget https://github.com/drunkleen/leenfetch/releases/download/v1.2.0/leenfetch-v1.2.0-REHL-x86_64.rpm
 sudo rpm -i leenfetch-*.rpm
 ```
 
 - AArch64 (ARM64)
 ```bash
-wget https://github.com/drunkleen/leenfetch/releases/download/v1.1.0/leenfetch-v1.1.0-REHL-aarch64.rpm
+wget https://github.com/drunkleen/leenfetch/releases/download/v1.2.0/leenfetch-v1.2.0-REHL-aarch64.rpm
 sudo rpm -i leenfetch-*.rpm
 ```
 
@@ -162,16 +162,16 @@ Download the zip for your architecture from GitHub Releases and extract it (upda
 
 - AMD64 (x86_64)
 ```powershell
-Invoke-WebRequest -Uri "https://github.com/drunkleen/leenfetch/releases/download/v1.1.0/leenfetch-v1.1.0-windows-x86_64.zip" -OutFile "leenfetch-win.zip"
+Invoke-WebRequest -Uri "https://github.com/drunkleen/leenfetch/releases/download/v1.2.0/leenfetch-v1.2.0-windows-x86_64.zip" -OutFile "leenfetch-win.zip"
 Expand-Archive .\leenfetch-win.zip -DestinationPath .
-.\leenfetch-v1.1.0-windows-x86_64.exe
+.\leenfetch-v1.2.0-windows-x86_64.exe
 ```
 
 - AArch64 (ARM64)
 ```powershell
-Invoke-WebRequest -Uri "https://github.com/drunkleen/leenfetch/releases/download/v1.1.0/leenfetch-v1.1.0-windows-aarch64.zip" -OutFile "leenfetch-win.zip"
+Invoke-WebRequest -Uri "https://github.com/drunkleen/leenfetch/releases/download/v1.2.0/leenfetch-v1.2.0-windows-aarch64.zip" -OutFile "leenfetch-win.zip"
 Expand-Archive .\leenfetch-win.zip -DestinationPath .
-.\leenfetch-v1.1.0-windows-aarch64.exe
+.\leenfetch-v1.2.0-windows-aarch64.exe
 ```
 
 > Run the executable from the same directory you extracted to, or move it into a directory on your `PATH`.
