@@ -41,7 +41,12 @@ jobs:
 
       - name: Install system dependencies (Linux hosts)
         if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y libx11-dev libxrandr-dev zip rpm gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu
+        run: |
+          PACKAGES="libx11-dev libxrandr-dev zip rpm gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu"
+          if [ "${{ matrix.target }}" = "x86_64-pc-windows-gnu" ]; then
+            PACKAGES="$PACKAGES mingw-w64"
+          fi
+          sudo apt-get update && sudo apt-get install -y $PACKAGES
 
       - name: Install packaging tools
         run: |
@@ -57,7 +62,8 @@ jobs:
 
           case "${{ matrix.target }}" in
             x86_64-pc-windows-gnu)
-              cross build --release --target ${{ matrix.target }}
+              rustup target add x86_64-pc-windows-gnu
+              RUSTFLAGS="-C link-arg=-lws2_32" cargo build --release --target ${{ matrix.target }}
               cp target/${{ matrix.target }}/release/leenfetch.exe dist/leenfetch-${VERSION}-windows-x86_64.exe
               (cd dist && zip leenfetch-${VERSION}-windows-x86_64.zip leenfetch-${VERSION}-windows-x86_64.exe)
               ;;
