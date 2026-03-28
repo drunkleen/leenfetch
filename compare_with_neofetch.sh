@@ -6,9 +6,9 @@ RUNS=100
 WARMUP=5
 
 # Commands (can be overridden positionally)
-CMD1="neofetch"
-CMD2="fastfetch"
-CMD3="leenfetch"
+CMD1="./target/release/leenfetch"
+CMD2="leenfetch"
+CMD3="fastfetch"
 
 PREPARE="sleep 0.1"   # small pause between runs; stabilizes CPU scheduler
 AUTO_RERUN=true        # re-run once on detected noise
