@@ -1,6 +1,5 @@
 use std::fmt::Write;
 use std::fs;
-use std::process::Command;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::modules::enums::OsAgeShorthand;
@@ -20,7 +19,7 @@ pub fn get_os_age(shorthand: OsAgeShorthand) -> Option<String> {
 /// Best-effort detection of install time (epoch seconds) of the root filesystem.
 /// Strategy:
 /// 1) Try `metadata("/").created()` (when supported by platform/fs)
-/// 2) Fallback to `stat -c %W /` (Linux) which returns birth time or 0/-1 if unknown
+/// 2) Fallback to `libc::stat` syscalls for birth time
 fn read_install_epoch_seconds() -> Option<u64> {
     // Try std first (portable when supported)
     if let Ok(md) = fs::metadata("/") {
@@ -34,23 +33,30 @@ fn read_install_epoch_seconds() -> Option<u64> {
         }
     }
 
-    // Fallback: Linux `stat` birth time for `/`
-    let out = Command::new("stat").args(["-c", "%W", "/"]).output().ok()?;
+    // Fallback: Use libc::stat to get st_birthtime (Linux specific)
+    // Try to get st_ctime as fallback (inode change time, close to install time)
+    let root_cstr = std::ffi::CString::new("/").ok()?;
+    let mut stat_buf: libc::stat = unsafe { std::mem::zeroed() };
 
-    if !out.status.success() {
-        return None;
-    }
+    if unsafe { libc::stat(root_cstr.as_ptr(), &mut stat_buf) } == 0 {
+        // Try st_birthtime if available (BSD/macOS, some Linux with new glibc)
+        #[cfg(any(target_os = "freebsd", target_os = "macos"))]
+        {
+            let birth = stat_buf.st_birthtime;
+            if birth > 0 {
+                return Some(birth as u64);
+            }
+        }
 
-    let s = String::from_utf8_lossy(&out.stdout).trim().to_string();
-    // %W might be "0" or "-1" if unknown
-    if s == "0" || s == "-1" {
-        return None;
-    }
-
-    // Handle potential negative parse safely
-    if let Ok(v) = s.parse::<i64>() {
-        if v > 0 {
-            return Some(v as u64);
+        // Fallback: use st_ctime (inode change time - often close to install)
+        // This is not ideal but better than spawning a process
+        let ctime = stat_buf.st_ctime as u64;
+        if ctime > 0 {
+            // Only use if it seems reasonable (at least 1 day old)
+            let now = SystemTime::now().duration_since(UNIX_EPOCH).ok()?.as_secs();
+            if now > ctime && (now - ctime) > 86400 {
+                return Some(ctime);
+            }
         }
     }
 

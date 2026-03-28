@@ -1,5 +1,6 @@
 use std::env;
-use std::process::Command;
+use std::ffi::CString;
+use std::fs;
 
 /// Return (username, hostname, combined length) as a tuple.
 ///
@@ -15,7 +16,7 @@ pub fn get_titles(fqdn: bool) -> (String, String) {
 }
 
 fn get_user() -> String {
-    // 1. Try $USER
+    // 1. Try $USER environment variable (fastest)
     if let Some(u) = env::var_os("USER") {
         let s = u.to_string_lossy();
         if !s.is_empty() {
@@ -23,15 +24,16 @@ fn get_user() -> String {
         }
     }
 
-    if let Ok(out) = Command::new("id").arg("-un").output() {
-        if out.status.success() {
-            let s = String::from_utf8_lossy(&out.stdout).trim().to_string();
-            if !s.is_empty() {
-                return s;
-            }
+    // 2. Use getuid() + getpwuid() syscalls (no process spawn)
+    let uid = unsafe { libc::getuid() };
+    if uid > 0 {
+        // Try to get username from passwd entry
+        if let Some(pw) = get_pwuid(uid) {
+            return pw;
         }
     }
 
+    // 3. Fallback: extract from $HOME
     if let Ok(home) = env::var("HOME") {
         if let Some(name) = home.rsplit('/').find(|s| !s.is_empty()) {
             return name.to_string();
@@ -42,18 +44,66 @@ fn get_user() -> String {
     "unknown".into()
 }
 
+fn get_pwuid(uid: libc::uid_t) -> Option<String> {
+    // Use getpwuid_r for thread-safe passwd lookup
+    let mut passwd = MaybeUninit::uninit();
+    let mut buf = vec![0u8; 1024];
+
+    let result = unsafe {
+        let mut pwd_ptr: *mut libc::passwd = std::ptr::null_mut();
+        libc::getpwuid_r(
+            uid,
+            passwd.as_mut_ptr(),
+            buf.as_mut_ptr() as *mut libc::c_char,
+            buf.len(),
+            &mut pwd_ptr,
+        )
+    };
+
+    if result == 0 && !passwd.as_ptr().is_null() {
+        let pwd = unsafe { passwd.assume_init() };
+        if !pwd.pw_name.is_null() {
+            let name = unsafe { CString::from_raw(pwd.pw_name) };
+            return Some(name.to_string_lossy().into_owned());
+        }
+    }
+    None
+}
+
 fn get_hostname(fqdn: bool) -> String {
-    if fqdn {
-        if let Ok(out) = Command::new("hostname").arg("-f").output() {
-            if out.status.success() {
-                let s = String::from_utf8_lossy(&out.stdout).trim().to_string();
-                if !s.is_empty() {
-                    return s;
+    // 1. Try gethostname() syscall first (fastest)
+    let mut buf = [0u8; 256];
+    let len = unsafe { libc::gethostname(buf.as_mut_ptr() as *mut libc::c_char, buf.len()) };
+    if len == 0 {
+        let s = String::from_utf8_lossy(&buf)
+            .trim_end_matches('\0')
+            .to_string();
+        if !s.is_empty() && (s != "localhost" || !fqdn) {
+            if fqdn {
+                // Try to get FQDN
+                if let Ok(fqdn_name) = fs::read_to_string("/etc/hostname") {
+                    let trimmed = fqdn_name.trim().to_string();
+                    if !trimmed.is_empty() && trimmed.contains('.') {
+                        return trimmed;
+                    }
+                }
+                // Try DNS domain from /etc/resolv.conf or nsswitch
+                if let Ok(domain) = fs::read_to_string("/etc/resolv.conf") {
+                    for line in domain.lines() {
+                        if line.starts_with("domain ") {
+                            let domain = line[7..].trim();
+                            if !domain.is_empty() {
+                                return format!("{}.{}", s, domain);
+                            }
+                        }
+                    }
                 }
             }
+            return s;
         }
     }
 
+    // 2. Try HOSTNAME environment variable
     if let Some(h) = env::var_os("HOSTNAME") {
         let s = h.to_string_lossy();
         if !s.is_empty() {
@@ -61,17 +111,18 @@ fn get_hostname(fqdn: bool) -> String {
         }
     }
 
-    if let Ok(out) = Command::new("hostname").output() {
-        if out.status.success() {
-            let s = String::from_utf8_lossy(&out.stdout).trim().to_string();
-            if !s.is_empty() {
-                return s;
-            }
+    // 3. Fallback: read /etc/hostname
+    if let Ok(hostname) = fs::read_to_string("/etc/hostname") {
+        let s = hostname.trim().to_string();
+        if !s.is_empty() {
+            return s;
         }
     }
 
     "localhost".into()
 }
+
+use std::mem::MaybeUninit;
 
 #[cfg(test)]
 mod tests {
