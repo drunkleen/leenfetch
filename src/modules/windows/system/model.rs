@@ -1,6 +1,6 @@
 use std::ptr::null_mut;
 use winapi::shared::winerror::ERROR_SUCCESS;
-use winapi::um::winreg::{HKEY_LOCAL_MACHINE, RRF_RT_REG_SZ, RegGetValueW};
+use winapi::um::winreg::{RegGetValueW, HKEY_LOCAL_MACHINE, RRF_RT_REG_SZ};
 
 pub fn get_model() -> Option<String> {
     // Read from BIOS registry branch (fast, no WMI):

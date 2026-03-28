@@ -2,7 +2,7 @@ use std::ptr;
 
 use winapi::um::wingdi::DEVMODEW;
 use winapi::um::winuser::{
-    ENUM_CURRENT_SETTINGS, EnumDisplaySettingsW, GetSystemMetrics, SM_CXSCREEN, SM_CYSCREEN,
+    EnumDisplaySettingsW, GetSystemMetrics, ENUM_CURRENT_SETTINGS, SM_CXSCREEN, SM_CYSCREEN,
 };
 
 pub fn get_resolution(refresh_rate: bool) -> Option<String> {

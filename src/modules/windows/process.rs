@@ -3,7 +3,7 @@ use std::process::{Command, Stdio};
 use winapi::shared::minwindef::DWORD;
 use winapi::um::handleapi::CloseHandle;
 use winapi::um::tlhelp32::{
-    CreateToolhelp32Snapshot, PROCESSENTRY32W, Process32FirstW, Process32NextW, TH32CS_SNAPPROCESS,
+    CreateToolhelp32Snapshot, Process32FirstW, Process32NextW, PROCESSENTRY32W, TH32CS_SNAPPROCESS,
 };
 
 // Cache process names (lowercased) for the duration of a single run to avoid repeated scans.

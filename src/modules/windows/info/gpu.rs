@@ -2,8 +2,8 @@ use std::ptr::null_mut;
 
 use winapi::shared::guiddef::GUID;
 use winapi::um::setupapi::{
-    DIGCF_PRESENT, SP_DEVINFO_DATA, SPDRP_DEVICEDESC, SetupDiDestroyDeviceInfoList,
-    SetupDiEnumDeviceInfo, SetupDiGetClassDevsW, SetupDiGetDeviceRegistryPropertyW,
+    SetupDiDestroyDeviceInfoList, SetupDiEnumDeviceInfo, SetupDiGetClassDevsW,
+    SetupDiGetDeviceRegistryPropertyW, DIGCF_PRESENT, SPDRP_DEVICEDESC, SP_DEVINFO_DATA,
 };
 
 pub fn get_gpus() -> Vec<String> {

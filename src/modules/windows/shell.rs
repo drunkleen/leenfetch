@@ -7,7 +7,7 @@ use winapi::shared::minwindef::DWORD;
 use winapi::um::handleapi::CloseHandle;
 use winapi::um::processthreadsapi::OpenProcess;
 use winapi::um::tlhelp32::{
-    CreateToolhelp32Snapshot, PROCESSENTRY32W, Process32FirstW, Process32NextW, TH32CS_SNAPPROCESS,
+    CreateToolhelp32Snapshot, Process32FirstW, Process32NextW, PROCESSENTRY32W, TH32CS_SNAPPROCESS,
 };
 use winapi::um::winbase::QueryFullProcessImageNameW;
 use winapi::um::winnt::PROCESS_QUERY_LIMITED_INFORMATION;
@@ -119,7 +119,11 @@ fn detect_parent_shell() -> Option<String> {
         let path = String::from_utf16_lossy(&buf[..size as usize])
             .trim()
             .to_string();
-        if path.is_empty() { None } else { Some(path) }
+        if path.is_empty() {
+            None
+        } else {
+            Some(path)
+        }
     }
 }
 

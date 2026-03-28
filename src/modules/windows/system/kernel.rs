@@ -2,7 +2,7 @@ use std::ptr::null_mut;
 use winapi::shared::minwindef::DWORD;
 use winapi::shared::winerror::ERROR_SUCCESS;
 use winapi::um::winnt::OSVERSIONINFOW;
-use winapi::um::winreg::{HKEY_LOCAL_MACHINE, RRF_RT_REG_DWORD, RegGetValueW};
+use winapi::um::winreg::{RegGetValueW, HKEY_LOCAL_MACHINE, RRF_RT_REG_DWORD};
 
 #[inline(always)]
 pub fn get_kernel() -> Option<String> {

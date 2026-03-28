@@ -1,7 +1,7 @@
 use std::env;
 use std::ptr::null_mut;
 use winapi::shared::winerror::ERROR_SUCCESS;
-use winapi::um::winreg::{HKEY_LOCAL_MACHINE, RRF_RT_REG_SZ, RRF_SUBKEY_WOW6464KEY, RegGetValueW};
+use winapi::um::winreg::{RegGetValueW, HKEY_LOCAL_MACHINE, RRF_RT_REG_SZ, RRF_SUBKEY_WOW6464KEY};
 
 use crate::modules::enums::DistroDisplay;
 

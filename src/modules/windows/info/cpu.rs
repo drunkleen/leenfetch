@@ -2,7 +2,7 @@ use std::ptr::null_mut;
 use winapi::shared::minwindef::DWORD;
 use winapi::shared::winerror::ERROR_SUCCESS;
 use winapi::um::sysinfoapi::{GetSystemInfo, SYSTEM_INFO};
-use winapi::um::winreg::{HKEY_LOCAL_MACHINE, RRF_RT_REG_DWORD, RRF_RT_REG_SZ, RegGetValueW};
+use winapi::um::winreg::{RegGetValueW, HKEY_LOCAL_MACHINE, RRF_RT_REG_DWORD, RRF_RT_REG_SZ};
 
 pub fn get_cpu(
     cpu_brand: bool,
@@ -67,7 +67,11 @@ fn get_core_count() -> u32 {
         let mut info: SYSTEM_INFO = std::mem::zeroed();
         GetSystemInfo(&mut info as *mut _);
         let n = info.dwNumberOfProcessors;
-        if n == 0 { 1 } else { n }
+        if n == 0 {
+            1
+        } else {
+            n
+        }
     }
 }
 
