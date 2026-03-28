@@ -31,19 +31,33 @@ pub fn get_theme(de: Option<&str>) -> Option<String> {
         }
     }
 
-    // GTK3: via gsettings
-    if let Ok(output) = Command::new("gsettings")
-        .args(["get", "org.gnome.desktop.interface", "gtk-theme"])
-        .output()
-    {
-        if output.status.success() {
-            let val = String::from_utf8_lossy(&output.stdout)
-                .trim()
-                .trim_matches('\'')
-                .to_string();
-            if !val.is_empty() {
-                gtk3 = Some(val.clone());
-                gtk2 = Some(val.clone()); // fallback
+    // GTK3: try config file first (faster)
+    let gtk3_path = format!("{}/.config/gtk-3.0/settings.ini", home);
+    if let Ok(content) = fs::read_to_string(&gtk3_path) {
+        for line in content.lines() {
+            if let Some(val) = line.trim().strip_prefix("gtk-theme-name=") {
+                gtk3 = Some(val.trim_matches('"').to_string());
+                gtk2 = gtk3.clone();
+                break;
+            }
+        }
+    }
+
+    // Fallback to gsettings if config file not found
+    if gtk3.is_none() {
+        if let Ok(output) = Command::new("gsettings")
+            .args(["get", "org.gnome.desktop.interface", "gtk-theme"])
+            .output()
+        {
+            if output.status.success() {
+                let val = String::from_utf8_lossy(&output.stdout)
+                    .trim()
+                    .trim_matches('\'')
+                    .to_string();
+                if !val.is_empty() {
+                    gtk3 = Some(val.clone());
+                    gtk2 = Some(val.clone());
+                }
             }
         }
     }

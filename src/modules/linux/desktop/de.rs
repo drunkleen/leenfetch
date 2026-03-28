@@ -99,11 +99,16 @@ fn normalize_de_name(de: &mut String) {
 }
 
 fn is_installed(cmd: &str) -> bool {
-    Command::new("which")
-        .arg(cmd)
-        .output()
-        .map(|o| o.status.success())
-        .unwrap_or(false)
+    // Check if command exists in PATH without spawning a process
+    if let Ok(path) = std::env::var("PATH") {
+        for dir in path.split(':') {
+            let cmd_path = std::path::Path::new(dir).join(cmd);
+            if cmd_path.exists() {
+                return true;
+            }
+        }
+    }
+    false
 }
 
 fn run_command(cmd: &str, args: &[&str]) -> Option<String> {

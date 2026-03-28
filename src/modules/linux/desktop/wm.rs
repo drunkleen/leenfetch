@@ -1,9 +1,21 @@
 use std::env;
 use std::fs;
-use std::process::Command;
 
 pub fn get_wm() -> Option<String> {
-    // Prefer Wayland
+    // Check environment variables first (fastest)
+    if let Ok(swaysock) = env::var("SWAYSOCK") {
+        if !swaysock.is_empty() {
+            return Some("sway".to_string());
+        }
+    }
+
+    if let Ok(hyprland) = env::var("HYPRLAND_INSTANCE_SIGNATURE") {
+        if !hyprland.is_empty() {
+            return Some("Hyprland".to_string());
+        }
+    }
+
+    // Wayland detection via XDG_RUNTIME_DIR
     if let Ok(runtime) = env::var("XDG_RUNTIME_DIR") {
         let socket = env::var("WAYLAND_DISPLAY").unwrap_or_else(|_| "wayland-0".to_string());
         let path = format!("{}/{}", runtime, socket);
@@ -16,12 +28,7 @@ pub fn get_wm() -> Option<String> {
 
     // X11 (DISPLAY is set)
     if env::var("DISPLAY").is_ok() {
-        // Most accurate: ask X server directly
-        if let Some(wm) = get_wm_from_xprop() {
-            return Some(wm);
-        }
-
-        // Fallback: scan known X11 WM processes
+        // Scan known X11 WM processes
         if let Some(wm) = scan_proc(X11_WMS) {
             return Some(wm);
         }
@@ -31,45 +38,35 @@ pub fn get_wm() -> Option<String> {
     scan_proc(ALL_WMS)
 }
 
-// Uses `ps -e` to scan processes for known WMs
+// Uses /proc to scan processes for known WMs (faster than spawning ps)
 fn scan_proc(wm_names: &[&str]) -> Option<String> {
-    let output = Command::new("ps")
-        .args(["-eo", "comm="])
-        .output()
-        .ok()?
-        .stdout;
-    let ps_text = String::from_utf8_lossy(&output);
+    let proc_path = match fs::read_dir("/proc") {
+        Ok(p) => p,
+        Err(_) => return None,
+    };
 
-    for line in ps_text.lines() {
-        let name = line.trim();
-        for &wm in wm_names {
-            if name.eq_ignore_ascii_case(wm) || name.contains(wm) {
-                return Some(normalize_wm(wm));
+    for entry in proc_path.flatten() {
+        let name = entry.file_name();
+        let name_str = name.to_string_lossy();
+
+        // Only look at numeric PIDs
+        if !name_str.chars().all(|c| c.is_ascii_digit()) {
+            continue;
+        }
+
+        // Read the comm file (process name)
+        let comm_path = entry.path().join("comm");
+        if let Ok(comm) = fs::read_to_string(&comm_path) {
+            let process_name = comm.trim();
+            for &wm in wm_names {
+                if process_name.eq_ignore_ascii_case(wm) || process_name.contains(wm) {
+                    return Some(normalize_wm(wm));
+                }
             }
         }
     }
 
     None
-}
-
-// Uses xprop to query the active X11 WM (_NET_WM_NAME)
-fn get_wm_from_xprop() -> Option<String> {
-    let root = Command::new("xprop")
-        .args(["-root", "_NET_SUPPORTING_WM_CHECK"])
-        .output()
-        .ok()?;
-    let root_out = String::from_utf8_lossy(&root.stdout);
-    let win_id = root_out.rsplit(' ').next()?.trim();
-
-    let wm = Command::new("xprop")
-        .args(["-id", win_id, "-notype", "_NET_WM_NAME"])
-        .output()
-        .ok()?;
-    let name = String::from_utf8_lossy(&wm.stdout);
-
-    name.split('=')
-        .nth(1)
-        .map(|s| normalize_wm(s.trim().trim_matches('"')))
 }
 
 fn normalize_wm(wm: &str) -> String {
@@ -151,30 +148,6 @@ mod tests {
         assert_eq!(normalize_wm("kwin"), "KWin");
         assert_eq!(normalize_wm("WINDOWMAKER"), "wmaker");
         assert_eq!(normalize_wm("i3"), "i3"); // fallback to default
-    }
-
-    #[test]
-    fn test_scan_proc_finds_known_wm() {
-        let sample_ps = "i3\nbash\nXorg\n";
-
-        for wm in ALL_WMS {
-            let fake_output = sample_ps.replace("i3", wm);
-            let found = parse_ps_for_wm(&fake_output, &[wm]);
-            assert_eq!(found, Some(normalize_wm(wm)));
-        }
-    }
-
-    // Internal helper to isolate scan_proc logic
-    fn parse_ps_for_wm(ps_output: &str, targets: &[&str]) -> Option<String> {
-        for line in ps_output.lines() {
-            let name = line.trim();
-            for &wm in targets {
-                if name.eq_ignore_ascii_case(wm) || name.contains(wm) {
-                    return Some(normalize_wm(wm));
-                }
-            }
-        }
-        None
     }
 
     #[test]

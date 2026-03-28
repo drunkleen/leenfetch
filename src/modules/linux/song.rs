@@ -74,12 +74,26 @@ fn detect_player() -> Option<String> {
         "clementine",
     ];
 
-    let output = Command::new("ps").args(["-eo", "comm="]).output().ok()?;
-    let ps_output = String::from_utf8_lossy(&output.stdout);
+    // Use /proc instead of spawning ps
+    if let Ok(proc_path) = std::fs::read_dir("/proc") {
+        for entry in proc_path.flatten() {
+            let name = entry.file_name();
+            let name_str = name.to_string_lossy();
 
-    for player in players {
-        if ps_output.lines().any(|line| line.trim().contains(player)) {
-            return Some(player.to_string());
+            // Only look at numeric PIDs
+            if !name_str.chars().all(|c| c.is_ascii_digit()) {
+                continue;
+            }
+
+            let comm_path = entry.path().join("comm");
+            if let Ok(comm) = std::fs::read_to_string(&comm_path) {
+                let process_name = comm.trim().to_lowercase();
+                for player in &players {
+                    if process_name.contains(*player) {
+                        return Some(player.to_string());
+                    }
+                }
+            }
         }
     }
 
@@ -104,11 +118,19 @@ mod tests {
         };
         let album = {
             let val = lines.next().unwrap_or("").trim();
-            if val.is_empty() { "Unknown Album" } else { val }
+            if val.is_empty() {
+                "Unknown Album"
+            } else {
+                val
+            }
         };
         let title = {
             let val = lines.next().unwrap_or("").trim();
-            if val.is_empty() { "Unknown Song" } else { val }
+            if val.is_empty() {
+                "Unknown Song"
+            } else {
+                val
+            }
         };
 
         assert_eq!(artist, "Unknown Artist");
