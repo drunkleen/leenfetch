@@ -49,8 +49,7 @@ winapi = { version = "0.3.9", features = [
     "tlhelp32",
     "processthreadsapi",
     "winver",
- ] }
-
+  ] }
 
 [package.metadata.dist]
 ci = true
