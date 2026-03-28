@@ -37,8 +37,45 @@ pub fn get_bar(percent: u8) -> String {
     let filled_blocks = (percent as usize * total_blocks) / 100;
     let empty_blocks = total_blocks - filled_blocks;
 
-    let filled = "█".repeat(filled_blocks);
-    let empty = "░".repeat(empty_blocks);
+    // Pre-computed block strings for common values (avoid allocations)
+    const BLOCKS: &[&str] = &[
+        "",
+        "█",
+        "██",
+        "███",
+        "████",
+        "█████",
+        "██████",
+        "███████",
+        "████████",
+        "█████████",
+        "██████████",
+        "███████████",
+        "████████████",
+        "█████████████",
+        "██████████████",
+    ];
+    const EMPTY_BLOCKS: &[&str] = &[
+        "",
+        "░",
+        "░░",
+        "░░░",
+        "░░░░",
+        "░░░░░",
+        "░░░░░░",
+        "░░░░░░░",
+        "░░░░░░░░",
+        "░░░░░░░░░",
+        "░░░░░░░░░░",
+        "░░░░░░░░░░░",
+        "░░░░░░░░░░░░",
+        "░░░░░░░░░░░░░",
+        "░░░░░░░░░░░░░░",
+    ];
+
+    let filled = BLOCKS[filled_blocks.min(14)];
+    let empty = EMPTY_BLOCKS[empty_blocks.min(14)];
+
     format!("[{}{}]", filled, empty)
 }
 
