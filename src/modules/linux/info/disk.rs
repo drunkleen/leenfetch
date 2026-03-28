@@ -171,55 +171,55 @@ fn format_size(bytes: u64) -> String {
     }
 }
 
-fn parse_disk_output(
-    stdout: &str,
-    subtitle_mode: DiskSubtitle,
-    display_mode: DiskDisplay,
-) -> Vec<(String, String)> {
-    let mut lines = stdout.lines().skip(1);
-    let mut results = Vec::new();
+// fn parse_disk_output(
+//     stdout: &str,
+//     subtitle_mode: DiskSubtitle,
+//     display_mode: DiskDisplay,
+// ) -> Vec<(String, String)> {
+//     let mut lines = stdout.lines().skip(1);
+//     let mut results = Vec::new();
 
-    while let Some(line) = lines.next() {
-        let parts: Vec<&str> = line.split_whitespace().filter(|s| !s.is_empty()).collect();
+//     while let Some(line) = lines.next() {
+//         let parts: Vec<&str> = line.split_whitespace().filter(|s| !s.is_empty()).collect();
 
-        if parts.len() < 6 {
-            continue;
-        }
+//         if parts.len() < 6 {
+//             continue;
+//         }
 
-        let total = parts[1];
-        let used = parts[2];
-        let perc = parts[4].trim_end_matches('%');
-        let mount = parts[5];
+//         let total = parts[1];
+//         let used = parts[2];
+//         let perc = parts[4].trim_end_matches('%');
+//         let mount = parts[5];
 
-        let usage_display = format!("{} / {}", used, total);
-        let perc_val = perc.parse::<u8>().unwrap_or(0);
+//         let usage_display = format!("{} / {}", used, total);
+//         let perc_val = perc.parse::<u8>().unwrap_or(0);
 
-        let final_str = match display_mode {
-            DiskDisplay::Info => usage_display,
-            DiskDisplay::Percentage => format!("{}% {}", perc, get_bar(perc_val)),
-            DiskDisplay::InfoBar => format!("{} {}", usage_display, get_bar(perc_val)),
-            DiskDisplay::BarInfo => format!("{} {}", get_bar(perc_val), usage_display),
-            DiskDisplay::Bar => get_bar(perc_val),
-        };
+//         let final_str = match display_mode {
+//             DiskDisplay::Info => usage_display,
+//             DiskDisplay::Percentage => format!("{}% {}", perc, get_bar(perc_val)),
+//             DiskDisplay::InfoBar => format!("{} {}", usage_display, get_bar(perc_val)),
+//             DiskDisplay::BarInfo => format!("{} {}", get_bar(perc_val), usage_display),
+//             DiskDisplay::Bar => get_bar(perc_val),
+//         };
 
-        let subtitle = match subtitle_mode {
-            DiskSubtitle::Name => parts[0].to_string(),
-            DiskSubtitle::Dir => mount.split('/').last().unwrap_or("").to_string(),
-            DiskSubtitle::None => "".to_string(),
-            DiskSubtitle::Mount => mount.to_string(),
-        };
+//         let subtitle = match subtitle_mode {
+//             DiskSubtitle::Name => parts[0].to_string(),
+//             DiskSubtitle::Dir => mount.split('/').last().unwrap_or("").to_string(),
+//             DiskSubtitle::None => "".to_string(),
+//             DiskSubtitle::Mount => mount.to_string(),
+//         };
 
-        let full_subtitle = if subtitle.is_empty() {
-            "Disk".to_string()
-        } else {
-            format!("Disk ({})", subtitle)
-        };
+//         let full_subtitle = if subtitle.is_empty() {
+//             "Disk".to_string()
+//         } else {
+//             format!("Disk ({})", subtitle)
+//         };
 
-        results.push((full_subtitle, final_str));
-    }
+//         results.push((full_subtitle, final_str));
+//     }
 
-    results
-}
+//     results
+// }
 
 #[cfg(test)]
 mod tests {
