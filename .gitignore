@@ -7,3 +7,4 @@ target
 /.idea
 .idea
 agent.md
+temp/**

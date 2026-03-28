@@ -428,7 +428,6 @@ impl Core {
                 data.wm = context.get_wm();
             }
             ModuleKind::De => {
-                data.wm = context.get_wm();
                 data.de = context.get_de();
             }
             ModuleKind::Cpu => {
@@ -574,17 +573,29 @@ impl Core {
     ) -> (String, HashMap<&str, &str>) {
         let custom_ascii_path = {
             let path = self.flags.custom_ascii_path.trim();
-            if path.is_empty() { None } else { Some(path) }
+            if path.is_empty() {
+                None
+            } else {
+                Some(path)
+            }
         };
 
         let ascii_color_value = {
             let value = self.flags.ascii_colors.trim();
-            if value.is_empty() { "distro" } else { value }
+            if value.is_empty() {
+                "distro"
+            } else {
+                value
+            }
         };
 
         let ascii_distro_value = {
             let value = self.flags.ascii_distro.trim();
-            if value.is_empty() { "distro" } else { value }
+            if value.is_empty() {
+                "distro"
+            } else {
+                value
+            }
         };
 
         let resolved_distro = match ascii_distro_value {
