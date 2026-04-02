@@ -296,7 +296,7 @@ Piped input (for example `fortune | cowsay | leenfetch`) always overrides `ascii
 | `uptime_shorthand` | `full`, `tiny`, `seconds` | `"tiny"` | Session uptime format. |
 | `os_age_shorthand` | `full`, `tiny`, `seconds` | `"tiny"` | Installation age format. |
 
-Every key above can be overridden from the CLI for quick experiments—for example `leenfetch --battery-display barinfo` or `leenfetch --no-shell-version`. See [Command-Line Options](#command-line-options) for the full list.
+Every key above can be overridden from the CLI for quick experiments—for example `leenfetch --battery-display barinfo` or `leenfetch --shell-version false`. See [Command-Line Options](#command-line-options) for the full list.
 
 ```jsonc
 {
@@ -579,17 +579,17 @@ Combine with other tools:
 
 - **Boolean toggles**
 
-  Every toggle is available as a pair. Examples:
-  - `--memory-percent` / `--no-memory-percent`
-  - `--cpu-show-temp` / `--no-cpu-show-temp`
-  - `--cpu-speed` / `--no-cpu-speed`
-  - `--cpu-frequency` / `--no-cpu-frequency`
-  - `--cpu-cores` / `--no-cpu-cores`
-  - `--cpu-brand` / `--no-cpu-brand`
-  - `--shell-path` / `--no-shell-path`
-  - `--shell-version` / `--no-shell-version`
-  - `--refresh-rate` / `--no-refresh-rate`
-  - `--de-version` / `--no-de-version`
+  Every toggle uses a single flag with an explicit value. Examples:
+  - `--memory-percent true`
+  - `--cpu-show-temp false`
+  - `--cpu-speed true`
+  - `--cpu-frequency false`
+  - `--cpu-cores true`
+  - `--cpu-brand false`
+  - `--shell-path true`
+  - `--shell-version false`
+  - `--refresh-rate true`
+  - `--de-version false`
 
 - **Layout helpers**
   - `--only cpu,memory,shell` — Render only the listed modules (order comes from the config).

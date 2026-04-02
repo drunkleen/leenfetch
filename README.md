@@ -370,7 +370,7 @@ Need a temporary tweak for screenshots or testing? LeenFetch now mirrors most `f
 - ASCII controls: `--ascii_distro <name>`, `--ascii_colors <list>`, `--custom_ascii_path <file>`, and `--color-blocks <glyph>`.
 - Formatting knobs: `--battery-display`, `--disk-display`, `--disk-subtitle`, `--memory-unit`, `--packages`, `--uptime`, `--os-age`, `--distro-display`, `--cpu-temp-unit`, and `--format <pretty|json>` for output style.
 - Remote + layout: `--ssh <host>[,<host>...]` to fetch via SSH, `--only cpu,memory,shell` to render a subset, `--hide gpu` to drop modules from the current layout.
-- Boolean toggles come in pairs—use `--cpu-speed` / `--no-cpu-speed`, `--shell-path` / `--no-shell-path`, `--memory-percent` / `--no-memory-percent`, etc., for quick on/off control of individual fields.
+- Boolean toggles use a single flag with an explicit value, for example `--cpu-speed true`, `--shell-path false`, or `--memory-percent true`.
 
 Run `leenfetch --help` to see the complete list of overrides.
 

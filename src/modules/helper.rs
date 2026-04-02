@@ -105,46 +105,26 @@ pub struct Args {
     #[arg(long = "hide")]
     pub hide_modules: Option<String>,
 
-    #[arg(long = "memory-percent", action = ArgAction::SetTrue)]
-    pub memory_percent_on: bool,
-    #[arg(long = "no-memory-percent", action = ArgAction::SetFalse)]
-    pub memory_percent_off: bool,
-    #[arg(long = "cpu-show-temp", action = ArgAction::SetTrue)]
-    pub cpu_show_temp_on: bool,
-    #[arg(long = "no-cpu-show-temp", action = ArgAction::SetFalse)]
-    pub cpu_show_temp_off: bool,
-    #[arg(long = "cpu-speed", action = ArgAction::SetTrue)]
-    pub cpu_speed_on: bool,
-    #[arg(long = "no-cpu-speed", action = ArgAction::SetFalse)]
-    pub cpu_speed_off: bool,
-    #[arg(long = "cpu-frequency", action = ArgAction::SetTrue)]
-    pub cpu_frequency_on: bool,
-    #[arg(long = "no-cpu-frequency", action = ArgAction::SetFalse)]
-    pub cpu_frequency_off: bool,
-    #[arg(long = "cpu-cores", action = ArgAction::SetTrue)]
-    pub cpu_cores_on: bool,
-    #[arg(long = "no-cpu-cores", action = ArgAction::SetFalse)]
-    pub cpu_cores_off: bool,
-    #[arg(long = "cpu-brand", action = ArgAction::SetTrue)]
-    pub cpu_brand_on: bool,
-    #[arg(long = "no-cpu-brand", action = ArgAction::SetFalse)]
-    pub cpu_brand_off: bool,
-    #[arg(long = "shell-path", action = ArgAction::SetTrue)]
-    pub shell_path_on: bool,
-    #[arg(long = "no-shell-path", action = ArgAction::SetFalse)]
-    pub shell_path_off: bool,
-    #[arg(long = "shell-version", action = ArgAction::SetTrue)]
-    pub shell_version_on: bool,
-    #[arg(long = "no-shell-version", action = ArgAction::SetFalse)]
-    pub shell_version_off: bool,
-    #[arg(long = "refresh-rate", action = ArgAction::SetTrue)]
-    pub refresh_rate_on: bool,
-    #[arg(long = "no-refresh-rate", action = ArgAction::SetFalse)]
-    pub refresh_rate_off: bool,
-    #[arg(long = "de-version", action = ArgAction::SetTrue)]
-    pub de_version_on: bool,
-    #[arg(long = "no-de-version", action = ArgAction::SetFalse)]
-    pub de_version_off: bool,
+    #[arg(long = "memory-percent")]
+    pub memory_percent: Option<bool>,
+    #[arg(long = "cpu-show-temp")]
+    pub cpu_show_temp: Option<bool>,
+    #[arg(long = "cpu-speed")]
+    pub cpu_speed: Option<bool>,
+    #[arg(long = "cpu-frequency")]
+    pub cpu_frequency: Option<bool>,
+    #[arg(long = "cpu-cores")]
+    pub cpu_cores: Option<bool>,
+    #[arg(long = "cpu-brand")]
+    pub cpu_brand: Option<bool>,
+    #[arg(long = "shell-path")]
+    pub shell_path: Option<bool>,
+    #[arg(long = "shell-version")]
+    pub shell_version: Option<bool>,
+    #[arg(long = "refresh-rate")]
+    pub refresh_rate: Option<bool>,
+    #[arg(long = "de-version")]
+    pub de_version: Option<bool>,
 
     /// Fetch info from remote hosts via SSH (e.g., user@host or host:port)
     #[arg(long = "ssh", value_name = "HOST")]
@@ -220,66 +200,16 @@ impl Args {
             }
         }
 
-        apply_bool_override(
-            &mut overrides,
-            "memory_percent",
-            self.memory_percent_on,
-            self.memory_percent_off,
-        );
-        apply_bool_override(
-            &mut overrides,
-            "cpu_show_temp",
-            self.cpu_show_temp_on,
-            self.cpu_show_temp_off,
-        );
-        apply_bool_override(
-            &mut overrides,
-            "cpu_speed",
-            self.cpu_speed_on,
-            self.cpu_speed_off,
-        );
-        apply_bool_override(
-            &mut overrides,
-            "cpu_frequency",
-            self.cpu_frequency_on,
-            self.cpu_frequency_off,
-        );
-        apply_bool_override(
-            &mut overrides,
-            "cpu_cores",
-            self.cpu_cores_on,
-            self.cpu_cores_off,
-        );
-        apply_bool_override(
-            &mut overrides,
-            "cpu_brand",
-            self.cpu_brand_on,
-            self.cpu_brand_off,
-        );
-        apply_bool_override(
-            &mut overrides,
-            "shell_path",
-            self.shell_path_on,
-            self.shell_path_off,
-        );
-        apply_bool_override(
-            &mut overrides,
-            "shell_version",
-            self.shell_version_on,
-            self.shell_version_off,
-        );
-        apply_bool_override(
-            &mut overrides,
-            "refresh_rate",
-            self.refresh_rate_on,
-            self.refresh_rate_off,
-        );
-        apply_bool_override(
-            &mut overrides,
-            "de_version",
-            self.de_version_on,
-            self.de_version_off,
-        );
+        apply_bool_override(&mut overrides, "memory_percent", self.memory_percent);
+        apply_bool_override(&mut overrides, "cpu_show_temp", self.cpu_show_temp);
+        apply_bool_override(&mut overrides, "cpu_speed", self.cpu_speed);
+        apply_bool_override(&mut overrides, "cpu_frequency", self.cpu_frequency);
+        apply_bool_override(&mut overrides, "cpu_cores", self.cpu_cores);
+        apply_bool_override(&mut overrides, "cpu_brand", self.cpu_brand);
+        apply_bool_override(&mut overrides, "shell_path", self.shell_path);
+        apply_bool_override(&mut overrides, "shell_version", self.shell_version);
+        apply_bool_override(&mut overrides, "refresh_rate", self.refresh_rate);
+        apply_bool_override(&mut overrides, "de_version", self.de_version);
 
         overrides.ssh_hosts = self.ssh_hosts.clone();
 
@@ -287,11 +217,9 @@ impl Args {
     }
 }
 
-fn apply_bool_override(overrides: &mut CliOverrides, key: &str, enable: bool, disable: bool) {
-    if enable {
-        overrides.set_bool(key, true);
-    } else if disable {
-        overrides.set_bool(key, false);
+fn apply_bool_override(overrides: &mut CliOverrides, key: &str, value: Option<bool>) {
+    if let Some(value) = value {
+        overrides.set_bool(key, value);
     }
 }
 
@@ -331,16 +259,16 @@ OPTIONS:
   --only <list>            Render only listed modules (comma-separated)
   --hide <list>            Hide listed modules (comma-separated)
 
-  --memory-percent / --no-memory-percent
-  --cpu-show-temp   / --no-cpu-show-temp
-  --cpu-speed       / --no-cpu-speed
-  --cpu-frequency   / --no-cpu-frequency
-  --cpu-cores       / --no-cpu-cores
-  --cpu-brand       / --no-cpu-brand
-  --shell-path      / --no-shell-path
-  --shell-version   / --no-shell-version
-  --refresh-rate    / --no-refresh-rate
-  --de-version      / --no-de-version
+  --memory-percent <true|false>
+  --cpu-show-temp <true|false>
+  --cpu-speed <true|false>
+  --cpu-frequency <true|false>
+  --cpu-cores <true|false>
+  --cpu-brand <true|false>
+  --shell-path <true|false>
+  --shell-version <true|false>
+  --refresh-rate <true|false>
+  --de-version <true|false>
 
 DESCRIPTION:
   leenfetch is a modern, minimal, and the fastest system info tool,
