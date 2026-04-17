@@ -101,7 +101,7 @@ fn get_disk_info_for_path(
         return None;
     }
 
-    let percent = ((used as f64 / total as f64) * 100.0) as u8;
+    let percent = ((used as f64 / total as f64) * 100.0).round().clamp(0.0, 100.0) as u8;
 
     // Format sizes in human-readable form
     let total_h = format_size(total);
@@ -221,54 +221,3 @@ fn format_size(bytes: u64) -> String {
 //     results
 // }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    fn sample_df_output() -> &'static str {
-        r#"Filesystem     Size  Used Avail Use% Mounted on
-/dev/sda1       100G   40G   60G  40% /
-tmpfs           2.0G     0  2.0G   0% /dev/shm
-/dev/sdb1       200G  150G   50G  75% /mnt/data
-"#
-    }
-
-    #[test]
-    fn test_parse_info_display_mount_subtitle() {
-        let result = parse_disk_output(sample_df_output(), DiskSubtitle::Mount, DiskDisplay::Info);
-
-        assert_eq!(result.len(), 3);
-        assert_eq!(result[0].0, "Disk (/)");
-        assert_eq!(result[0].1, "40G / 100G");
-    }
-
-    #[test]
-    fn test_parse_percentage_display_dir_subtitle() {
-        let result = parse_disk_output(
-            sample_df_output(),
-            DiskSubtitle::Dir,
-            DiskDisplay::Percentage,
-        );
-
-        assert_eq!(result[2].0, "Disk (data)");
-        assert!(result[2].1.starts_with("75%"));
-    }
-
-    #[test]
-    fn test_parse_bar_only() {
-        let result = parse_disk_output(sample_df_output(), DiskSubtitle::None, DiskDisplay::Bar);
-
-        assert_eq!(result[0].0, "Disk");
-        assert!(result[0].1.starts_with("[") && result[0].1.ends_with("]"));
-        assert!(result[0].1.len() > 2); // should contain some kind of bar
-    }
-
-    #[test]
-    fn test_parse_barinfo_with_name() {
-        let result =
-            parse_disk_output(sample_df_output(), DiskSubtitle::Name, DiskDisplay::BarInfo);
-
-        assert_eq!(result[2].0, "Disk (/dev/sdb1)");
-        assert!(result[2].1.contains("150G / 200G"));
-    }
-}

@@ -43,7 +43,7 @@ pub fn get_memory(memory_percent: bool, memory_unit: MemoryUnit) -> Option<Strin
         MemoryUnit::MiB => (used_kb as f64 / 1024.0, mem_total_kb as f64 / 1024.0, "MiB"),
     };
 
-    let percent = if memory_percent {
+    let percent = if memory_percent && total > 0.0 {
         format!(" ({:.0}%)", used / total * 100.0)
     } else {
         "".to_string()

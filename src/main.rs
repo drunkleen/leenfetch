@@ -19,8 +19,9 @@ use std::{
 };
 use unicode_width::UnicodeWidthStr;
 
-static ANSI_REGEX: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r"\x1b\[[0-9;]*m").expect("valid ANSI regex"));
+static ANSI_REGEX: Lazy<Regex> = Lazy::new(|| {
+    Regex::new(r"\x1b\[[0-9;]*m").unwrap_or_else(|e| panic!("Invalid ANSI regex: {e}"))
+});
 
 fn main() {
     if let Err(err) = run() {
@@ -387,7 +388,7 @@ fn print_ascii_and_info(ascii: &str, info_lines: &[String]) {
     // Move cursor back up to start of ASCII block
     let move_up = ascii_lines.len();
     print!("\x1b[{}A", move_up);
-    std::io::Write::flush(&mut std::io::stdout()).unwrap();
+    let _ = std::io::Write::flush(&mut std::io::stdout());
 
     total_lines -= info_lines.len();
 
