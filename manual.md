@@ -126,17 +126,17 @@ makepkg -si
 
 ### Debian / Ubuntu (.deb)
 
-Download the `.deb` from GitHub Releases and install with `dpkg` (replace `v1.2.0` with the latest tag if needed):
+Download the `.deb` from GitHub Releases and install with `dpkg` (replace `1` with the latest tag if needed):
 
 - AMD64 (x86_64)
 ```bash
-wget https://github.com/drunkleen/leenfetch/releases/download/v1.2.0/leenfetch-v1.2.0-debian-x86_64.deb
+wget https://github.com/drunkleen/leenfetch/releases/download/v1.2.1/leenfetch-v1.2.1-debian-x86_64.deb
 sudo dpkg -i leenfetch-*.deb
 ```
 
 - AArch64 (ARM64)
 ```bash
-wget https://github.com/drunkleen/leenfetch/releases/download/v1.2.0/leenfetch-v1.2.0-debian-aarch64.deb
+wget https://github.com/drunkleen/leenfetch/releases/download/v1.2.1/leenfetch-v1.2.1-debian-aarch64.deb
 sudo dpkg -i leenfetch-*.deb
 ```
 
@@ -146,13 +146,13 @@ Grab the `.rpm` from GitHub Releases (update the tag as needed):
 
 - AMD64 (x86_64)
 ```bash
-wget https://github.com/drunkleen/leenfetch/releases/download/v1.2.0/leenfetch-v1.2.0-REHL-x86_64.rpm
+wget https://github.com/drunkleen/leenfetch/releases/download/v1.2.1/leenfetch-v1.2.1-REHL-x86_64.rpm
 sudo rpm -i leenfetch-*.rpm
 ```
 
 - AArch64 (ARM64)
 ```bash
-wget https://github.com/drunkleen/leenfetch/releases/download/v1.2.0/leenfetch-v1.2.0-REHL-aarch64.rpm
+wget https://github.com/drunkleen/leenfetch/releases/download/v1.2.1/leenfetch-v1.2.1-REHL-aarch64.rpm
 sudo rpm -i leenfetch-*.rpm
 ```
 
@@ -162,16 +162,16 @@ Download the zip for your architecture from GitHub Releases and extract it (upda
 
 - AMD64 (x86_64)
 ```powershell
-Invoke-WebRequest -Uri "https://github.com/drunkleen/leenfetch/releases/download/v1.2.0/leenfetch-v1.2.0-windows-x86_64.zip" -OutFile "leenfetch-win.zip"
+Invoke-WebRequest -Uri "https://github.com/drunkleen/leenfetch/releases/download/v1.2.1/leenfetch-v1.2.1-windows-x86_64.zip" -OutFile "leenfetch-win.zip"
 Expand-Archive .\leenfetch-win.zip -DestinationPath .
-.\leenfetch-v1.2.0-windows-x86_64.exe
+.\leenfetch-v1.2.1-windows-x86_64.exe
 ```
 
 - AArch64 (ARM64)
 ```powershell
-Invoke-WebRequest -Uri "https://github.com/drunkleen/leenfetch/releases/download/v1.2.0/leenfetch-v1.2.0-windows-aarch64.zip" -OutFile "leenfetch-win.zip"
+Invoke-WebRequest -Uri "https://github.com/drunkleen/leenfetch/releases/download/v1.2.1/leenfetch-v1.2.1-windows-aarch64.zip" -OutFile "leenfetch-win.zip"
 Expand-Archive .\leenfetch-win.zip -DestinationPath .
-.\leenfetch-v1.2.0-windows-aarch64.exe
+.\leenfetch-v1.2.1-windows-aarch64.exe
 ```
 
 > Run the executable from the same directory you extracted to, or move it into a directory on your `PATH`.
@@ -296,7 +296,7 @@ Piped input (for example `fortune | cowsay | leenfetch`) always overrides `ascii
 | `uptime_shorthand` | `full`, `tiny`, `seconds` | `"tiny"` | Session uptime format. |
 | `os_age_shorthand` | `full`, `tiny`, `seconds` | `"tiny"` | Installation age format. |
 
-Every key above can be overridden from the CLI for quick experiments—for example `leenfetch --battery-display barinfo` or `leenfetch --no-shell-version`. See [Command-Line Options](#command-line-options) for the full list.
+Every key above can be overridden from the CLI for quick experiments—for example `leenfetch --battery-display barinfo` or `leenfetch --shell-version false`. See [Command-Line Options](#command-line-options) for the full list.
 
 ```jsonc
 {
@@ -579,17 +579,17 @@ Combine with other tools:
 
 - **Boolean toggles**
 
-  Every toggle is available as a pair. Examples:
-  - `--memory-percent` / `--no-memory-percent`
-  - `--cpu-show-temp` / `--no-cpu-show-temp`
-  - `--cpu-speed` / `--no-cpu-speed`
-  - `--cpu-frequency` / `--no-cpu-frequency`
-  - `--cpu-cores` / `--no-cpu-cores`
-  - `--cpu-brand` / `--no-cpu-brand`
-  - `--shell-path` / `--no-shell-path`
-  - `--shell-version` / `--no-shell-version`
-  - `--refresh-rate` / `--no-refresh-rate`
-  - `--de-version` / `--no-de-version`
+  Every toggle uses a single flag with an explicit value. Examples:
+  - `--memory-percent true`
+  - `--cpu-show-temp false`
+  - `--cpu-speed true`
+  - `--cpu-frequency false`
+  - `--cpu-cores true`
+  - `--cpu-brand false`
+  - `--shell-path true`
+  - `--shell-version false`
+  - `--refresh-rate true`
+  - `--de-version false`
 
 - **Layout helpers**
   - `--only cpu,memory,shell` — Render only the listed modules (order comes from the config).
