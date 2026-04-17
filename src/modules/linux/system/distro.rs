@@ -42,7 +42,7 @@ fn parse_distro_info(contents: &str, format: DistroDisplay) -> String {
         } else if line.starts_with("VERSION_CODENAME=") {
             codename = Some(trim_quotes(&line[17..]));
         } else if line.starts_with("UBUNTU_CODENAME=") {
-            codename = Some(trim_quotes(&line[17..]));
+            codename = Some(trim_quotes(&line[16..]));
         } else if line.starts_with("TAILS_PRODUCT_NAME=") {
             name = Some(trim_quotes(&line[20..]));
         }

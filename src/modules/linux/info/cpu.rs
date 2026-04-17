@@ -107,7 +107,9 @@ fn count_cores(cpuinfo: &str) -> u32 {
     cpuinfo
         .lines()
         .filter(|l| l.starts_with("processor"))
-        .count() as u32
+        .count()
+        .try_into()
+        .unwrap_or(u32::MAX)
 }
 
 fn extract_speed(cpuinfo: &str) -> Option<u32> {

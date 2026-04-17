@@ -21,7 +21,7 @@ static CACHE_MUTEX: Mutex<()> = Mutex::new(());
 /// Results are cached for 5 seconds to avoid redundant computation on quick successive calls.
 pub fn gather_system_info(config: &Config) -> Result<SystemInfo> {
     // Use a lock to prevent cache stampede
-    let _lock = CACHE_MUTEX.lock().unwrap();
+    let _lock = CACHE_MUTEX.lock().unwrap_or_else(|e| e.into_inner());
 
     // Create a cache key based on config (flags and layout)
     let cache_key = format!("{:?}_{:?}", config.flags, config.layout.len());

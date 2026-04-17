@@ -15,18 +15,20 @@ use std::{
     fs::{self, File},
 };
 
-static DEFAULT_CONFIG_CACHE: Lazy<Config> =
-    Lazy::new(|| json5::from_str(DEFAULT_CONFIG).expect("Invalid JSONC in default config"));
+static DEFAULT_CONFIG_CACHE: Lazy<Config> = Lazy::new(|| {
+    json5::from_str(DEFAULT_CONFIG).unwrap_or_else(|e| panic!("Built-in default config is invalid JSON: {e}"))
+});
 
 /// Loads the unified configuration from `config.jsonc`.
-fn load_config() -> Config {
+fn load_config() -> Result<Config, String> {
     let path = config_file("config.jsonc");
-    let data = fs::read_to_string(path).expect("Failed to read config.jsonc");
+    let data = fs::read_to_string(&path)
+        .map_err(|e| format!("Failed to read config.jsonc ({}): {}", path.display(), e))?;
     load_config_from_str(&data)
 }
 
-fn load_config_from_str(data: &str) -> Config {
-    json5::from_str(data).expect("Invalid JSONC in config.jsonc")
+fn load_config_from_str(data: &str) -> Result<Config, String> {
+    json5::from_str(data).map_err(|e| format!("Invalid JSONC in config.jsonc: {}", e))
 }
 
 /// Loads configuration from a custom path when provided.
@@ -35,9 +37,9 @@ pub fn load_config_at(path: Option<&str>) -> Result<Config, String> {
         Some(custom_path) => {
             let data = fs::read_to_string(custom_path)
                 .map_err(|err| format!("Failed to read config at {}: {}", custom_path, err))?;
-            Ok(load_config_from_str(&data))
+            load_config_from_str(&data)
         }
-        None => Ok(load_config()),
+        None => load_config(),
     }
 }
 
@@ -57,7 +59,10 @@ pub fn default_layout() -> Vec<LayoutItem> {
 ///
 /// A `Vec<LayoutItem>` containing the loaded module configuration.
 pub fn load_print_layout() -> Vec<LayoutItem> {
-    let layout = load_config().layout;
+    let layout = load_config().unwrap_or_else(|e| {
+        eprintln!("leenfetch: config error: {e}; using defaults");
+        default_config()
+    }).layout;
     if layout.is_empty() {
         default_layout()
     } else {
@@ -71,7 +76,10 @@ pub fn load_print_layout() -> Vec<LayoutItem> {
 ///
 /// A `Flags` struct containing the loaded configuration.
 pub fn load_flags() -> Flags {
-    load_config().flags
+    load_config().unwrap_or_else(|e| {
+        eprintln!("leenfetch: config error: {e}; using defaults");
+        default_config()
+    }).flags
 }
 
 /// Generates the default unified configuration file.

@@ -34,7 +34,7 @@ impl<T> Cache<T> {
 
         // Try to get from cache first (without lock)
         {
-            let entries = &mut *self.entries.lock().unwrap();
+            let entries = &mut *self.entries.lock().unwrap_or_else(|e| e.into_inner());
 
             if let Some(entry) = entries.get(key) {
                 if entry.expires_at > now {
@@ -50,7 +50,7 @@ impl<T> Cache<T> {
 
         // Store in cache
         {
-            let entries = &mut *self.entries.lock().unwrap();
+            let entries = &mut *self.entries.lock().unwrap_or_else(|e| e.into_inner());
             let expires_at = now + self.ttl;
             entries.insert(
                 key.to_string(),
@@ -65,11 +65,11 @@ impl<T> Cache<T> {
     }
 
     pub fn invalidate(&self, key: &str) {
-        self.entries.lock().unwrap().remove(key);
+        self.entries.lock().unwrap_or_else(|e| e.into_inner()).remove(key);
     }
 
     pub fn clear(&self) {
-        self.entries.lock().unwrap().clear();
+        self.entries.lock().unwrap_or_else(|e| e.into_inner()).clear();
     }
 }
 
