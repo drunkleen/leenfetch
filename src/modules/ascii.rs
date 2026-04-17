@@ -192,6 +192,8 @@ pub fn get_builtin_ascii_art(ascii_distro: &str) -> &'static str {
 
         ("kubuntu", _) => KUBUNTU,
 
+        ("leenium", _) => LEENIUM,
+
         ("linuxmint", true) | ("mint", true) | ("linux mint", true) => LINUXMINT_SMALL,
         ("linuxmint", false) | ("mint", false) | ("linux mint", false) => LINUXMINT,
         ("linuxmint_old", false)
@@ -238,6 +240,7 @@ pub fn get_builtin_ascii_art(ascii_distro: &str) -> &'static str {
         ("windows 11", _) | ("windows11", _) => WINDOWS_11,
         ("windows 10", _) | ("windows10", _) | ("windows 8", _) | ("windows8", _) => WINDOWS_10,
         ("windows", _) => WINDOWS,
+
 
         _ => DEFAULT,
     }
@@ -1866,6 +1869,26 @@ oyyyyysos${c2}dy${c1}yyyyyyyyyyyyyyyyyy${c2}dMMMMy${c1}syyyo
       -oyyyyyyy${c2}dMMy${c1}yyyyyysosyyyyo-
         ./oyyyyyyyyyyyyyyyyyyo/.
            `.:/oosyyyysso/:.`"#;
+
+const LEENIUM: &str = r#"${c1}████████████████████████████████████████
+████████████████████████████████████████
+████                                ████
+████     ██                  ██     ████
+████   ██████████████████████████   ████
+████     ██                  ██     ████
+████     ██  ██████████████  ██     ████
+████     ██  ██████████████  ██     ████
+████     ██  ████      ████  ██     ████
+████     ██  ████      ████  ██     ████
+████     ██  ████      ████  ██     ████
+████     ██  ███████████████████████████
+████     ██  ███████████████████████████
+████     ██            ████
+████   ██████████████████████
+████     ██            ████
+████                   ████
+███████████████████████████
+███████████████████████████"#;
 
 const LINUXMINT_SMALL: &str = r#"${c1} ___________
 |_          \
