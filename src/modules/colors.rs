@@ -178,6 +178,8 @@ pub fn get_builtin_distro_colors(distro: &str) -> &'static [u8] {
 
         ("kubuntu", _) => &[4, 7, 1],
 
+        ("leenium", _) => &[2, 7],
+
         ("linuxmint", _)
         | ("linux mint", _)
         | ("linuxmintold", _)
