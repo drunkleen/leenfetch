@@ -2,7 +2,7 @@
 title: leenfetch
 section: 1
 header: Manual
-footer: Leenfetch 1.2.0
+footer: Leenfetch 1.2.1
 ---
 
 # leenfetch — User Commands
@@ -69,7 +69,7 @@ leenfetch can also accept **piped input** to render as ASCII art. This allows us
   Render only the listed modules (comma-separated).
 - `--hide <LIST>`  
   Hide specific modules (comma-separated).
-- Boolean toggles follow a paired pattern—use `--cpu-speed` / `--no-cpu-speed`, `--shell-path` / `--no-shell-path`, `--memory-percent` / `--no-memory-percent`, `--refresh-rate` / `--no-refresh-rate`, etc.
+- Boolean toggles use a single flag with an explicit value, for example `--cpu-speed true`, `--shell-path false`, `--memory-percent true`, or `--refresh-rate false`.
 
 ## REMOTE FETCHING OVER SSH
 

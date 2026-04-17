@@ -108,14 +108,14 @@ If you're on Debian, Ubuntu, or a Debian-based distribution, you can download an
 
 - AMD64 (x86_64)
 ```bash
-wget https://github.com/drunkleen/leenfetch/releases/download/v1.2.0/leenfetch-v1.2.0-debian-x86_64.deb
+wget https://github.com/drunkleen/leenfetch/releases/download/v1.2.1/leenfetch-v1.2.1-debian-x86_64.deb
 sudo dpkg -i leenfetch-*.deb
 ```
 
 
 - AArch64 (ARM64)
 ```bash
-wget https://github.com/drunkleen/leenfetch/releases/download/v1.2.0/leenfetch-v1.2.0-debian-aarch64.deb
+wget https://github.com/drunkleen/leenfetch/releases/download/v1.2.1/leenfetch-v1.2.1-debian-aarch64.deb
 sudo dpkg -i leenfetch-*.deb
 ```
 
@@ -127,13 +127,13 @@ If you're using Fedora, RHEL, or another RPM-based distro, you can install LeenF
 
 - AMD64 (x86_64)
 ```bash
-wget https://github.com/drunkleen/leenfetch/releases/download/v1.2.0/leenfetch-v1.2.0-REHL-x86_64.rpm
+wget https://github.com/drunkleen/leenfetch/releases/download/v1.2.1/leenfetch-v1.2.1-REHL-x86_64.rpm
 sudo rpm -i leenfetch-*.rpm
 ```
 
 - AArch64 (ARM64)
 ```bash
-wget https://github.com/drunkleen/leenfetch/releases/download/v1.2.0/leenfetch-v1.2.0-REHL-aarch64.rpm
+wget https://github.com/drunkleen/leenfetch/releases/download/v1.2.1/leenfetch-v1.2.1-REHL-aarch64.rpm
 sudo rpm -i leenfetch-*.rpm
 ```
 
@@ -147,18 +147,18 @@ powershell:
 
 - AMD64 (x86_64)
 ```powershell
-Invoke-WebRequest -Uri "https://github.com/drunkleen/leenfetch/releases/download/v1.2.0/leenfetch-v1.2.0-windows-x86_64.zip" -OutFile "leenfetch-win.zip"
+Invoke-WebRequest -Uri "https://github.com/drunkleen/leenfetch/releases/download/v1.2.1/leenfetch-v1.2.1-windows-x86_64.zip" -OutFile "leenfetch-win.zip"
 Expand-Archive .\leenfetch-win.zip -DestinationPath .
 
-.\leenfetch-v1.2.0-windows-x86_64.exe
+.\leenfetch-v1.2.1-windows-x86_64.exe
 ```
 
 - AArch64 (ARM64)
 ```powershell
-Invoke-WebRequest -Uri "https://github.com/drunkleen/leenfetch/releases/download/v1.2.0/leenfetch-v1.2.0-windows-aarch64.zip" -OutFile "leenfetch-win.zip"
+Invoke-WebRequest -Uri "https://github.com/drunkleen/leenfetch/releases/download/v1.2.1/leenfetch-v1.2.1-windows-aarch64.zip" -OutFile "leenfetch-win.zip"
 Expand-Archive .\leenfetch-win.zip -DestinationPath .
 
-.\leenfetch-v1.2.0-windows-aarch64.exe
+.\leenfetch-v1.2.1-windows-aarch64.exe
 ```
 
 > Make sure you're in the same directory as `leenfetch.exe` when running the command.
@@ -370,7 +370,7 @@ Need a temporary tweak for screenshots or testing? LeenFetch now mirrors most `f
 - ASCII controls: `--ascii_distro <name>`, `--ascii_colors <list>`, `--custom_ascii_path <file>`, and `--color-blocks <glyph>`.
 - Formatting knobs: `--battery-display`, `--disk-display`, `--disk-subtitle`, `--memory-unit`, `--packages`, `--uptime`, `--os-age`, `--distro-display`, `--cpu-temp-unit`, and `--format <pretty|json>` for output style.
 - Remote + layout: `--ssh <host>[,<host>...]` to fetch via SSH, `--only cpu,memory,shell` to render a subset, `--hide gpu` to drop modules from the current layout.
-- Boolean toggles come in pairs—use `--cpu-speed` / `--no-cpu-speed`, `--shell-path` / `--no-shell-path`, `--memory-percent` / `--no-memory-percent`, etc., for quick on/off control of individual fields.
+- Boolean toggles use a single flag with an explicit value, for example `--cpu-speed true`, `--shell-path false`, or `--memory-percent true`.
 
 Run `leenfetch --help` to see the complete list of overrides.
 
