@@ -1,20 +1,20 @@
-use anyhow::{Context, Result, anyhow};
-use atty::Stream;
+use anyhow::{anyhow, Context, Result};
 use clap::Parser;
 use leenfetch_core::{
-    SystemInfo, config,
+    config,
     core::{Core, Data},
     gather_system_info,
     modules::{
-        helper::{Args, CliOverrides, OutputFormat, list_options, print_custom_help},
+        helper::{list_options, print_custom_help, Args, CliOverrides, OutputFormat},
         utils::colorize_text,
     },
+    SystemInfo,
 };
 use once_cell::sync::Lazy;
 use regex::Regex;
 use std::{
     collections::HashSet,
-    io::{self, Read},
+    io::{self, IsTerminal, Read},
     process::Command,
 };
 use unicode_width::UnicodeWidthStr;
@@ -93,7 +93,7 @@ fn run() -> Result<()> {
     }
 
     let mut pipe_input = String::new();
-    if !atty::is(Stream::Stdin) {
+    if !std::io::stdin().is_terminal() {
         io::stdin()
             .read_to_string(&mut pipe_input)
             .context("Failed to read from stdin")?;
