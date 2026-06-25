@@ -1,4 +1,4 @@
-pub fn get_builtin_ascii_art(ascii_distro: &str) -> &'static str {
+pub fn get_builtin_ascii_art(ascii_distro: &str) -> Option<&'static str> {
     let mut small_size = false;
 
     let dist = if let Some(stripped) = ascii_distro.strip_suffix("_small") {
@@ -10,290 +10,279 @@ pub fn get_builtin_ascii_art(ascii_distro: &str) -> &'static str {
 
     if dist.contains("windows") {
         if dist.contains("11") {
-            return WINDOWS_11;
+            return Some(WINDOWS_11);
         } else if dist.contains("10") || dist.contains("8") {
-            return WINDOWS_10;
+            return Some(WINDOWS_10);
         } else {
-            return WINDOWS;
+            return Some(WINDOWS);
         }
     }
 
     match (dist.as_str(), small_size) {
-        ("almalinux", false) | ("alma", false) => ALMALINUX,
+        ("almalinux", false) | ("alma", false) => Some(ALMALINUX),
 
-        ("alpine", true) => ALPINE_SMALL,
-        ("alpine", false) => ALPINE,
+        ("alpine", true) => Some(ALPINE_SMALL),
+        ("alpine", false) => Some(ALPINE),
 
-        ("alter", _) => ALTER,
+        ("alter", _) => Some(ALTER),
 
-        ("android", true) => ANDROID_SMALL,
-        ("android", false) => ANDROID,
+        ("android", true) => Some(ANDROID_SMALL),
+        ("android", false) => Some(ANDROID),
 
-        ("amazon", true) => AMAZON_SMALL,
-        ("amazon", false) => AMAZON,
+        ("amazon", true) => Some(AMAZON_SMALL),
+        ("amazon", false) => Some(AMAZON),
 
-        ("anarchy", _) => ANARCHY,
+        ("anarchy", _) => Some(ANARCHY),
 
-        ("instantos", _) => INSTANT_OS,
+        ("instantos", _) => Some(INSTANT_OS),
 
-        ("antix", _) => ANTI_X,
+        ("antix", _) => Some(ANTI_X),
 
-        ("antergos", _) => ANTERGOS,
+        ("antergos", _) => Some(ANTERGOS),
 
-        ("aosc os/retro", _) | ("aoscos/retro", _) | ("aosc os retro", _) => AOSC_OS_RETRO,
-        ("aosc os", _) | ("aoscos", _) => AOSC_OS,
+        ("aosc os/retro", _) | ("aoscos/retro", _) | ("aosc os retro", _) => Some(AOSC_OS_RETRO),
+        ("aosc os", _) | ("aoscos", _) => Some(AOSC_OS),
 
-        ("arch", true) | ("archlinux", true) | ("arch linux", true) => ARCH_SMALL,
-        ("arch", false) | ("archlinux", false) | ("arch linux", false) => ARCH,
+        ("arch", true) | ("archlinux", true) | ("arch linux", true) => Some(ARCH_SMALL),
+        ("arch", false) | ("archlinux", false) | ("arch linux", false) => Some(ARCH),
 
-        ("archbox", _) => ARCH_BOX,
+        ("archbox", _) => Some(ARCH_BOX),
 
-        ("archlabs", _) => ARCH_LABS,
+        ("archlabs", _) => Some(ARCH_LABS),
 
-        ("archcraft", _) => ARCH_CRAFT,
+        ("archcraft", _) => Some(ARCH_CRAFT),
 
-        ("arcolinux", true) => ARCOLINUX_SMALL,
-        ("arcolinux", false) => ARCOLINUX,
+        ("arcolinux", true) => Some(ARCOLINUX_SMALL),
+        ("arcolinux", false) => Some(ARCOLINUX),
 
-        ("apricity", _) => APRICITY,
+        ("apricity", _) => Some(APRICITY),
 
-        ("archstrike", _) => ARCH_STRIKE,
+        ("archstrike", _) => Some(ARCH_STRIKE),
 
-        ("archmerge", _) => ARCH_MERGE,
+        ("archmerge", _) => Some(ARCH_MERGE),
 
-        ("artix", true) => ARTIX_SMALL,
-        ("artix", false) => ARTIX,
+        ("artix", true) => Some(ARTIX_SMALL),
+        ("artix", false) => Some(ARTIX),
 
-        ("arya", _) => ARYA,
+        ("arya", _) => Some(ARYA),
 
-        ("asteroidos", _) | ("asteroid", _) => ASTEROIDOS,
+        ("asteroidos", _) | ("asteroid", _) => Some(ASTEROIDOS),
 
-        ("aix", _) => AIX,
+        ("aix", _) => Some(AIX),
 
-        ("bedrock", _) => BEDROCK,
+        ("bedrock", _) => Some(BEDROCK),
 
-        ("bitrig", _) => BITRIG,
+        ("bitrig", _) => Some(BITRIG),
 
-        ("blackarch", _) | ("black arch", _) => BLACK_ARCH,
+        ("blackarch", _) | ("black arch", _) => Some(BLACK_ARCH),
 
-        ("blag", _) => BLAG,
+        ("blag", _) => Some(BLAG),
 
-        ("blankon", _) | ("blank on", _) => BLANK_ON,
+        ("blankon", _) | ("blank on", _) => Some(BLANK_ON),
 
-        ("bluelight", _) => BLUE_LIGHT,
+        ("bluelight", _) => Some(BLUE_LIGHT),
 
-        ("bodhi", _) => BODHI,
+        ("bodhi", _) => Some(BODHI),
 
-        ("bonsai", _) => BONSAI,
+        ("bonsai", _) => Some(BONSAI),
 
-        ("bsd", _) => BSD,
+        ("bsd", _) => Some(BSD),
 
-        ("bunsenlabs", _) | ("bunsen labs", _) => BUNSEN_LABS,
+        ("bunsenlabs", _) | ("bunsen labs", _) => Some(BUNSEN_LABS),
 
-        ("calculate", _) | ("calculateos", _) => CALCULATE,
+        ("calculate", _) | ("calculateos", _) => Some(CALCULATE),
 
-        ("carbs", _) => CARBS,
+        ("carbs", _) => Some(CARBS),
 
-        ("cbl-mariner", _) | ("cbl mariner", _) => CBL_MARINER,
+        ("cbl-mariner", _) | ("cbl mariner", _) => Some(CBL_MARINER),
 
-        ("celos", _) | ("cel os", _) => CEL_OS,
+        ("celos", _) | ("cel os", _) => Some(CEL_OS),
 
-        ("clearos", _) => CLEAROS,
+        ("clearos", _) => Some(CLEAROS),
 
-        ("centos", true) => CENTOS_SMALL,
-        ("centos", false) => CENTOS,
+        ("centos", true) => Some(CENTOS_SMALL),
+        ("centos", false) => Some(CENTOS),
 
-        ("chakra", _) => CHAKRA,
+        ("chakra", _) => Some(CHAKRA),
 
-        ("chaletos", _) | ("chalet os", _) => CHALET_OS,
+        ("chaletos", _) | ("chalet os", _) => Some(CHALET_OS),
 
-        ("chapeau", _) => CHEAPEAU,
+        ("chapeau", _) => Some(CHEAPEAU),
 
-        ("chrom", _) | ("chrome", _) | ("chromeos", _) | ("chrome os", _) => CHROME,
+        ("chrom", _) | ("chrome", _) | ("chromeos", _) | ("chrome os", _) => Some(CHROME),
 
-        ("cleanjaro", true) => CLEANJARO_SMALL,
-        ("cleanjaro", false) => CLEANJARO,
+        ("cleanjaro", true) => Some(CLEANJARO_SMALL),
+        ("cleanjaro", false) => Some(CLEANJARO),
 
         ("clear linux os", _)
         | ("clearlinuxos", _)
         | ("clear_linux", _)
-        | ("clear_linux_os", _) => CLEAR_OS,
+        | ("clear_linux_os", _) => Some(CLEAR_OS),
 
-        ("clover", _) => CLOVER,
+        ("clover", _) => Some(CLOVER),
 
-        ("condres", _) => CONDRES,
+        ("condres", _) => Some(CONDRES),
 
         ("container Linux by coreos", _) | ("container_linux", _) | ("container", _) => {
-            CONTAINER_LINUX
+            Some(CONTAINER_LINUX)
         }
 
-        ("crux", true) => CRUX_SMALL,
-        ("crux", false) => CRUX,
+        ("crux", true) => Some(CRUX_SMALL),
+        ("crux", false) => Some(CRUX),
 
-        ("crystal linux", _) | ("crystal", _) => CRYSTAL_LINUX,
+        ("crystal linux", _) | ("crystal", _) => Some(CRYSTAL_LINUX),
 
-        ("cucumber", _) => CUCUMBER,
+        ("cucumber", _) => Some(CUCUMBER),
 
-        ("cyberos", _) | ("cyber os", _) => CYBER_OS,
+        ("cyberos", _) | ("cyber os", _) => Some(CYBER_OS),
 
-        ("dahlia", _) => DAHLIA,
+        ("dahlia", _) => Some(DAHLIA),
 
-        ("debian", true) | ("debian gnu/linux", true) => DEBIAN_SMALL,
-        ("debian", false) | ("debian gnu/linux", false) => DEBIAN,
+        ("debian", true) | ("debian gnu/linux", true) => Some(DEBIAN_SMALL),
+        ("debian", false) | ("debian gnu/linux", false) => Some(DEBIAN),
 
-        ("deepin", _) => DEEPIN,
+        ("deepin", _) => Some(DEEPIN),
 
-        ("desaos", _) => DESAOS,
+        ("desaos", _) => Some(DESAOS),
 
-        ("devuan", _) => DEVUAN,
+        ("devuan", _) => Some(DEVUAN),
 
-        ("dracos", _) => DRACOS,
+        ("dracos", _) => Some(DRACOS),
 
-        ("darkos", _) | ("dark os", _) => DARK_OS,
+        ("darkos", _) | ("dark os", _) => Some(DARK_OS),
 
-        ("dragonfly_old", _) => DRAGONFLY_OLD,
-        ("dragonfly", true) => DRAGONFLY_SMALL,
-        ("dragonfly", false) => DRAGONFLY,
+        ("dragonfly_old", _) => Some(DRAGONFLY_OLD),
+        ("dragonfly", true) => Some(DRAGONFLY_SMALL),
+        ("dragonfly", false) => Some(DRAGONFLY),
 
-        ("drauger", _) => DRAUGER,
+        ("drauger", _) => Some(DRAUGER),
 
-        ("elementary", true) => ELEMENTARY_SMALL,
-        ("elementary", false) => ELEMENTARY,
+        ("elementary", true) => Some(ELEMENTARY_SMALL),
+        ("elementary", false) => Some(ELEMENTARY),
 
-        ("endeavouros", true) => ENDEAVOUROS_SMALL,
-        ("endeavouros", false) => ENDEAVOUROS,
+        ("endeavouros", true) => Some(ENDEAVOUROS_SMALL),
+        ("endeavouros", false) => Some(ENDEAVOUROS),
 
-        ("endless", _) => ENDLESS,
+        ("endless", _) => Some(ENDLESS),
 
-        ("eurolinux", _) | ("euro linux", _) => EURO_LINUX,
+        ("eurolinux", _) | ("euro linux", _) => Some(EURO_LINUX),
 
-        ("exherbo", _) => EXHERBO,
+        ("exherbo", _) => Some(EXHERBO),
 
-        ("fedora", true) => FEDORA_SMALL,
-        ("fedora", false) => FEDORA,
+        ("fedora", true) => Some(FEDORA_SMALL),
+        ("fedora", false) => Some(FEDORA),
 
-        ("feren", _) => FEREN,
+        ("feren", _) => Some(FEREN),
 
-        ("freebsd", true) => FREEBSD_SMALL,
-        ("freebsd", false) | ("hardenedbsd", false) => FREEBSD,
+        ("freebsd", true) => Some(FREEBSD_SMALL),
+        ("freebsd", false) | ("hardenedbsd", false) => Some(FREEBSD),
 
-        ("freemint", _) => FREE_MINT,
+        ("freemint", _) => Some(FREE_MINT),
 
-        ("frugalware", _) => FRUGALWARE,
+        ("frugalware", _) => Some(FRUGALWARE),
 
-        ("funtoo", _) => FUNTOO,
+        ("funtoo", _) => Some(FUNTOO),
 
-        ("garuda", _) => GARUDA,
+        ("garuda", _) => Some(GARUDA),
 
-        ("hash", _) => HASH,
+        ("hash", _) => Some(HASH),
 
-        ("kali", _) => KALI,
+        ("kali", _) => Some(KALI),
 
-        ("kde", _) => KDE,
+        ("kde", _) => Some(KDE),
 
-        ("kubuntu", _) => KUBUNTU,
+        ("kubuntu", _) => Some(KUBUNTU),
 
-        ("leenium", _) => LEENIUM,
+        ("leenium", _) => Some(LEENIUM),
 
-        ("linuxmint", true) | ("mint", true) | ("linux mint", true) => LINUXMINT_SMALL,
-        ("linuxmint", false) | ("mint", false) | ("linux mint", false) => LINUXMINT,
+        ("linuxmint", true) | ("mint", true) | ("linux mint", true) => Some(LINUXMINT_SMALL),
+        ("linuxmint", false) | ("mint", false) | ("linux mint", false) => Some(LINUXMINT),
         ("linuxmint_old", false)
         | ("linuxmintold", false)
         | ("mintold", false)
         | ("mint_old", false)
-        | ("mint old", false) => LINUXMINT_OLD,
+        | ("mint old", false) => Some(LINUXMINT_OLD),
 
-        ("manjaro", true) => MANJARO_SMALL,
-        ("manjaro", false) => MANJARO,
+        ("manjaro", true) => Some(MANJARO_SMALL),
+        ("manjaro", false) => Some(MANJARO),
 
-        ("mx", true) => MX_SMALL,
-        ("mx", false) => MX,
+        ("mx", true) => Some(MX_SMALL),
+        ("mx", false) => Some(MX),
 
-        ("nixos", true) => NIXOS_SMALL,
-        ("nixos", false) => NIXOS,
+        ("nixos", true) => Some(NIXOS_SMALL),
+        ("nixos", false) => Some(NIXOS),
 
-        ("opensuse", true) | ("suse", true) => OPENSUSE_SMALL,
-        ("opensuse", false) | ("open suse", false) | ("suse", false) => OPENSUSE,
-        ("opensuse leap", _) | ("opensuse_leap", _) => OPENSUSE_LEAP,
-        ("opensuse tumbleweed", _) | ("opensuse_tumbleweed", _) => OPENSUSE_TUMBLEWEED,
+        ("opensuse", true) | ("suse", true) => Some(OPENSUSE_SMALL),
+        ("opensuse", false) | ("open suse", false) | ("suse", false) => Some(OPENSUSE),
+        ("opensuse leap", _) | ("opensuse_leap", _) => Some(OPENSUSE_LEAP),
+        ("opensuse tumbleweed", _) | ("opensuse_tumbleweed", _) => Some(OPENSUSE_TUMBLEWEED),
 
-        ("omarchy", _) => OMARCHY,
+        ("omarchy", _) => Some(OMARCHY),
 
-        ("parch", _) | ("parch linux", _) => PARCH,
+        ("parch", _) | ("parch linux", _) => Some(PARCH),
 
-        ("parrot", _) | ("parrot linux", _) => PARROT,
+        ("parrot", _) | ("parrot linux", _) => Some(PARROT),
 
-        ("popos", true) | ("pop_os", true) => POP_OS_SMALL,
-        ("popos", false) | ("pop_os", false) | ("pop!_os", false) => POP_OS,
+        ("popos", true) | ("pop_os", true) => Some(POP_OS_SMALL),
+        ("popos", false) | ("pop_os", false) | ("pop!_os", false) => Some(POP_OS),
 
-        ("redhat", _) | ("red hat", _) | ("rhel", _) => REDHAT,
+        ("redhat", _) | ("red hat", _) | ("rhel", _) => Some(REDHAT),
 
-        ("rocky", true) => ROCKY_SMALL,
-        ("rocky", false) => ROCKY,
+        ("rocky", true) => Some(ROCKY_SMALL),
+        ("rocky", false) => Some(ROCKY),
 
-        ("tails", _) => TAILS,
+        ("tails", _) => Some(TAILS),
 
-        ("ubuntu", true) => UBUNTU_SMALL,
-        ("ubuntu", false) => UBUNTU,
+        ("ubuntu", true) => Some(UBUNTU_SMALL),
+        ("ubuntu", false) => Some(UBUNTU),
 
-        ("zorin", _) => ZORIN,
+        ("zorin", _) => Some(ZORIN),
 
-        ("windows 11", _) | ("windows11", _) => WINDOWS_11,
-        ("windows 10", _) | ("windows10", _) | ("windows 8", _) | ("windows8", _) => WINDOWS_10,
-        ("windows", _) => WINDOWS,
+        ("windows 11", _) | ("windows11", _) => Some(WINDOWS_11),
+        ("windows 10", _) | ("windows10", _) | ("windows 8", _) | ("windows8", _) => {
+            Some(WINDOWS_10)
+        }
+        ("windows", _) => Some(WINDOWS),
 
-        ("aperio", _) => APERIO,
-        ("itc", _) => ITC,
-        ("rfremix", _) | ("fedora_old", _) => FEDORA_OLD,
-        ("xferience", _) => XFERIENCE,
+        ("aperio", _) => Some(APERIO),
+        ("itc", _) => Some(ITC),
+        ("rfremix", _) | ("fedora_old", _) => Some(FEDORA_OLD),
+        ("xferience", _) => Some(XFERIENCE),
 
-        ("gentoo", false) => GENTOO,
-        ("gentoo", true) => GENTOO_SMALL,
-        ("guix", _) => GUIX,
-        ("haiku", false) => HAIKU,
-        ("haiku", true) => HAIKU_SMALL,
-        ("hyperbola", false) => HYPERBOLA,
-        ("hyperbola", true) => HYPERBOLA_SMALL,
-        ("linuxlite", false) | ("linux lite", false) | ("linux_lite", false) => LINUXLITE,
-        ("linuxlite", true) => LINUXLITE_SMALL,
-        ("mageia", false) => MAGEIA,
-        ("mageia", true) => MAGEIA_SMALL,
-        ("netbsd", false) => NETBSD,
-        ("netbsd", true) => NETBSD_SMALL,
-        ("openbsd", false) => OPENBSD,
-        ("openbsd", true) => OPENBSD_SMALL,
-        ("parabola", false) => PARABOLA,
-        ("parabola", true) => PARABOLA_SMALL,
-        ("postmarketos", false) => POSTMARKETOS,
-        ("postmarketos", true) => POSTMARKETOS_SMALL,
-        ("pureos", false) => PUREOS,
-        ("pureos", true) => PUREOS_SMALL,
-        ("raspbian", false) => RASPBIAN,
-        ("raspbian", true) => RASPBIAN_SMALL,
-        ("slackware", false) => SLACKWARE,
-        ("slackware", true) => SLACKWARE_SMALL,
-        ("solaris", false) => SOLARIS,
-        ("sunos", false) => SUNOS,
-        ("sunos", true) => SUNOS_SMALL,
-        ("void", false) => VOID,
-        ("void", true) => VOID_SMALL,
+        ("gentoo", false) => Some(GENTOO),
+        ("gentoo", true) => Some(GENTOO_SMALL),
+        ("guix", _) => Some(GUIX),
+        ("haiku", false) => Some(HAIKU),
+        ("haiku", true) => Some(HAIKU_SMALL),
+        ("hyperbola", false) => Some(HYPERBOLA),
+        ("hyperbola", true) => Some(HYPERBOLA_SMALL),
+        ("linuxlite", false) | ("linux lite", false) | ("linux_lite", false) => Some(LINUXLITE),
+        ("linuxlite", true) => Some(LINUXLITE_SMALL),
+        ("mageia", false) => Some(MAGEIA),
+        ("mageia", true) => Some(MAGEIA_SMALL),
+        ("netbsd", false) => Some(NETBSD),
+        ("netbsd", true) => Some(NETBSD_SMALL),
+        ("openbsd", false) => Some(OPENBSD),
+        ("openbsd", true) => Some(OPENBSD_SMALL),
+        ("parabola", false) => Some(PARABOLA),
+        ("parabola", true) => Some(PARABOLA_SMALL),
+        ("postmarketos", false) => Some(POSTMARKETOS),
+        ("postmarketos", true) => Some(POSTMARKETOS_SMALL),
+        ("pureos", false) => Some(PUREOS),
+        ("pureos", true) => Some(PUREOS_SMALL),
+        ("raspbian", false) => Some(RASPBIAN),
+        ("raspbian", true) => Some(RASPBIAN_SMALL),
+        ("slackware", false) => Some(SLACKWARE),
+        ("slackware", true) => Some(SLACKWARE_SMALL),
+        ("solaris", false) => Some(SOLARIS),
+        ("sunos", false) => Some(SUNOS),
+        ("sunos", true) => Some(SUNOS_SMALL),
+        ("void", false) => Some(VOID),
+        ("void", true) => Some(VOID_SMALL),
 
-        _ => DEFAULT,
+        _ => None,
     }
 }
-
-const DEFAULT: &str = r#"${c2}        #####
-${c2}       #######
-${c2}       ##${c1}O${c2}#${c1}O${c2}##
-${c2}       #${c3}#####${c2}#
-${c2}     ##${c1}##${c3}###${c1}##${c2}##
-${c2}    #${c1}##########${c2}##
-${c2}   #${c1}############${c2}##
-${c2}   #${c1}############${c2}###
-${c3}  ##${c2}#${c1}###########${c2}##${c3}#
-${c3}######${c2}#${c1}#######${c2}#${c3}######
-${c3}#######${c2}#${c1}#####${c2}#${c3}#######
-${c3}  #####${c2}#######${c3}#####"#;
 
 const ALMALINUX: &str = r#"${c1}         'c:.
 ${c1}        lkkkx, ..       ${c2}..   ,cc,
@@ -1424,7 +1413,7 @@ ${c2}  `Y$$
      `$$b.
        `Y$$b.
           `"Y$b._
-              `""""#;
+              `"""#;
 
 const DEEPIN: &str = r#"${c1}             ............
          .';;;;;.       .,;,.
@@ -2453,7 +2442,6 @@ const GUIX: &str = r#"${c1}|.__          __.|
       \ \/ /
        \__/"#;
 
-
 const HAIKU: &str = r#"${c1}       ,^,
       /   \
 *--_ ;     ; _--*
@@ -2709,7 +2697,6 @@ const SOLARIS: &str = r#"${c1}       .   .;   .
    .;. ..      .. .;.
 ..  ..             ..  ..
  .;,                 ,;."#;
-
 
 const SUNOS: &str = r#"${c1}                 `-     `
           `--    `+-    .:

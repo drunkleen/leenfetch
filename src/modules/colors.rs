@@ -34,7 +34,7 @@ pub fn get_builtin_distro_colors(distro: &str) -> &'static [u8] {
 
         ("android", _) => &[2, 7],
 
-        ("antix", false) => &[1, 7, 3],
+        ("antix", _) => &[1, 7, 3],
 
         ("antergos", _) => &[4, 6],
 
@@ -88,7 +88,7 @@ pub fn get_builtin_distro_colors(distro: &str) -> &'static [u8] {
 
         ("bunsenlabs", _) | ("bunsen labs", _) => &[7],
 
-        ("calculate", false) | ("calculateos", false) => &[7, 3],
+        ("calculate", _) | ("calculateos", _) => &[7, 3],
 
         ("carbs", _) => &[4, 5, 4, 4, 4, 4],
 
@@ -96,7 +96,7 @@ pub fn get_builtin_distro_colors(distro: &str) -> &'static [u8] {
 
         ("celos", _) | ("cel os", _) => &[4, 6, 0, 5],
 
-        ("clearos", false) => &[2],
+        ("clearos", _) => &[2],
 
         ("centos", _) => &[3, 2, 4, 5, 7],
 
@@ -131,7 +131,7 @@ pub fn get_builtin_distro_colors(distro: &str) -> &'static [u8] {
 
         ("dahlia", _) => &[1, 7, 3],
 
-        ("debian", _) => &[1, 3, 7],
+        ("debian", _) | ("debian gnu/linux", _) => &[1, 3, 7],
 
         ("deepin", _) => &[2, 7],
 

@@ -131,10 +131,42 @@ pub fn get_ascii_and_colors(ascii_distro: &str) -> String {
         return "".to_string();
     }
 
-    let ascii_art = get_builtin_ascii_art(ascii_distro);
+    let ascii_art = resolve_ascii_art(ascii_distro);
 
     ascii_art.to_string()
 }
+
+/// Resolves ASCII art for a given distro name.
+/// Tries direct match first, then falls back to ID_LIKE if available.
+fn resolve_ascii_art(distro: &str) -> &'static str {
+    // 1. Try direct distro name match
+    if let Some(art) = get_builtin_ascii_art(distro) {
+        return art;
+    }
+
+    // 2. No match — try ID_LIKE parent distro
+    if let Some(parent) = crate::modules::linux::system::distro::get_id_like() {
+        if let Some(art) = get_builtin_ascii_art(&parent) {
+            return art;
+        }
+    }
+
+    // 3. Nothing found — return fallback DEFAULT
+    DEFAULT_ASCII
+}
+
+const DEFAULT_ASCII: &str = r#"${c2}        #####
+${c2}       #######
+${c2}       ##${c1}O${c2}#${c1}O${c2}##
+${c2}       #${c3}#####${c2}#
+${c2}     ##${c1}##${c3}###${c1}##${c2}##
+${c2}    #${c1}##########${c2}##
+${c2}   #${c1}############${c2}##
+${c2}   #${c1}############${c2}###
+${c3}  ##${c2}#${c1}###########${c2}##${c3}#
+${c3}######${c2}#${c1}#######${c2}#${c3}######
+${c3}#######${c2}#${c1}#####${c2}#${c3}#######
+${c3}  #####${c2}#######${c3}#####"#;
 
 // ---------------------------------
 //        Color Functions
