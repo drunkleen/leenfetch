@@ -556,7 +556,6 @@ fn apply_flag_overrides(
     apply_bool_override(flags, overrides, "shell_version", |f, v| {
         f.shell_version = v
     })?;
-    apply_bool_override(flags, overrides, "refresh_rate", |f, v| f.refresh_rate = v)?;
     apply_bool_override(flags, overrides, "de_version", |f, v| f.de_version = v)?;
 
     Ok(())
