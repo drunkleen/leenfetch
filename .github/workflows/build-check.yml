@@ -1,12 +1,14 @@
-name: Release
+name: Build Check
 
 on:
   push:
-    tags:
-      - "v*.*.*"
+    branches: [master]
+  pull_request:
+    branches: [master]
 
-permissions:
-  contents: write
+concurrency:
+  group: build-check-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -64,9 +66,6 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - name: Extract tag name
-        run: echo "VERSION=${GITHUB_REF##*/}" >> $GITHUB_ENV
-
       - uses: dtolnay/rust-toolchain@stable
 
       - name: Install target
@@ -93,6 +92,7 @@ jobs:
         run: |
           set -euxo pipefail
           mkdir -p dist
+          VERSION=$(git describe --tags --always --dirty 2>/dev/null || echo "dev")
 
           case "${{ matrix.format }}" in
             tar-gz)
@@ -203,147 +203,3 @@ jobs:
         with:
           name: ${{ matrix.name }}
           path: dist/*
-
-  aur-publish:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-
-      - name: Extract version
-        run: echo "VERSION=${GITHUB_REF##*/}" >> $GITHUB_ENV
-
-      - name: Compute source checksum
-        run: |
-          curl -sL "https://github.com/${{ github.repository }}/archive/refs/tags/${VERSION}.tar.gz" -o source.tar.gz
-          echo "SHA256=$(sha256sum source.tar.gz | cut -d' ' -f1)" >> $GITHUB_ENV
-
-      - name: Set up SSH key for AUR
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.AUR_SECRET }}" > ~/.ssh/aur
-          chmod 600 ~/.ssh/aur
-          ssh-keyscan aur.archlinux.org >> ~/.ssh/known_hosts 2>/dev/null
-          cat >> ~/.ssh/config << 'EOF'
-          Host aur.archlinux.org
-            IdentityFile ~/.ssh/aur
-            User aur
-          EOF
-
-      - name: Update AUR PKGBUILD and push
-        run: |
-          git clone ssh://aur@aur.archlinux.org/leenfetch.git aur-repo
-          cd aur-repo
-          git config user.name "DrunkLeen"
-          git config user.email "snape@drunkleen.com"
-
-          sed -i "s/^pkgver=.*/pkgver=${VERSION#v}/" PKGBUILD
-          sed -i "s/^sha256sums=.*/sha256sums=('${SHA256}')/" PKGBUILD
-
-          docker run --rm -v $PWD:/work archlinux:latest bash -c "
-            pacman -Sy --noconfirm base-devel
-            cd /work
-            useradd build
-            chown build:build /work PKGBUILD
-            su build -c 'makepkg --printsrcinfo' > .SRCINFO.tmp
-            [ -s .SRCINFO.tmp ] || { echo '.SRCINFO is empty - makepkg failed'; exit 1; }
-            mv .SRCINFO.tmp .SRCINFO
-          "
-
-          git add PKGBUILD .SRCINFO
-          git commit -m "Update to ${VERSION}"
-          git push origin master
-
-  release:
-    needs: aur-publish
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-
-      - name: Extract tag name
-        run: echo "VERSION=${GITHUB_REF##*/}" >> $GITHUB_ENV
-
-      - uses: actions/download-artifact@v8
-        with:
-          path: dist
-
-      - name: Flatten downloaded artifacts
-        run: |
-          find dist -mindepth 2 -type f -exec mv -f {} dist/ \;
-          find dist -mindepth 1 -type d -empty -delete
-
-      - name: Generate checksums
-        run: |
-          cd dist
-          find . -type f ! -name "SHA256SUMS.txt" -print0 | xargs -0 sha256sum > SHA256SUMS.txt
-
-      - name: Build release notes body
-        env:
-          REPO: ${{ github.repository }}
-        run: |
-          set -euxo pipefail
-
-          VERSION_NUM=${VERSION#v}
-          sed -n "/^## \[${VERSION_NUM}\]/,/^## \[/p" CHANGELOG.md | head -n -2 > dist/CHANGELOG_SECTION.md
-
-          {
-            echo "# 🐧 LeenFetch ${VERSION}"
-            echo ""
-            echo "## Changelog"
-            echo ""
-            cat dist/CHANGELOG_SECTION.md
-            echo ""
-            echo "---"
-            echo ""
-            echo "## 📦 Available Downloads"
-            echo ""
-            echo "| File | Platform | Arch |"
-            echo "|------|----------|------|"
-            echo "| [leenfetch-${VERSION}-arch-x86_64.pkg.tar.zst](https://github.com/drunkleen/leenfetch/releases/download/${VERSION}/leenfetch-${VERSION}-arch-x86_64.pkg.tar.zst) | Arch Linux | x86_64 |"
-            echo "| [leenfetch-${VERSION}-arch-aarch64.pkg.tar.zst](https://github.com/drunkleen/leenfetch/releases/download/${VERSION}/leenfetch-${VERSION}-arch-aarch64.pkg.tar.zst) | Arch Linux | ARM64 |"
-            echo "| [leenfetch-${VERSION}-debian-x86_64.deb](https://github.com/drunkleen/leenfetch/releases/download/${VERSION}/leenfetch-${VERSION}-debian-x86_64.deb) | Debian/Ubuntu | x86_64 |"
-            echo "| [leenfetch-${VERSION}-debian-aarch64.deb](https://github.com/drunkleen/leenfetch/releases/download/${VERSION}/leenfetch-${VERSION}-debian-aarch64.deb) | Debian/Ubuntu | ARM64 |"
-            echo "| [leenfetch-${VERSION}-rhel-x86_64.rpm](https://github.com/drunkleen/leenfetch/releases/download/${VERSION}/leenfetch-${VERSION}-rhel-x86_64.rpm) | RHEL/Fedora | x86_64 |"
-            if [ -f "dist/leenfetch-${VERSION}-rhel-aarch64.rpm" ]; then
-              echo "| [leenfetch-${VERSION}-rhel-aarch64.rpm](https://github.com/drunkleen/leenfetch/releases/download/${VERSION}/leenfetch-${VERSION}-rhel-aarch64.rpm) | RHEL/Fedora | ARM64 |"
-            fi
-            echo "| [leenfetch-${VERSION}-linux-x86_64.tar.gz](https://github.com/drunkleen/leenfetch/releases/download/${VERSION}/leenfetch-${VERSION}-linux-x86_64.tar.gz) | Linux (tar.gz) | x86_64 |"
-            echo "| [leenfetch-${VERSION}-linux-aarch64.tar.gz](https://github.com/drunkleen/leenfetch/releases/download/${VERSION}/leenfetch-${VERSION}-linux-aarch64.tar.gz) | Linux (tar.gz) | ARM64 |"
-            echo "| [leenfetch-${VERSION}-linux-x86_64-musl.tar.gz](https://github.com/drunkleen/leenfetch/releases/download/${VERSION}/leenfetch-${VERSION}-linux-x86_64-musl.tar.gz) | Linux (musl, static) | x86_64 |"
-            if [ -f "dist/leenfetch-${VERSION}-linux-aarch64-musl.tar.gz" ]; then
-              echo "| [leenfetch-${VERSION}-linux-aarch64-musl.tar.gz](https://github.com/drunkleen/leenfetch/releases/download/${VERSION}/leenfetch-${VERSION}-linux-aarch64-musl.tar.gz) | Linux (musl, static) | ARM64 |"
-            fi
-            echo "| [leenfetch-${VERSION}-windows-x86_64.zip](https://github.com/drunkleen/leenfetch/releases/download/${VERSION}/leenfetch-${VERSION}-windows-x86_64.zip) | Windows | x86_64 |"
-            echo ""
-            echo "## Checksums"
-            echo '```'
-          } > dist/RELEASE.md
-          cat dist/SHA256SUMS.txt >> dist/RELEASE.md
-          echo '```' >> dist/RELEASE.md
-          rm -f dist/CHANGELOG_SECTION.md
-
-      - name: Append generated release notes
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          REPO: ${{ github.repository }}
-        run: |
-          set -euxo pipefail
-          if gh api -X POST repos/$REPO/releases/generate-notes -f tag_name=${VERSION} --jq '.body' > /tmp/notes.md 2>/dev/null; then
-            {
-              cat dist/RELEASE.md
-              echo
-              echo "## Changes & Commits"
-              echo
-              cat /tmp/notes.md
-            } > dist/RELEASE_NOTES.md
-            mv dist/RELEASE_NOTES.md dist/RELEASE.md
-          fi
-
-      - name: Upload Release Assets
-        uses: softprops/action-gh-release@v2
-        with:
-          files: dist/*
-          generate_release_notes: false
-          body_path: dist/RELEASE.md
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
