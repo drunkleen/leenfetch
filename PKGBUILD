@@ -4,7 +4,7 @@ _pkgauthor=drunkleen
 _pkgname=leenfetch
 
 pkgname=${_pkgname}
-pkgver=1.2.1
+pkgver=1.2.2
 pkgrel=1
 pkgdesc="Fast, minimal, customizable system info tool in Rust (Neofetch alternative)"
 arch=('x86_64' 'aarch64')
@@ -12,7 +12,7 @@ url="https://github.com/${_pkgauthor}/${_pkgname}"
 license=('MIT')
 provides=("${_pkgname}")
 conflicts=("${_pkgname}")
-depends=('libx11' 'libxrandr' 'glibc' 'gcc-libs')
+depends=('glibc' 'gcc-libs')
 makedepends=('rust' 'cargo')
 source=("$pkgname-$pkgver.tar.gz::$url/archive/refs/tags/v$pkgver.tar.gz")
 sha256sums=('SKIP')

@@ -5,6 +5,40 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Version
 
 ---
 
+## [1.2.2] — 2026-06-24
+
+### Added
+- 3 CI workflows: `ci.yml` (tests), `build-check.yml` (build check), `release.yml` (release)
+- Community files: `SUPPORT.md`, `.github/FUNDING.yml`, updated issue/PR templates
+- Install scripts: `scripts/install.sh` (Linux) and `scripts/install.ps1` (Windows) — one-liner install/update
+- Static musl builds for x86_64 and ARM64 (fully static, glibc-independent)
+
+### Changed
+- `atty` replaced with `std::io::IsTerminal` (zero-dependency, stable since Rust 1.70)
+- Windows FFI migrated from `winapi` to `windows-sys` 0.61.2
+- `rust-version` set to `1.96.0` (latest)
+- Updated all dependencies to latest compatible versions (`cargo update` — 13 package upgrades)
+- GitHub Actions rewritten to 3-phase pipeline (build → package → release) — 9 artifacts per release
+- Arch Linux packaging added: `.pkg.tar.zst` for both x86_64 and ARM64 (`makepkg` + manual format)
+- Removed X11 feature: screen resolution now uses DRM only (no libX11/libXrandr linkage)
+- Removed `refresh_rate` config option and `--refresh-rate` CLI flag (DRM doesn't expose Hz)
+- `extract_cpu_model` refactored into a pure function; filesystem fallbacks moved to `get_cpu`
+- README download links now point to latest release with auto-detection scripts
+- Support section migrated from PayPal/crypto to Patreon and Buy Me a Coffee
+- Windows release artifacts are `.zip` only (no standalone `.exe`)
+
+### Fixed
+- `EnvLock` test utility recovers from mutex poison instead of panicking (prevents cascading test failures)
+- `test_hostname_from_env` corrected to reflect `gethostname()` syscall priority over `HOSTNAME` env var
+- `returns_none_when_no_managers_found` test now properly isolates via `LEENFETCH_PKG_ROOT` env var instead of `PATH`
+- RPM cross-build for aarch64 now uses `rpmbuild` with inline spec (bypasses `cargo-rpm` cross issues)
+- Duplicated `cross build` call for aarch64 removed (saves ~30s per run)
+- Windows MinGW install slimmed: `mingw-w64` → `gcc-mingw-w64-x86-64` (avoids no-output timeout)
+- mold linker scoped to project build only, not `cargo install` (fixes linker crash)
+- `REHL` typos in README fixed (`RHEL`)
+
+---
+
 ## [1.2.1] — 2026-04-17
 
 ### Added
