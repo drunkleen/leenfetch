@@ -1,7 +1,24 @@
 # Changelog
 
-All notable changes to LeenFetch are documented here.  
+All notable changes to **leenfetch** are documented here.  
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions follow [Semantic Versioning](https://semver.org/).
+
+---
+
+## [1.3.0] — 2026-06-24
+
+### Added
+- 7 new CLI flags: `--gpu_brand`, `--gpu_type`, `--kernel_shorthand`, `--speed_shorthand`, `--disk_percent`, `--disk_show`, `--print_config`
+- `--disable` flag (alias for `--hide`)
+- Config keys: `gpu_brand`, `gpu_type`, `kernel_shorthand`, `speed_shorthand`, `disk_percent`, `disk_show`
+
+### Changed
+- All 18 CLI flags renamed to neofetch-compatible underscores (e.g., `--packages` → `--package_managers`, `--cpu-temp-unit` → `--cpu_temp`)
+- Config key `distro_display` renamed to `distro_shorthand` (old key still accepted via serde alias)
+- `cpu_show_temp` merged into `cpu_temp` (now accepts `"C"`, `"F"`, or `"off"`; old `true`/`false` values still accepted via custom deserializer)
+- CPU temperature display now controlled by `--cpu_temp off` instead of `--cpu-show-temp false`
+- JSONC default template now includes all 28 config fields (was 20)
+- `manual.md` removed (content migrated to wiki)
 
 ---
 
@@ -125,7 +142,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Version
 ## [1.0.2] — 2025-??-??
 
 ### Changed
-- Parallelized module data collection with `rayon` — LeenFetch is now ~35% faster than fastfetch and ~95% faster than neofetch
+- Parallelized module data collection with `rayon` — **leenfetch** is now ~35% faster than fastfetch and ~95% faster than neofetch
 - GPU info fetch reimplemented with more accurate model details
 
 ---
