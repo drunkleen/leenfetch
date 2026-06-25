@@ -1,11 +1,9 @@
 use std::ptr;
 
-use winapi::um::wingdi::DEVMODEW;
-use winapi::um::winuser::{
-    EnumDisplaySettingsW, GetSystemMetrics, ENUM_CURRENT_SETTINGS, SM_CXSCREEN, SM_CYSCREEN,
-};
+use windows_sys::Win32::Graphics::Gdi::{EnumDisplaySettingsW, DEVMODEW, ENUM_CURRENT_SETTINGS};
+use windows_sys::Win32::UI::WindowsAndMessaging::{GetSystemMetrics, SM_CXSCREEN, SM_CYSCREEN};
 
-pub fn get_resolution(refresh_rate: bool) -> Option<String> {
+pub fn get_resolution() -> Option<String> {
     unsafe {
         let width = GetSystemMetrics(SM_CXSCREEN);
         let height = GetSystemMetrics(SM_CYSCREEN);
@@ -14,18 +12,6 @@ pub fn get_resolution(refresh_rate: bool) -> Option<String> {
             return None;
         }
 
-        let mut result = format!("{}x{}", width, height);
-
-        if refresh_rate {
-            let mut devmode: DEVMODEW = std::mem::zeroed();
-            devmode.dmSize = std::mem::size_of::<DEVMODEW>() as u16;
-
-            let success = EnumDisplaySettingsW(ptr::null(), ENUM_CURRENT_SETTINGS, &mut devmode);
-            if success != 0 {
-                result = format!("{} @ {}Hz", result, devmode.dmDisplayFrequency);
-            }
-        }
-
-        Some(result)
+        Some(format!("{}x{}", width, height))
     }
 }

@@ -2,8 +2,9 @@ use crate::modules::windows::process::process_names_lower;
 use std::ffi::OsStr;
 use std::os::windows::ffi::OsStrExt;
 use std::ptr::null_mut;
-use winapi::shared::minwindef::DWORD;
-use winapi::um::winver::{GetFileVersionInfoSizeW, GetFileVersionInfoW, VerQueryValueW};
+use windows_sys::Win32::Storage::FileSystem::{
+    GetFileVersionInfoSizeW, GetFileVersionInfoW, VerQueryValueW,
+};
 
 /// Desktop Environment enum
 pub fn get_de(show_version: bool, wm: Option<&str>) -> Option<String> {
@@ -51,7 +52,7 @@ fn get_shell_version(shell_exe: &str) -> Option<String> {
     let path = format!("C:\\Windows\\System32\\{}", shell_exe);
     let wide: Vec<u16> = OsStr::new(&path).encode_wide().chain(Some(0)).collect();
     unsafe {
-        let mut handle: DWORD = 0;
+        let mut handle: u32 = 0;
         let size = GetFileVersionInfoSizeW(wide.as_ptr(), &mut handle);
         if size == 0 {
             return None;
@@ -63,7 +64,7 @@ fn get_shell_version(shell_exe: &str) -> Option<String> {
         }
 
         // Determine language/codepage from Translation block
-        let mut trans_ptr: *mut winapi::ctypes::c_void = null_mut();
+        let mut trans_ptr: *mut core::ffi::c_void = null_mut();
         let mut trans_len: u32 = 0;
         let trans_key: Vec<u16> = OsStr::new("\\VarFileInfo\\Translation")
             .encode_wide()
@@ -91,7 +92,7 @@ fn get_shell_version(shell_exe: &str) -> Option<String> {
             lang, codepage
         );
         let key_w: Vec<u16> = OsStr::new(&key).encode_wide().chain(Some(0)).collect();
-        let mut str_ptr: *mut winapi::ctypes::c_void = null_mut();
+        let mut str_ptr: *mut core::ffi::c_void = null_mut();
         let mut str_len: u32 = 0;
         if VerQueryValueW(
             buf.as_mut_ptr() as *mut _,

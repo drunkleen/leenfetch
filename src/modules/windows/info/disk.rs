@@ -4,9 +4,11 @@ use crate::modules::{
 };
 use std::ffi::OsString;
 use std::os::windows::ffi::{OsStrExt, OsStringExt};
-use winapi::shared::minwindef::DWORD;
-use winapi::um::fileapi::{GetDiskFreeSpaceExW, GetDriveTypeW, GetLogicalDriveStringsW};
-use winapi::um::winbase::DRIVE_FIXED;
+use windows_sys::Win32::Storage::FileSystem::{
+    GetDiskFreeSpaceExW, GetDriveTypeW, GetLogicalDriveStringsW,
+};
+
+const DRIVE_FIXED: u32 = 3;
 
 pub fn get_disks(
     subtitle_mode: DiskSubtitle,
@@ -60,7 +62,7 @@ fn enumerate_fixed_drives() -> Vec<String> {
     unsafe {
         // Get required buffer length
         let mut buffer: [u16; 512] = [0; 512];
-        let len = GetLogicalDriveStringsW(buffer.len() as DWORD, buffer.as_mut_ptr());
+        let len = GetLogicalDriveStringsW(buffer.len() as u32, buffer.as_mut_ptr());
         if len == 0 || (len as usize) >= buffer.len() {
             return Vec::new();
         }

@@ -1,8 +1,17 @@
 use std::ptr::null_mut;
-use winapi::shared::minwindef::DWORD;
-use winapi::shared::winerror::ERROR_SUCCESS;
-use winapi::um::winnt::OSVERSIONINFOW;
-use winapi::um::winreg::{RegGetValueW, HKEY_LOCAL_MACHINE, RRF_RT_REG_DWORD};
+use windows_sys::Win32::Foundation::ERROR_SUCCESS;
+use windows_sys::Win32::System::Registry::{RegGetValueW, HKEY_LOCAL_MACHINE, RRF_RT_REG_DWORD};
+
+#[repr(C)]
+#[allow(non_snake_case)]
+struct OSVERSIONINFOW {
+    dwOSVersionInfoSize: u32,
+    dwMajorVersion: u32,
+    dwMinorVersion: u32,
+    dwBuildNumber: u32,
+    dwPlatformId: u32,
+    szCSDVersion: [u16; 128],
+}
 
 #[inline(always)]
 pub fn get_kernel() -> Option<String> {
@@ -27,11 +36,11 @@ pub fn get_kernel() -> Option<String> {
     None
 }
 
-fn read_ubr() -> Option<DWORD> {
+fn read_ubr() -> Option<u32> {
     let key = to_wide("SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion");
     let val = to_wide("UBR");
-    let mut data: DWORD = 0;
-    let mut size = std::mem::size_of::<DWORD>() as u32;
+    let mut data: u32 = 0;
+    let mut size = std::mem::size_of::<u32>() as u32;
     let status = unsafe {
         RegGetValueW(
             HKEY_LOCAL_MACHINE,
@@ -43,7 +52,7 @@ fn read_ubr() -> Option<DWORD> {
             &mut size,
         )
     };
-    if status == ERROR_SUCCESS as i32 {
+    if status == ERROR_SUCCESS {
         Some(data)
     } else {
         None

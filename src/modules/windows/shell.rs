@@ -3,14 +3,13 @@ use crate::modules::windows::process::process_names_lower;
 use std::path::Path;
 use std::process::{Command as Cmd, Stdio};
 use std::time::{Duration, Instant};
-use winapi::shared::minwindef::DWORD;
-use winapi::um::handleapi::CloseHandle;
-use winapi::um::processthreadsapi::OpenProcess;
-use winapi::um::tlhelp32::{
+use windows_sys::Win32::Foundation::CloseHandle;
+use windows_sys::Win32::System::Diagnostics::ToolHelp::{
     CreateToolhelp32Snapshot, Process32FirstW, Process32NextW, PROCESSENTRY32W, TH32CS_SNAPPROCESS,
 };
-use winapi::um::winbase::QueryFullProcessImageNameW;
-use winapi::um::winnt::PROCESS_QUERY_LIMITED_INFORMATION;
+use windows_sys::Win32::System::Threading::{
+    OpenProcess, QueryFullProcessImageNameW, PROCESS_QUERY_LIMITED_INFORMATION,
+};
 
 pub fn get_shell(show_path: bool, show_version: bool) -> Option<String> {
     let parent_shell_path = if is_safe_mode() {
@@ -58,9 +57,9 @@ fn detect_parent_shell() -> Option<String> {
 
         let current_pid = std::process::id();
         let mut entry: PROCESSENTRY32W = std::mem::zeroed();
-        entry.dwSize = std::mem::size_of::<PROCESSENTRY32W>() as DWORD;
+        entry.dwSize = std::mem::size_of::<PROCESSENTRY32W>() as u32;
 
-        let mut parent_pid: DWORD = 0;
+        let mut parent_pid: u32 = 0;
         if Process32FirstW(snapshot, &mut entry) != 0 {
             loop {
                 if entry.th32ProcessID == current_pid {
@@ -84,7 +83,7 @@ fn detect_parent_shell() -> Option<String> {
         }
 
         let mut buf: Vec<u16> = vec![0u16; 32768];
-        let mut size: DWORD = buf.len() as DWORD;
+        let mut size: u32 = buf.len() as u32;
         let ok = QueryFullProcessImageNameW(hproc, 0, buf.as_mut_ptr(), &mut size);
         CloseHandle(hproc);
         if ok == 0 {
@@ -94,7 +93,7 @@ fn detect_parent_shell() -> Option<String> {
                 return None;
             }
             let mut e2: PROCESSENTRY32W = std::mem::zeroed();
-            e2.dwSize = std::mem::size_of::<PROCESSENTRY32W>() as DWORD;
+            e2.dwSize = std::mem::size_of::<PROCESSENTRY32W>() as u32;
             let mut name = None;
             if Process32FirstW(snapshot2, &mut e2) != 0 {
                 loop {

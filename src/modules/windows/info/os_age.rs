@@ -6,9 +6,10 @@ use std::ptr::null_mut;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::modules::enums::OsAgeShorthand;
-use winapi::shared::minwindef::DWORD;
-use winapi::shared::winerror::ERROR_SUCCESS;
-use winapi::um::winreg::{RegGetValueW, HKEY_LOCAL_MACHINE, RRF_RT_REG_DWORD, RRF_RT_REG_QWORD};
+use windows_sys::Win32::Foundation::ERROR_SUCCESS;
+use windows_sys::Win32::System::Registry::{
+    RegGetValueW, HKEY_LOCAL_MACHINE, RRF_RT_REG_DWORD, RRF_RT_REG_QWORD,
+};
 
 /// Returns the OS "age" (time since Windows installation) formatted per shorthand.
 pub fn get_os_age(shorthand: OsAgeShorthand) -> Option<String> {
@@ -73,8 +74,8 @@ fn read_registry_install_date() -> Option<u64> {
     let key_path = to_wide("SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion");
     let value_name = to_wide("InstallDate");
 
-    let mut data: DWORD = 0;
-    let mut data_size = std::mem::size_of::<DWORD>() as u32;
+    let mut data: u32 = 0;
+    let mut data_size = std::mem::size_of::<u32>() as u32;
 
     let status = unsafe {
         RegGetValueW(
@@ -88,7 +89,7 @@ fn read_registry_install_date() -> Option<u64> {
         )
     };
 
-    if status == ERROR_SUCCESS as i32 {
+    if status == ERROR_SUCCESS {
         let value = u64::from(data);
         if value > 0 {
             return Some(value);
@@ -117,7 +118,7 @@ fn read_registry_install_timestamp() -> Option<u64> {
         )
     };
 
-    if status == ERROR_SUCCESS as i32 && data > 0 {
+    if status == ERROR_SUCCESS && data > 0 {
         return filetime_to_unix_epoch(data);
     }
 

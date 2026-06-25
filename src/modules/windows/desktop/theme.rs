@@ -1,9 +1,8 @@
 use std::{env, fs, path::Path};
 
 use std::ptr::null_mut;
-use winapi::shared::minwindef::DWORD;
-use winapi::shared::winerror::ERROR_SUCCESS;
-use winapi::um::winreg::{RegGetValueW, HKEY_CURRENT_USER, RRF_RT_REG_DWORD};
+use windows_sys::Win32::Foundation::ERROR_SUCCESS;
+use windows_sys::Win32::System::Registry::{RegGetValueW, HKEY_CURRENT_USER, RRF_RT_REG_DWORD};
 
 pub fn get_theme(_de: Option<&str>) -> Option<String> {
     let mut result = Vec::new();
@@ -44,8 +43,8 @@ fn read_windows_apps_theme() -> Option<bool> {
     let key_path = to_wide("Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize");
     let value_name = to_wide("AppsUseLightTheme");
 
-    let mut data: DWORD = 0;
-    let mut data_size = std::mem::size_of::<DWORD>() as u32;
+    let mut data: u32 = 0;
+    let mut data_size = std::mem::size_of::<u32>() as u32;
 
     let status = unsafe {
         RegGetValueW(
@@ -59,7 +58,7 @@ fn read_windows_apps_theme() -> Option<bool> {
         )
     };
 
-    if status == ERROR_SUCCESS as i32 {
+    if status == ERROR_SUCCESS {
         Some(data != 0)
     } else {
         None

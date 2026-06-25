@@ -2,8 +2,7 @@ use crate::modules::enums::BatteryDisplayMode;
 use crate::modules::utils::get_bar;
 
 use std::mem::MaybeUninit;
-use winapi::um::winbase::GetSystemPowerStatus;
-use winapi::um::winbase::SYSTEM_POWER_STATUS;
+use windows_sys::Win32::System::Power::{GetSystemPowerStatus, SYSTEM_POWER_STATUS};
 
 pub fn get_battery(display_mode: BatteryDisplayMode) -> Vec<String> {
     let mut status = MaybeUninit::<SYSTEM_POWER_STATUS>::uninit();

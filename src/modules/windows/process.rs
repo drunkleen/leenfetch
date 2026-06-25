@@ -1,8 +1,7 @@
 use once_cell::sync::OnceCell;
 use std::process::{Command, Stdio};
-use winapi::shared::minwindef::DWORD;
-use winapi::um::handleapi::CloseHandle;
-use winapi::um::tlhelp32::{
+use windows_sys::Win32::Foundation::CloseHandle;
+use windows_sys::Win32::System::Diagnostics::ToolHelp::{
     CreateToolhelp32Snapshot, Process32FirstW, Process32NextW, PROCESSENTRY32W, TH32CS_SNAPPROCESS,
 };
 
@@ -30,7 +29,7 @@ fn enumerate_processes_lower() -> Vec<String> {
 
         let mut names: Vec<String> = Vec::with_capacity(256);
         let mut entry: PROCESSENTRY32W = std::mem::zeroed();
-        entry.dwSize = std::mem::size_of::<PROCESSENTRY32W>() as DWORD;
+        entry.dwSize = std::mem::size_of::<PROCESSENTRY32W>() as u32;
 
         if Process32FirstW(snapshot, &mut entry) != 0 {
             loop {

@@ -1,7 +1,7 @@
 use std::{ffi::OsStr, io::Error, os::windows::ffi::OsStrExt, process::Command, ptr};
-use winapi::um::winnt::KEY_READ;
-use winapi::um::winnt::REG_DWORD;
-use winapi::um::winreg::{RegOpenKeyExW, RegQueryValueExW, HKEY_CURRENT_USER};
+use windows_sys::Win32::System::Registry::{
+    RegOpenKeyExW, RegQueryValueExW, HKEY_CURRENT_USER, KEY_READ, REG_DWORD,
+};
 
 fn detect_light_dark_mode() -> &'static str {
     // Read the "AppsUseLightTheme" registry value
@@ -44,11 +44,11 @@ fn detect_accent_color() -> Option<String> {
 }
 
 fn read_reg_dword(
-    hkey: winapi::shared::minwindef::HKEY,
+    hkey: windows_sys::Win32::Foundation::HKEY,
     path: &str,
     value: &str,
 ) -> Result<u32, Error> {
-    use winapi::shared::minwindef::{DWORD, LPBYTE};
+    use windows_sys::Win32::Foundation::LPBYTE;
 
     unsafe {
         let mut hkey_out = ptr::null_mut();
@@ -59,8 +59,8 @@ fn read_reg_dword(
             return Err(Error::last_os_error());
         }
 
-        let mut data: DWORD = 0;
-        let mut data_size = std::mem::size_of::<DWORD>() as DWORD;
+        let mut data: u32 = 0;
+        let mut data_size = std::mem::size_of::<u32>() as u32;
         let mut val_type = 0;
 
         let result = RegQueryValueExW(

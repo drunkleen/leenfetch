@@ -1,7 +1,9 @@
 use std::env;
 use std::ptr::null_mut;
-use winapi::shared::winerror::ERROR_SUCCESS;
-use winapi::um::winreg::{RegGetValueW, HKEY_LOCAL_MACHINE, RRF_RT_REG_SZ, RRF_SUBKEY_WOW6464KEY};
+use windows_sys::Win32::Foundation::ERROR_SUCCESS;
+use windows_sys::Win32::System::Registry::{
+    RegGetValueW, HKEY_LOCAL_MACHINE, RRF_RT_REG_SZ, RRF_SUBKEY_WOW6464KEY,
+};
 
 use crate::modules::enums::DistroDisplay;
 
@@ -109,7 +111,7 @@ fn read_reg_sz(subkey: &str, value: &str) -> Option<String> {
                 &mut size,
             )
         };
-        if status != ERROR_SUCCESS as i32 || size == 0 {
+        if status != ERROR_SUCCESS || size == 0 {
             return None;
         }
         let mut buf: Vec<u16> = vec![0u16; (size as usize + 1) / 2];
@@ -125,7 +127,7 @@ fn read_reg_sz(subkey: &str, value: &str) -> Option<String> {
                 &mut size2,
             )
         };
-        if status != ERROR_SUCCESS as i32 {
+        if status != ERROR_SUCCESS {
             return None;
         }
         let end = buf.iter().position(|&c| c == 0).unwrap_or(buf.len());

@@ -1,8 +1,9 @@
 use std::ptr::null_mut;
-use winapi::shared::minwindef::DWORD;
-use winapi::shared::winerror::ERROR_SUCCESS;
-use winapi::um::sysinfoapi::{GetSystemInfo, SYSTEM_INFO};
-use winapi::um::winreg::{RegGetValueW, HKEY_LOCAL_MACHINE, RRF_RT_REG_DWORD, RRF_RT_REG_SZ};
+use windows_sys::Win32::Foundation::ERROR_SUCCESS;
+use windows_sys::Win32::System::Registry::{
+    RegGetValueW, HKEY, HKEY_LOCAL_MACHINE, RRF_RT_REG_DWORD, RRF_RT_REG_SZ,
+};
+use windows_sys::Win32::System::SystemInformation::{GetSystemInfo, SYSTEM_INFO};
 
 pub fn get_cpu(
     cpu_brand: bool,
@@ -79,8 +80,8 @@ fn get_cpu_speed_mhz() -> Option<u32> {
     // Read from registry: HKLM\HARDWARE\DESCRIPTION\System\CentralProcessor\0\~MHz
     let key = "HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0";
     let name = "~MHz";
-    let mut data: DWORD = 0;
-    let mut data_size = std::mem::size_of::<DWORD>() as u32;
+    let mut data: u32 = 0;
+    let mut data_size = std::mem::size_of::<u32>() as u32;
     let status = unsafe {
         RegGetValueW(
             HKEY_LOCAL_MACHINE,
@@ -92,7 +93,7 @@ fn get_cpu_speed_mhz() -> Option<u32> {
             &mut data_size,
         )
     };
-    if status == ERROR_SUCCESS as i32 {
+    if status == ERROR_SUCCESS {
         Some(data as u32)
     } else {
         None
@@ -156,7 +157,7 @@ fn to_wide(s: &str) -> Vec<u16> {
         .collect()
 }
 
-fn read_reg_sz(root: winapi::shared::minwindef::HKEY, subkey: &str, value: &str) -> Option<String> {
+fn read_reg_sz(root: HKEY, subkey: &str, value: &str) -> Option<String> {
     let sub = to_wide(subkey);
     let val = to_wide(value);
     // First query size
@@ -172,7 +173,7 @@ fn read_reg_sz(root: winapi::shared::minwindef::HKEY, subkey: &str, value: &str)
             &mut size,
         )
     };
-    if status != ERROR_SUCCESS as i32 || size == 0 {
+    if status != ERROR_SUCCESS || size == 0 {
         return None;
     }
     // Allocate buffer of u16
@@ -190,7 +191,7 @@ fn read_reg_sz(root: winapi::shared::minwindef::HKEY, subkey: &str, value: &str)
             &mut size2,
         )
     };
-    if status != ERROR_SUCCESS as i32 {
+    if status != ERROR_SUCCESS {
         return None;
     }
     // Find terminating 0

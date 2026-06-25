@@ -1,7 +1,7 @@
 use std::ptr::null_mut;
 
-use winapi::shared::guiddef::GUID;
-use winapi::um::setupapi::{
+use windows_sys::core::GUID;
+use windows_sys::Win32::Devices::DeviceAndDriverInstallation::{
     SetupDiDestroyDeviceInfoList, SetupDiEnumDeviceInfo, SetupDiGetClassDevsW,
     SetupDiGetDeviceRegistryPropertyW, DIGCF_PRESENT, SPDRP_DEVICEDESC, SP_DEVINFO_DATA,
 };
@@ -16,7 +16,7 @@ pub fn get_gpus() -> Vec<String> {
             null_mut(),
             DIGCF_PRESENT,
         );
-        if hdev.is_null() {
+        if hdev == 0 {
             return vec!["Unknown GPU".to_string()];
         }
 
@@ -67,8 +67,8 @@ fn widestr_to_string(buf: &[u16]) -> String {
 
 // {4d36e968-e325-11ce-bfc1-08002be10318}
 const GUID_DEVCLASS_DISPLAY: GUID = GUID {
-    Data1: 0x4d36e968,
-    Data2: 0xe325,
-    Data3: 0x11ce,
-    Data4: [0xbf, 0xc1, 0x08, 0x00, 0x2b, 0xe1, 0x03, 0x18],
+    data1: 0x4d36e968,
+    data2: 0xe325,
+    data3: 0x11ce,
+    data4: [0xbf, 0xc1, 0x08, 0x00, 0x2b, 0xe1, 0x03, 0x18],
 };
