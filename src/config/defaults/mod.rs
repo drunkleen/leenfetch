@@ -50,21 +50,29 @@ pub const DEFAULT_CONFIG: &str = r#"// ===============================
         // options: true or false
         "cpu_speed": true,
 
-        // Which temperature unit to use for CPU temperature.
-        // Options: "C", "F"
+        // Which temperature unit to use for CPU temperature, or off.
+        // Options: "C", "F", "off"
         "cpu_temp": "C",
-
-        // Show the CPU temperature.
-        // options: true or false
-        "cpu_show_temp": false,
 
         // Show the version of your desktop environment.
         // options: true or false
         "de_version": true,
 
+        // Show the GPU vendor name.
+        // options: true or false
+        "gpu_brand": true,
+
+        // Which GPU to display.
+        // Options: "all", "dedicated", "integrated"
+        "gpu_type": "all",
+
+        // Shorten the kernel output.
+        // options: true or false
+        "kernel_shorthand": true,
+
         // How much detail to show about your operating system.
         // Options: "name", "name_version", "name_arch", "name_model", "name_model_version", "name_model_arch", "name_model_version_arch"
-        "distro_display": "name",
+        "distro_shorthand": "name",
 
         // How to display disk usage information.
         // Options: "info", "percentage", "infobar", "barinfo", or "bar".
@@ -74,8 +82,17 @@ pub const DEFAULT_CONFIG: &str = r#"// ===============================
         // Options: "name", "dir", "none", "mount"
         "disk_subtitle": "dir",
 
+        // Show disk usage percentage.
+        // options: true or false
+        "disk_percent": true,
+
+        // Which disks to display.
+        // Options: "/" or comma-separated mount points
+        "disk_show": "/",
+
         // Show memory usage as a percentage.
         // options: true or false
+        "memory_percent": true,
 
         // Which unit to use for memory display.
         // Options: "mib", "gib", "kib"
@@ -92,6 +109,10 @@ pub const DEFAULT_CONFIG: &str = r#"// ===============================
         // Show the version of your shell.
         // options: true or false
         "shell_version": true,
+
+        // Show CPU speed without decimals.
+        // options: true or false
+        "speed_shorthand": false,
 
         // How to display system uptime.
         // Options: "full", "tiny", or "seconds".

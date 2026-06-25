@@ -81,6 +81,11 @@ fn run() -> Result<()> {
         return Ok(());
     }
 
+    if args.print_config {
+        println!("{}", config::defaults::DEFAULT_CONFIG);
+        return Ok(());
+    }
+
     let overrides = args.into_overrides();
 
     if !overrides.use_defaults && overrides.config_path.is_none() {
@@ -428,7 +433,7 @@ fn apply_flag_overrides(
             "off" | "bar" | "infobar" | "barinfo" => {
                 flags.battery_display = normalized;
             }
-            _ => return Err(format!("Invalid value for --battery-display: {}", value)),
+            _ => return Err(format!("Invalid value for --battery_display: {}", value)),
         }
     }
 
@@ -439,7 +444,7 @@ fn apply_flag_overrides(
                 flags.disk_display = normalized;
             }
             _ => {
-                return Err(format!("Invalid value for --disk-display: {}", value));
+                return Err(format!("Invalid value for --disk_display: {}", value));
             }
         }
     }
@@ -451,7 +456,7 @@ fn apply_flag_overrides(
                 flags.disk_subtitle = normalized;
             }
             _ => {
-                return Err(format!("Invalid value for --disk-subtitle: {}", value));
+                return Err(format!("Invalid value for --disk_subtitle: {}", value));
             }
         }
     }
@@ -463,7 +468,7 @@ fn apply_flag_overrides(
                 flags.memory_unit = normalized;
             }
             _ => {
-                return Err(format!("Invalid value for --memory-unit: {}", value));
+                return Err(format!("Invalid value for --memory_unit: {}", value));
             }
         }
     }
@@ -473,7 +478,7 @@ fn apply_flag_overrides(
         match normalized.as_str() {
             "off" | "on" | "tiny" => flags.package_managers = normalized,
             _ => {
-                return Err(format!("Invalid value for --packages: {}", value));
+                return Err(format!("Invalid value for --package_managers: {}", value));
             }
         }
     }
@@ -483,7 +488,7 @@ fn apply_flag_overrides(
         match normalized.as_str() {
             "full" | "tiny" | "seconds" => flags.uptime_shorthand = normalized,
             _ => {
-                return Err(format!("Invalid value for --uptime: {}", value));
+                return Err(format!("Invalid value for --uptime_shorthand: {}", value));
             }
         }
     }
@@ -493,12 +498,12 @@ fn apply_flag_overrides(
         match normalized.as_str() {
             "full" | "tiny" | "seconds" => flags.os_age_shorthand = normalized,
             _ => {
-                return Err(format!("Invalid value for --os-age: {}", value));
+                return Err(format!("Invalid value for --os_age_shorthand: {}", value));
             }
         }
     }
 
-    if let Some(value) = overrides.flags.get("distro_display") {
+    if let Some(value) = overrides.flags.get("distro_shorthand") {
         let normalized = value.to_ascii_lowercase();
         match normalized.as_str() {
             "name"
@@ -507,9 +512,9 @@ fn apply_flag_overrides(
             | "name_model"
             | "name_model_version"
             | "name_model_arch"
-            | "name_model_version_arch" => flags.distro_display = normalized,
+            | "name_model_version_arch" => flags.distro_shorthand = normalized,
             _ => {
-                return Err(format!("Invalid value for --distro-display: {}", value));
+                return Err(format!("Invalid value for --distro-shorthand: {}", value));
             }
         }
     }
@@ -517,34 +522,22 @@ fn apply_flag_overrides(
     if let Some(value) = overrides.flags.get("cpu_temp") {
         let normalized = value.to_ascii_lowercase();
         match normalized.as_str() {
-            "c" | "celsius" => {
-                flags.cpu_temp = 'C';
-                flags.cpu_show_temp = true;
-            }
-            "f" | "fahrenheit" => {
-                flags.cpu_temp = 'F';
-                flags.cpu_show_temp = true;
-            }
-            "off" | "none" => {
-                flags.cpu_show_temp = false;
-            }
+            "c" | "celsius" => flags.cpu_temp = "C".into(),
+            "f" | "fahrenheit" => flags.cpu_temp = "F".into(),
+            "off" | "none" => flags.cpu_temp = "off".into(),
             _ if normalized.len() == 1 => {
                 if let Some(ch) = normalized.chars().next() {
-                    flags.cpu_temp = ch.to_ascii_uppercase();
-                    flags.cpu_show_temp = true;
+                    flags.cpu_temp = ch.to_ascii_uppercase().to_string();
                 }
             }
             _ => {
-                return Err(format!("Invalid value for --cpu-temp-unit: {}", value));
+                return Err(format!("Invalid value for --cpu-temp: {}", value));
             }
         }
     }
 
     apply_bool_override(flags, overrides, "memory_percent", |f, v| {
         f.memory_percent = v
-    })?;
-    apply_bool_override(flags, overrides, "cpu_show_temp", |f, v| {
-        f.cpu_show_temp = v
     })?;
     apply_bool_override(flags, overrides, "cpu_speed", |f, v| f.cpu_speed = v)?;
     apply_bool_override(flags, overrides, "cpu_frequency", |f, v| {
@@ -557,6 +550,17 @@ fn apply_flag_overrides(
         f.shell_version = v
     })?;
     apply_bool_override(flags, overrides, "de_version", |f, v| f.de_version = v)?;
+    apply_bool_override(flags, overrides, "gpu_brand", |f, v| f.gpu_brand = v)?;
+    apply_bool_override(flags, overrides, "kernel_shorthand", |f, v| {
+        f.kernel_shorthand = v
+    })?;
+    apply_bool_override(flags, overrides, "speed_shorthand", |f, v| {
+        f.speed_shorthand = v
+    })?;
+    apply_bool_override(flags, overrides, "disk_percent", |f, v| f.disk_percent = v)?;
+
+    apply_string_override(flags, overrides, "gpu_type", |f, v| f.gpu_type = v)?;
+    apply_string_override(flags, overrides, "disk_show", |f, v| f.disk_show = v)?;
 
     Ok(())
 }
@@ -576,6 +580,21 @@ where
             "false" => apply(flags, false),
             _ => return Err(format!("Invalid boolean value for {key}: {value}")),
         }
+    }
+    Ok(())
+}
+
+fn apply_string_override<F>(
+    flags: &mut config::settings::Flags,
+    overrides: &CliOverrides,
+    key: &str,
+    mut apply: F,
+) -> Result<(), String>
+where
+    F: FnMut(&mut config::settings::Flags, String),
+{
+    if let Some(value) = overrides.flags.get(key) {
+        apply(flags, value.clone());
     }
     Ok(())
 }

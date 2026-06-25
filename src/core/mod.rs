@@ -390,7 +390,7 @@ impl Core {
                 data.os = Some(get_os());
             }
             ModuleKind::Distro => {
-                let display = DistroDisplay::from_str(&flags.distro_display)
+                let display = DistroDisplay::from_str(&flags.distro_shorthand)
                     .unwrap_or(DistroDisplay::NameModelVersionArch);
                 data.distro = Some(get_distro(display));
             }
@@ -435,11 +435,11 @@ impl Core {
                     flags.cpu_brand,
                     flags.cpu_frequency,
                     flags.cpu_cores,
-                    flags.cpu_show_temp,
-                    flags.cpu_speed,
-                    match flags.cpu_temp {
-                        'f' | 'F' => Some('F'),
-                        'c' | 'C' => Some('C'),
+                    flags.cpu_temp != "off",
+                    flags.speed_shorthand,
+                    match flags.cpu_temp.as_str() {
+                        "C" => Some('C'),
+                        "F" => Some('F'),
                         _ => None,
                     },
                 );

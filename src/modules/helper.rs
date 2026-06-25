@@ -80,53 +80,69 @@ pub struct Args {
     pub ascii_colors: Option<String>,
     #[arg(long = "custom_ascii_path")]
     pub custom_ascii_path: Option<String>,
-    #[arg(long = "battery-display")]
+    #[arg(long = "battery_display")]
     pub battery_display: Option<String>,
-    #[arg(long = "disk-display")]
+    #[arg(long = "disk_display")]
     pub disk_display: Option<String>,
-    #[arg(long = "disk-subtitle")]
+    #[arg(long = "disk_subtitle")]
     pub disk_subtitle: Option<String>,
-    #[arg(long = "memory-unit")]
+    #[arg(long = "memory_unit")]
     pub memory_unit: Option<String>,
-    #[arg(long = "packages", alias = "package-managers")]
+    #[arg(long = "package_managers", alias = "packages")]
     pub package_managers: Option<String>,
-    #[arg(long = "uptime")]
+    #[arg(long = "uptime_shorthand", alias = "uptime")]
     pub uptime_shorthand: Option<String>,
-    #[arg(long = "os-age")]
+    #[arg(long = "os_age_shorthand")]
     pub os_age_shorthand: Option<String>,
-    #[arg(long = "distro-display")]
-    pub distro_display: Option<String>,
-    #[arg(long = "color-blocks")]
+    #[arg(long = "distro_shorthand", alias = "distro-display")]
+    pub distro_shorthand: Option<String>,
+    #[arg(long = "color_blocks")]
     pub color_blocks: Option<String>,
-    #[arg(long = "cpu-temp-unit")]
+    #[arg(long = "cpu_temp", alias = "cpu-temp-unit")]
     pub cpu_temp: Option<String>,
     #[arg(long = "only")]
     pub only_modules: Option<String>,
     #[arg(long = "hide")]
     pub hide_modules: Option<String>,
+    #[arg(long = "disable")]
+    pub disable_modules: Option<String>,
 
-    #[arg(long = "memory-percent")]
+    #[arg(long = "memory_percent")]
     pub memory_percent: Option<bool>,
-    #[arg(long = "cpu-show-temp")]
-    pub cpu_show_temp: Option<bool>,
-    #[arg(long = "cpu-speed")]
+    #[arg(long = "cpu_speed")]
     pub cpu_speed: Option<bool>,
-    #[arg(long = "cpu-frequency")]
+    #[arg(long = "cpu_frequency")]
     pub cpu_frequency: Option<bool>,
-    #[arg(long = "cpu-cores")]
+    #[arg(long = "cpu_cores")]
     pub cpu_cores: Option<bool>,
-    #[arg(long = "cpu-brand")]
+    #[arg(long = "cpu_brand")]
     pub cpu_brand: Option<bool>,
-    #[arg(long = "shell-path")]
+    #[arg(long = "shell_path")]
     pub shell_path: Option<bool>,
-    #[arg(long = "shell-version")]
+    #[arg(long = "shell_version")]
     pub shell_version: Option<bool>,
-    #[arg(long = "de-version")]
+    #[arg(long = "de_version")]
     pub de_version: Option<bool>,
+    #[arg(long = "gpu_brand")]
+    pub gpu_brand: Option<bool>,
+    #[arg(long = "kernel_shorthand")]
+    pub kernel_shorthand: Option<bool>,
+    #[arg(long = "speed_shorthand")]
+    pub speed_shorthand: Option<bool>,
+    #[arg(long = "disk_percent")]
+    pub disk_percent: Option<bool>,
+    #[arg(long = "gpu_type")]
+    pub gpu_type: Option<String>,
+    #[arg(long = "disk_show")]
+    pub disk_show: Option<String>,
 
     /// Fetch info from remote hosts via SSH (e.g., user@host or host:port)
     #[arg(long = "ssh", value_name = "HOST")]
     pub ssh_hosts: Vec<String>,
+
+    /// Print the default config to stdout and exit
+    #[arg(long = "print_config", action = ArgAction::SetTrue)]
+    pub print_config: bool,
 }
 
 impl Args {
@@ -166,14 +182,20 @@ impl Args {
         if let Some(val) = self.os_age_shorthand {
             overrides.set_string("os_age_shorthand", val);
         }
-        if let Some(val) = self.distro_display {
-            overrides.set_string("distro_display", val);
+        if let Some(val) = self.distro_shorthand {
+            overrides.set_string("distro_shorthand", val);
         }
         if let Some(val) = self.color_blocks {
             overrides.set_string("color_blocks", val);
         }
         if let Some(val) = self.cpu_temp {
             overrides.set_string("cpu_temp", val);
+        }
+        if let Some(val) = self.gpu_type {
+            overrides.set_string("gpu_type", val);
+        }
+        if let Some(val) = self.disk_show {
+            overrides.set_string("disk_show", val);
         }
 
         if let Some(only) = self.only_modules {
@@ -198,8 +220,16 @@ impl Args {
             }
         }
 
+        if let Some(disable) = self.disable_modules {
+            for entry in disable.split(',') {
+                let trimmed = entry.trim();
+                if !trimmed.is_empty() {
+                    overrides.hide_modules.insert(trimmed.to_string());
+                }
+            }
+        }
+
         apply_bool_override(&mut overrides, "memory_percent", self.memory_percent);
-        apply_bool_override(&mut overrides, "cpu_show_temp", self.cpu_show_temp);
         apply_bool_override(&mut overrides, "cpu_speed", self.cpu_speed);
         apply_bool_override(&mut overrides, "cpu_frequency", self.cpu_frequency);
         apply_bool_override(&mut overrides, "cpu_cores", self.cpu_cores);
@@ -207,6 +237,10 @@ impl Args {
         apply_bool_override(&mut overrides, "shell_path", self.shell_path);
         apply_bool_override(&mut overrides, "shell_version", self.shell_version);
         apply_bool_override(&mut overrides, "de_version", self.de_version);
+        apply_bool_override(&mut overrides, "gpu_brand", self.gpu_brand);
+        apply_bool_override(&mut overrides, "kernel_shorthand", self.kernel_shorthand);
+        apply_bool_override(&mut overrides, "speed_shorthand", self.speed_shorthand);
+        apply_bool_override(&mut overrides, "disk_percent", self.disk_percent);
 
         overrides.ssh_hosts = self.ssh_hosts.clone();
 
@@ -243,28 +277,35 @@ OPTIONS:
   --ascii_colors <s>       Override color palette (e.g., 2,7,3 or "distro")
   --custom_ascii_path <p>  Use ASCII art from the given file path
 
-  --battery-display <mode> Battery output style (off, bar, infobar, barinfo)
-  --disk-display <mode>    Disk output style (info, percentage, infobar, barinfo, bar)
-  --disk-subtitle <mode>   Disk subtitle (name, dir, none, mount)
-  --memory-unit <unit>     Force memory unit (kib, mib, gib)
-  --packages <mode>        Package summary verbosity (off, on, tiny)
-  --uptime <mode>          Uptime shorthand (full, tiny, seconds)
-  --os-age <mode>          OS age shorthand (full, tiny, seconds)
-  --distro-display <mode>  Distro detail level (name, name_version, ...)
-  --color-blocks <glyph>   Glyph used for color swatches
-  --cpu-temp-unit <unit>   CPU temperature unit (C, F, off)
+  --battery_display <mode> Battery output style (off, bar, infobar, barinfo)
+  --disk_display <mode>    Disk output style (info, percentage, infobar, barinfo, bar)
+  --disk_subtitle <mode>   Disk subtitle (name, dir, none, mount)
+  --disk_percent <bool>    Show disk percentage
+  --disk_show <path>       Which disks to display (comma-separated mount points)
+  --memory_unit <unit>     Force memory unit (kib, mib, gib)
+  --package_managers <mode> Package summary verbosity (off, on, tiny)
+  --uptime_shorthand <mode> Uptime shorthand (full, tiny, seconds)
+  --os_age_shorthand <mode> OS age shorthand (full, tiny, seconds)
+  --distro_shorthand <mode> Distro detail level (name, name_version, ...)
+  --color_blocks <glyph>   Glyph used for color swatches
+  --cpu_temp <unit>        CPU temperature unit (C, F, off)
+  --gpu_type <type>        Which GPU to display (all, dedicated, integrated)
   --only <list>            Render only listed modules (comma-separated)
   --hide <list>            Hide listed modules (comma-separated)
+  --disable <list>         Alias for --hide
 
-  --memory-percent  <true|false>
-  --cpu-show-temp   <true|false>
-  --cpu-speed       <true|false>
-  --cpu-frequency   <true|false>
-  --cpu-cores       <true|false>
-  --cpu-brand       <true|false>
-  --shell-path      <true|false>
-  --shell-version   <true|false>
-  --de-version      <true|false>
+  --memory_percent  <true|false>
+  --cpu_speed       <true|false>
+  --cpu_frequency   <true|false>
+  --cpu_cores       <true|false>
+  --cpu_brand       <true|false>
+  --shell_path      <true|false>
+  --shell_version   <true|false>
+  --de_version      <true|false>
+  --gpu_brand       <true|false>
+  --kernel_shorthand <true|false>
+  --speed_shorthand <true|false>
+  --disk_percent    <true|false>
 
 DESCRIPTION:
   leenfetch is a modern, minimal, and the fastest system info tool,
@@ -289,7 +330,7 @@ EXAMPLES:
   leenfetch --ssh host1 --ssh host2 🛰️ Fetch multiple hosts sequentially
   leenfetch --ascii_distro arch     🎨 Use Arch logo manually
   leenfetch --ascii_colors 2,7,3    🌈 Use custom colors
-  leenfetch --packages tiny         📦 Compact package summary for screenshots
+  leenfetch --package_managers tiny 📦 Compact package summary for screenshots
   leenfetch --only cpu,memory       🧩 Focus on specific modules temporarily
   leenfetch --list-options          📜 View all available configuration keys
 
@@ -308,10 +349,10 @@ pub fn list_options() {
         "{}",
         r#"
 
-📄 LeenFetch Configuration Options Reference
+📄 leenfetch Configuration Options Reference
 ──────────────────────────────────────────────
 
-📁 LeenFetch stores everything in a single JSONC file:
+📁 leenfetch stores everything in a single JSONC file:
   • Linux:   ~/.config/leenfetch/config.jsonc
   • Windows: %APPDATA%/leenfetch/config.jsonc
 
@@ -348,42 +389,57 @@ pub fn list_options() {
   cpu_speed           = true | false
       Show CPU speed.
   
-  cpu_temp            = "C" | "F"
-      Temperature unit for CPU: Celsius or Fahrenheit.
-  
-  cpu_show_temp       = true | false
-      Show CPU temperature.
+  cpu_temp            = "C" | "F" | "off"
+      Temperature unit for CPU: Celsius, Fahrenheit, or off.
   
   de_version          = true | false
       Show desktop environment version.
   
-  distro_display      = "name" | "name_version" | "name_arch" | "name_model" | "name_model_version" | "name_model_arch" | "name_model_version_arch"
+  distro_shorthand    = "name" | "name_version" | "name_arch" | "name_model" | "name_model_version" | "name_model_arch" | "name_model_version_arch"
       How much detail to show for OS info.
   
   disk_display        = "info" | "percentage" | "infobar" | "barinfo" | "bar"
       Disk usage display style.
   
+  disk_percent        = true | false
+      Show disk usage percentage.
+  
+  disk_show           = <path>
+      Which disks to display (default "/").
+  
   disk_subtitle       = "name" | "dir" | "none" | "mount"
       Disk label: device, last dir, none, or full mount point.
+  
+  gpu_brand           = true | false
+      Show GPU vendor name.
+  
+  gpu_type            = "all" | "dedicated" | "integrated"
+      Which GPU to display.
+  
+  kernel_shorthand    = true | false
+      Shorten kernel output.
   
   memory_percent      = true | false
       Show memory as percent.
   
-  memory_unit	 = "mib" | "gib" | "kib"
+  memory_unit         = "mib" | "gib" | "kib"
       Memory unit.
   
-  package_managers	 = "off" | "on" | "tiny"
+  package_managers    = "off" | "on" | "tiny"
       Package info: none, full, or compact.
   
-  shell_path	 = true | false
+  shell_path          = true | false
       Show full shell path.
   
   shell_version       = true | false
       Show shell version.
   
+  speed_shorthand     = true | false
+      Show CPU speed without decimals.
+  
   uptime_shorthand    = "full" | "tiny" | "seconds"
       Uptime format: verbose, compact, or seconds only.
- 
+  
   os_age_shorthand    = "full" | "tiny" | "seconds"
       Format for the OS install age module.
 
