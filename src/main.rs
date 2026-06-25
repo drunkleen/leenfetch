@@ -514,7 +514,7 @@ fn apply_flag_overrides(
             | "name_model_arch"
             | "name_model_version_arch" => flags.distro_shorthand = normalized,
             _ => {
-                return Err(format!("Invalid value for --distro-shorthand: {}", value));
+                return Err(format!("Invalid value for --distro_shorthand: {}", value));
             }
         }
     }
