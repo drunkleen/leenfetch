@@ -2,12 +2,12 @@
 
 ## Supported Versions
 
-Only the latest stable release receives security fixes.
+Only the latest release receives security fixes.
 
 | Version | Supported |
 |---------|-----------|
-| 1.2.x   | Yes       |
-| < 1.2   | No        |
+| Latest  | Yes       |
+| Older   | No        |
 
 ## Reporting a Vulnerability
 

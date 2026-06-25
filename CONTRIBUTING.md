@@ -33,15 +33,22 @@ Typos, unclear explanations, missing examples — all fair game. Docs live in `R
 ## Getting Started
 
 ### Prerequisites
-- [Rust](https://rustup.rs/) (stable, edition 2024)
+- [Rust](https://rustup.rs/) (stable >= 1.96.0, edition 2024)
 - On Linux: `libc` headers (usually pre-installed)
 - On Windows: MSVC toolchain or MinGW
+- For cross-compilation: `cross` (`cargo install cross --locked`) and [Docker](https://docker.com/)
 
-### Build
+### Build (native)
 ```bash
 git clone https://github.com/drunkleen/leenfetch.git
 cd leenfetch
 cargo build
+```
+
+### Build (cross-compile for ARM64)
+```bash
+cargo install cross --locked
+cross build --release --target aarch64-unknown-linux-gnu
 ```
 
 ### Run

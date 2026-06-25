@@ -22,6 +22,7 @@
 
 - [ ] Tested on Linux
 - [ ] Tested on Windows
+- [ ] Tested on ARM64
 - [ ] Tested with default config
 - [ ] Tested with custom config
 
