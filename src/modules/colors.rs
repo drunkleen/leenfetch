@@ -59,7 +59,8 @@ pub fn get_builtin_distro_colors(distro: &str) -> &'static [u8] {
 
         ("archmerge", _) => &[6, 6, 7, 1],
 
-        ("artix", _) => &[6, 6, 7, 1],
+        ("artix", true) => &[6, 6, 7, 1],
+        ("artix", false) => &[6, 6, 7, 1],
 
         ("arya", _) => &[2, 1],
 
@@ -219,6 +220,11 @@ pub fn get_builtin_distro_colors(distro: &str) -> &'static [u8] {
         ("ubuntu", _) => &[1, 7, 3],
 
         ("zorin", _) => &[4, 6],
+
+        ("aperio", _) => &[255],
+        ("itc", _) => &[1],
+        ("rfremix", _) | ("fedora_old", _) => &[4, 7, 1],
+        ("xferience", _) => &[6, 6, 7, 1],
 
         _ => &[7, 0, 3],
     }
