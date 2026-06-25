@@ -247,6 +247,37 @@ pub fn get_builtin_ascii_art(ascii_distro: &str) -> &'static str {
         ("rfremix", _) | ("fedora_old", _) => FEDORA_OLD,
         ("xferience", _) => XFERIENCE,
 
+        ("gentoo", false) => GENTOO,
+        ("gentoo", true) => GENTOO_SMALL,
+        ("guix", _) => GUIX,
+        ("haiku", false) => HAIKU,
+        ("haiku", true) => HAIKU_SMALL,
+        ("hyperbola", false) => HYPERBOLA,
+        ("hyperbola", true) => HYPERBOLA_SMALL,
+        ("linuxlite", false) | ("linux lite", false) | ("linux_lite", false) => LINUXLITE,
+        ("linuxlite", true) => LINUXLITE_SMALL,
+        ("mageia", false) => MAGEIA,
+        ("mageia", true) => MAGEIA_SMALL,
+        ("netbsd", false) => NETBSD,
+        ("netbsd", true) => NETBSD_SMALL,
+        ("openbsd", false) => OPENBSD,
+        ("openbsd", true) => OPENBSD_SMALL,
+        ("parabola", false) => PARABOLA,
+        ("parabola", true) => PARABOLA_SMALL,
+        ("postmarketos", false) => POSTMARKETOS,
+        ("postmarketos", true) => POSTMARKETOS_SMALL,
+        ("pureos", false) => PUREOS,
+        ("pureos", true) => PUREOS_SMALL,
+        ("raspbian", false) => RASPBIAN,
+        ("raspbian", true) => RASPBIAN_SMALL,
+        ("slackware", false) => SLACKWARE,
+        ("slackware", true) => SLACKWARE_SMALL,
+        ("solaris", false) => SOLARIS,
+        ("sunos", false) => SUNOS,
+        ("sunos", true) => SUNOS_SMALL,
+        ("void", false) => VOID,
+        ("void", true) => VOID_SMALL,
+
         _ => DEFAULT,
     }
 }
@@ -2386,3 +2417,338 @@ const XFERIENCE: &str = r#"${c1}           ``--:::::::-.`
  `/+o/.  -o.    :oooooo+ ```:.+oo+-
 `:++oo-    -/`   :oooooo+ .`-`+oooo/.
 .+ooo+.    .`   `://///+-+..oooooo+:`"#;
+
+const GENTOO: &str = r#"${c1}         -/oyddmdhs+:.
+     -o${c2}dNMMMMMMMMNNmhy+${c1}-`
+   -y${c2}NMMMMMMMMMMMNNNmmdhy${c1}+-
+ `o${c2}mMMMMMMMMMMMMNmdmmmmddhhy${c1}/`
+ om${c2}MMMMMMMMMMMN${c1}hhyyyo${c2}hmdddhhhd${c1}o`
+.y${c2}dMMMMMMMMMMd${c1}hs++so/s${c2}mdddhhhhdm${c1}+`
+ oy${c2}hdmNMMMMMMMN${c1}dyooy${c2}dmddddhhhhyhN${c1}d.
+  :o${c2}yhhdNNMMMMMMMNNNmmdddhhhhhyym${c1}Mh
+    .:${c2}+sydNMMMMMNNNmmmdddhhhhhhmM${c1}my
+       /m${c2}MMMMMMNNNmmmdddhhhhhmMNh${c1}s:
+    `o${c2}NMMMMMMMNNNmmmddddhhdmMNhs${c1}+`
+  `s${c2}NMMMMMMMMNNNmmmdddddmNMmhs${c1}/.
+ /N${c2}MMMMMMMMNNNNmmmdddmNMNdso${c1}:`
++M${c2}MMMMMMNNNNNmmmmdmNMNdso${c1}/-
+yM${c2}MNNNNNNNmmmmmNNMmhs+/${c1}-`
+/h${c2}MMNNNNNNNNMNdhs++/${c1}-`
+`/${c2}ohdmmddhys+++/:${c1}.`
+  `-//////:--."#;
+
+const GENTOO_SMALL: &str = r#"${c1} _-----_
+(       \
+\    0   \
+${c2} \        )
+ /      _/
+(     _-
+\____-"#;
+
+const GUIX: &str = r#"${c1}|.__          __.|
+|__ \        / __|
+   \ \      / /
+    \ \    / /
+     \ \  / /
+      \ \/ /
+       \__/"#;
+
+
+const HAIKU: &str = r#"${c1}       ,^,
+      /   \
+*--_ ;     ; _--*
+\   '"     "'   /
+ '.           .'
+.-'"         "'-.
+ '-.__.   .__.-'
+       |_|"#;
+
+const HAIKU_SMALL: &str = r#""#;
+
+const HYPERBOLA: &str = r#"${c1}                     WW
+                     KX              W
+                    WO0W          NX0O
+                    NOO0NW  WNXK0OOKW
+                    W0OOOOOOOOOOOOKN
+                     N0OOOOOOO0KXW
+                       WNXXXNW
+                 NXK00000KN
+             WNK0OOOOOOOOOO0W
+           NK0OOOOOOOOOOOOOO0W
+         X0OOOOOOO00KK00OOOOOK
+       X0OOOO0KNWW      WX0OO0W
+     X0OO0XNW              KOOW
+   N00KNW                   KOW
+ NKXN                       W0W
+WW                           W"#;
+
+const HYPERBOLA_SMALL: &str = r#"${c1}    |`__.`/
+    \____/
+    .--.
+   /    \
+  /  ___ \
+ / .`   `.\
+/.`      `.\"#;
+
+const LINUXLITE: &str = r#"${c1}          ,xXc
+      .l0MMMMMO
+   .kNMMMMMWMMMN,
+   KMMMMMMKMMMMMMo
+  'MMMMMMNKMMMMMM:
+  kMMMMMMOMMMMMMO
+ .MMMMMMX0MMMMMW.
+ oMMMMMMxWMMMMM:
+ WMMMMMNkMMMMMO
+:MMMMMMOXMMMMW
+.0MMMMMxMMMMM;
+:;cKMMWxMMMMO
+'MMWMMXOMMMMl
+ kMMMMKOMMMMMX:
+ .WMMMMKOWMMM0c
+  lMMMMMWO0MNd:'
+   oollXMKXoxl;.
+     ':. .: .'
+              ..
+                ."#;
+
+const LINUXLITE_SMALL: &str = r#"${c1}   /\
+  /  \
+ / ${c2}/ ${c1}/
+> ${c2}/ ${c1}/
+\ ${c2}\ ${c1}\
+ \_${c2}\${c1}_\
+${c2}    \"#;
+
+const MAGEIA: &str = r#"${c1}        .°°.
+         °°   .°°.
+         .°°°. °°
+         .   .
+          °°° .°°°.
+      .°°°.   '___'
+${c2}     .${c1}'___'     ${c2}   .
+   :dkxc;'.  ..,cxkd;
+ .dkk. kkkkkkkkkk .kkd.
+.dkk.  ';cloolc;.  .kkd
+ckk.                .kk;
+xO:                  cOd
+xO:                  lOd
+lOO.                .OO:
+.k00.              .00x
+ .k00;            ;00O.
+  .lO0Kc;,,,,,,;c0KOc.
+     ;d00KKKKKK00d;
+        .,KKKK,."#;
+
+const MAGEIA_SMALL: &str = r#"${c1}   *
+    *
+   **
+${c2} /\__/\
+/      \
+\      /
+ \____/"#;
+
+const NETBSD: &str = r#"${c2}\\${c1}\`-______,----__
+${c2} \\        ${c1}__,---\`_
+${c2}  \\       ${c1}\`.____
+${c2}   \\${c1}-______,----\`-
+${c2}    \\
+     \\
+      \\"#;
+
+const NETBSD_SMALL: &str = r#""#;
+
+const OPENBSD: &str = r#"${c1}      _____
+    \-     -/
+ \_/         \
+ |        ${c2}O O${c1} |
+ |_  <   )  3 )
+ / \         /
+    /-_____-\"#;
+
+const OPENBSD_SMALL: &str = r#""#;
+
+const PARABOLA: &str = r#"${c1}                          `.-.    `.
+                   `.`  `:++.   `-+o+.
+             `` `:+/. `:+/.   `-+oooo+
+        ``-::-.:+/. `:+/.   `-+oooooo+
+    `.-:///-  ..`   .-.   `-+oooooooo-
+ `..-..`                 `+ooooooooo:
+``                        :oooooooo/
+                          `ooooooo:
+                          `oooooo:
+                          -oooo+.
+                          +ooo/`
+                         -ooo-
+                        `+o/.
+                        /+-
+                       //`
+                      -."#;
+
+const PARABOLA_SMALL: &str = r#"${c1}  __ __ __  _
+.`_//_//_/ / `.
+          /  .`
+         / .`
+        /.`
+       /`"#;
+
+const POSTMARKETOS: &str = r#"${c1}                 /\
+                /  \
+               /    \
+              /      \
+             /        \
+            /          \
+            \           \
+          /\ \____       \
+         /  \____ \       \
+        /       /  \       \
+       /       /    \    ___\
+      /       /      \  / ____
+     /       /        \/ /    \
+    /       / __________/      \
+   /        \ \                 \
+  /          \ \                 \
+ /           / /                  \
+/___________/ /____________________\"#;
+
+const POSTMARKETOS_SMALL: &str = r#"${c1}        /\
+       /  \
+      /    \
+      \__   \
+    /\__ \  _\
+   /   /  \/ __
+  /   / ____/  \
+ /    \ \       \
+/_____/ /________\"#;
+
+const PUREOS: &str = r#"${c1}dmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmd
+dNm//////////////////////////////////mNd
+dNd                                  dNd
+dNd                                  dNd
+dNd                                  dNd
+dNd                                  dNd
+dNd                                  dNd
+dNd                                  dNd
+dNd                                  dNd
+dNd                                  dNd
+dNm//////////////////////////////////mNd
+dmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmd"#;
+
+const PUREOS_SMALL: &str = r#"${c1} _____________
+|  _________  |
+| |         | |
+| |         | |
+| |_________| |
+|_____________|"#;
+
+const RASPBIAN: &str = r#"${c1}  `.::///+:/-.        --///+//-:``
+ `+oooooooooooo:   `+oooooooooooo:
+  /oooo++//ooooo:  ooooo+//+ooooo.
+  `+ooooooo:-:oo-  +o+::/ooooooo:
+   `:oooooooo+``    `.oooooooo+-
+     `:++ooo/.        :+ooo+/.`
+        ${c2}...`  `.----.` ``..
+     .::::-``:::::::::.`-:::-`
+    -:::-`   .:::::::-`  `-:::-
+   `::.  `.--.`  `` `.---.``.::`
+       .::::::::`  -::::::::` `
+ .::` .:::::::::- `::::::::::``::.
+-:::` ::::::::::.  ::::::::::.`:::-
+::::  -::::::::.   `-::::::::  ::::
+-::-   .-:::-.``....``.-::-.   -::-
+ .. ``       .::::::::.     `..`..
+   -:::-`   -::::::::::`  .:::::`
+   :::::::` -::::::::::` :::::::.
+   .:::::::  -::::::::. ::::::::
+    `-:::::`   ..--.`   ::::::.
+      `...`  `...--..`  `...`
+            .::::::::::
+             `.-::::-`"#;
+
+const RASPBIAN_SMALL: &str = r#"${c1}   ..    ,.
+  :oo: .:oo:
+  'o\o o/o:
+${c2} :: . :: . ::
+:: :::  ::: ::
+:'  '',.''  ':
+ ::: :::: :::
+ ':,  ''  ,:'
+   ' ~::~ '"#;
+
+const SLACKWARE: &str = r#"${c1}                  :::::::
+            :::::::::::::::::::
+         :::::::::::::::::::::::::
+       ::::::::${c2}cllcccccllllllll${c1}::::::
+    :::::::::${c2}lc               dc${c1}:::::::
+   ::::::::${c2}cl   clllccllll    oc${c1}:::::::::
+  :::::::::${c2}o   lc${c1}::::::::${c2}co   oc${c1}::::::::::
+ ::::::::::${c2}o    cccclc${c1}:::::${c2}clcc${c1}::::::::::::
+ :::::::::::${c2}lc        cclccclc${c1}:::::::::::::
+::::::::::::::${c2}lcclcc          lc${c1}::::::::::::
+::::::::::${c2}cclcc${c1}:::::${c2}lccclc     oc${c1}:::::::::::
+::::::::::${c2}o    l${c1}::::::::::${c2}l    lc${c1}:::::::::::
+ :::::${c2}cll${c1}:${c2}o     clcllcccll     o${c1}:::::::::::
+ :::::${c2}occ${c1}:${c2}o                  clc${c1}:::::::::::
+  ::::${c2}ocl${c1}:${c2}ccslclccclclccclclc${c1}:::::::::::::
+   :::${c2}oclcccccccccccccllllllllllllll${c1}:::::
+    ::${c2}lcc1lcccccccccccccccccccccccco${c1}::::
+      ::::::::::::::::::::::::::::::::
+        ::::::::::::::::::::::::::::
+           ::::::::::::::::::::::
+                ::::::::::::"#;
+
+const SLACKWARE_SMALL: &str = r#"${c1}   ________
+  /  ______|
+  | |______
+  \______  \
+   ______| |
+| |________/
+|____________"#;
+
+const SOLARIS: &str = r#"${c1}       .   .;   .
+   .   :;  ::  ;:   .
+   .;. ..      .. .;.
+..  ..             ..  ..
+ .;,                 ,;."#;
+
+
+const SUNOS: &str = r#"${c1}                 `-     `
+          `--    `+-    .:
+           .+:  `++:  -/+-     .
+    `.::`  -++/``:::`./+/  `.-/.
+      `++/-`.`          ` /++:`
+  ``   ./:`                .: `..`.-
+``./+/:-                     -+++:-
+    -/+`                      :."#;
+
+const SUNOS_SMALL: &str = r#"${c1}       .   .;   .
+   .   :;  ::  ;:   .
+   .;. ..      .. .;.
+..  ..             ..  ..
+ .;,                 ,;."#;
+
+const VOID: &str = r#"${c1}                __.;=====;.__
+            _.=+==++=++=+=+===;.
+             -=+++=+===+=+=+++++=_
+        .     -=:``     `--==+=++==.
+       _vi,    `            --+=++++:
+      .uvnvi.       _._       -==+==+.
+     .vvnvnI`    .;==|==;.     :|=||=|.
+${c2}+QmQQm${c1}pvvnv; ${c2}_yYsyQQWUUQQQm #QmQ#${c1}:${c2}QQQWUV$QQm.
+${c2} -QQWQW${c1}pvvo${c2}wZ?.wQQQE${c1}==<${c2}QWWQ/QWQW.QQWW${c1}(: ${c2}jQWQE
+${c2}  -$QQQQmmU'  jQQQ@${c1}+=<${c2}QWQQ)mQQQ.mQQQC${c1}+;${c2}jWQQ@'
+${c2}   -$WQ8Y${c1}nI:   ${c2}QWQQwgQQWV${c1}`${c2}mWQQ.jQWQQgyyWW@!
+${c1}     -1vvnvv.     `~+++`        ++|+++
+      +vnvnnv,                 `-|===
+       +vnvnvns.           .      :=-
+        -Invnvvnsi..___..=sv=.     `
+          +Invnvnvnnnnnnnnvvnn;.
+            ~|Invnvnvvnvvvnnv}+`
+               -~|{*l}*|~"#;
+
+const VOID_SMALL: &str = r#"${c1}    _______
+ _ \______ -
+| \  ___  \ |
+| | /   \ | |
+| | \___/ | |
+| \______ \_|
+ -_______\"#;
