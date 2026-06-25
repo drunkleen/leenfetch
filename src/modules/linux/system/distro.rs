@@ -1,5 +1,6 @@
 use std::fs;
 use std::path::Path;
+use std::process::Command;
 
 use crate::modules::enums::DistroDisplay;
 
@@ -11,7 +12,7 @@ pub fn get_distro(format: DistroDisplay) -> String {
         "/etc/openwrt_release",
     ];
 
-    for path in release_files {
+    for path in &release_files {
         if Path::new(path).exists() {
             if let Ok(contents) = fs::read_to_string(path) {
                 return parse_distro_info(&contents, format);
@@ -19,7 +20,42 @@ pub fn get_distro(format: DistroDisplay) -> String {
         }
     }
 
+    // Fallback: try lsb_release
+    if let Ok(output) = Command::new("lsb_release").arg("-si").output() {
+        if let Ok(name) = String::from_utf8(output.stdout) {
+            let name = name.trim().to_string();
+            if !name.is_empty() {
+                return name;
+            }
+        }
+    }
+
+    // Fallback: try uname
+    if let Ok(output) = Command::new("uname").arg("-o").output() {
+        if let Ok(name) = String::from_utf8(output.stdout) {
+            let name = name.trim().to_string();
+            if !name.is_empty() {
+                return name;
+            }
+        }
+    }
+
     "Unknown".into()
+}
+
+/// Returns the `ID_LIKE` value from `/etc/os-release`, if present.
+/// Used by the ASCII art fallback to show the parent distro's logo (e.g., Omarchy → Arch).
+pub fn get_id_like() -> Option<String> {
+    let contents = fs::read_to_string("/etc/os-release").ok()?;
+    for line in contents.lines() {
+        let line = line.trim();
+        if line.starts_with("ID_LIKE=") {
+            let val = trim_quotes(&line[8..]);
+            let first = val.split_whitespace().next()?.to_lowercase();
+            return Some(first);
+        }
+    }
+    None
 }
 
 fn parse_distro_info(contents: &str, format: DistroDisplay) -> String {
