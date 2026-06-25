@@ -1,10 +1,13 @@
 # 🧠 **leenfetch**
 
-[![Crates.io](https://img.shields.io/crates/v/leenfetch)](https://crates.io/crates/leenfetch)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![CI](https://github.com/drunkleen/leenfetch/actions/workflows/ci.yml/badge.svg)](https://github.com/drunkleen/leenfetch/actions/workflows/ci.yml)
+[![TEST](https://github.com/drunkleen/leenfetch/actions/workflows/ci.yml/badge.svg)](https://github.com/drunkleen/leenfetch/actions/workflows/ci.yml)
 [![Build](https://github.com/drunkleen/leenfetch/actions/workflows/build-check.yml/badge.svg)](https://github.com/drunkleen/leenfetch/actions/workflows/build-check.yml)
 [![Release](https://github.com/drunkleen/leenfetch/actions/workflows/release.yml/badge.svg)](https://github.com/drunkleen/leenfetch/actions/workflows/release.yml)
+[![Crates.io](https://img.shields.io/crates/v/leenfetch)](https://crates.io/crates/leenfetch)
+[![GitHub all releases](https://img.shields.io/github/downloads/drunkleen/leenfetch/total?logo=github)](https://github.com/drunkleen/leenfetch/releases)
+[![Crates.io Downloads](https://img.shields.io/crates/d/leenfetch?logo=rust)](https://crates.io/crates/leenfetch)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/drunkleen/leenfetch)
 
 A fast, minimal, and customizable system information tool built in Rust — your alternative to Neofetch.
 
@@ -47,7 +50,8 @@ iwr https://raw.githubusercontent.com/drunkleen/leenfetch/master/install.ps1 | i
 
 ## 📖 Full Documentation
 
-Everything else — configuration, module reference, CLI options, SSH, theming, troubleshooting — is in the **[wiki](https://github.com/drunkleen/leenfetch/wiki)**.
+Everything else — configuration, module reference, CLI options, SSH, theming, troubleshooting — is in the **[wiki](https://github.com/drunkleen/leenfetch/wiki)** or [DeepWiki](https://deepwiki.com/drunkleen/leenfetch)
+. 
 
 ## 🎯 Roadmap
 
