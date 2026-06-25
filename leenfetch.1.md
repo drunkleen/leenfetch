@@ -2,7 +2,7 @@
 title: leenfetch
 section: 1
 header: Manual
-footer: Leenfetch 1.2.2
+footer: leenfetch 1.2.2
 ---
 
 # leenfetch — User Commands
@@ -43,37 +43,53 @@ leenfetch can also accept **piped input** to render as ASCII art. This allows us
   Override the ASCII palette (comma-separated indices such as `1,2,3,4,5,6,7` or `distro`).
 - `--custom_ascii_path <PATH>`  
   Use a custom ASCII art file for this run.
-- `--color-blocks <GLYPH>`  
+- `--color_blocks <GLYPH>`  
   Change the glyph used for the color swatch (default: `●`).
-- `--battery-display <MODE>`  
+- `--battery_display <MODE>`  
   Switch battery output between `off`, `bar`, `infobar`, and `barinfo`.
-- `--disk-display <MODE>`  
+- `--disk_display <MODE>`  
   Select disk output (`info`, `percentage`, `infobar`, `barinfo`, `bar`).
-- `--disk-subtitle <MODE>`  
+- `--disk_subtitle <MODE>`  
   Choose disk labels (`name`, `dir`, `none`, `mount`).
-- `--memory-unit <UNIT>`  
+- `--disk_percent <true|false>`  
+  Show or hide disk usage percentage.
+- `--disk_show <PATH>`  
+  Which disks to display (comma-separated mount points).
+- `--memory_unit <UNIT>`  
   Force memory units (`kib`, `mib`, `gib`).
-- `--packages <MODE>`  
+- `--package_managers <MODE>`  
   Control package summaries (`off`, `on`, `tiny`).
-- `--uptime <MODE>` / `--os-age <MODE>`  
+- `--uptime_shorthand <MODE>` / `--os_age_shorthand <MODE>`  
   Pick shorthand (`full`, `tiny`, `seconds`).
-- `--distro-display <MODE>`  
+- `--distro_shorthand <MODE>`  
   Set OS detail level (e.g., `name`, `name_version`, `name_model_arch`).
-- `--cpu-temp-unit <UNIT>`  
+- `--cpu_temp <UNIT>`  
   Select CPU temperature units (`C`, `F`, or `off` to hide).
+- `--gpu_brand <true|false>`  
+  Show or hide GPU vendor name.
+- `--gpu_type <TYPE>`  
+  Which GPU to show (`all`, `dedicated`, `integrated`).
+- `--kernel_shorthand <true|false>`  
+  Shorten kernel output.
+- `--speed_shorthand <true|false>`  
+  Show CPU speed without decimals.
 - `--format <pretty|json>`  
   Choose human-readable pretty output (default) or machine-readable JSON.
 - `--ssh <HOST>...`  
   Fetch system info from one or more hosts via SSH, then render locally. Each host runs `leenfetch --format json` remotely; the output is printed locally using the requested format.
+- `--print_config`  
+  Print the default configuration to stdout and exit.
 - `--only <LIST>`  
   Render only the listed modules (comma-separated).
 - `--hide <LIST>`  
   Hide specific modules (comma-separated).
-- Boolean toggles use a single flag with an explicit value, for example `--cpu-speed true`, `--shell-path false`, or `--memory-percent true`.
+- `--disable <LIST>`  
+  Alias for `--hide`.
+- Boolean toggles use a single flag with an explicit value, for example `--cpu_speed true`, `--shell_path false`, or `--memory_percent true`.
 
 ## REMOTE FETCHING OVER SSH
 
-`--ssh` lets you pull data from remote hosts and render it locally. LeenFetch connects with your system SSH client, runs `leenfetch --format json` on each target, parses the output, and prints either pretty text (default) or JSON (`--format json`).
+`--ssh` lets you pull data from remote hosts and render it locally. **leenfetch** connects with your system SSH client, runs `leenfetch --format json` on each target, parses the output, and prints either pretty text (default) or JSON (`--format json`).
 
 - Requirements: the remote host must have `leenfetch` in `PATH`.
 - Uses your SSH config/agent, honoring usernames/ports in the target string; a short connect timeout is applied.

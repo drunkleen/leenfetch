@@ -14,7 +14,7 @@
 . ftr VB CB
 . ftr VBI CBI
 .\}
-.TH "leenfetch" "1" "" "Leenfetch 1.2.2" "Manual"
+.TH "leenfetch" "1" "" "leenfetch 1.2.2" "Manual"
 .hy
 .SH leenfetch \[em] User Commands
 .SS NAME
@@ -107,65 +107,103 @@ Override the ASCII palette (comma-separated indices such as
 .PD
 Use a custom ASCII art file for this run.
 .IP \[bu] 2
-\f[V]--color-blocks <GLYPH>\f[R]
+\f[V]--color_blocks <GLYPH>\f[R]
 .PD 0
 .P
 .PD
 Change the glyph used for the color swatch (default:
 \f[V]\[u25CF]\f[R]).
 .IP \[bu] 2
-\f[V]--battery-display <MODE>\f[R]
+\f[V]--battery_display <MODE>\f[R]
 .PD 0
 .P
 .PD
 Switch battery output between \f[V]off\f[R], \f[V]bar\f[R],
 \f[V]infobar\f[R], and \f[V]barinfo\f[R].
 .IP \[bu] 2
-\f[V]--disk-display <MODE>\f[R]
+\f[V]--disk_display <MODE>\f[R]
 .PD 0
 .P
 .PD
 Select disk output (\f[V]info\f[R], \f[V]percentage\f[R],
 \f[V]infobar\f[R], \f[V]barinfo\f[R], \f[V]bar\f[R]).
 .IP \[bu] 2
-\f[V]--disk-subtitle <MODE>\f[R]
+\f[V]--disk_subtitle <MODE>\f[R]
 .PD 0
 .P
 .PD
 Choose disk labels (\f[V]name\f[R], \f[V]dir\f[R], \f[V]none\f[R],
 \f[V]mount\f[R]).
 .IP \[bu] 2
-\f[V]--memory-unit <UNIT>\f[R]
+\f[V]--disk_percent <true|false>\f[R]
+.PD 0
+.P
+.PD
+Show or hide disk usage percentage.
+.IP \[bu] 2
+\f[V]--disk_show <PATH>\f[R]
+.PD 0
+.P
+.PD
+Which disks to display (comma-separated mount points).
+.IP \[bu] 2
+\f[V]--memory_unit <UNIT>\f[R]
 .PD 0
 .P
 .PD
 Force memory units (\f[V]kib\f[R], \f[V]mib\f[R], \f[V]gib\f[R]).
 .IP \[bu] 2
-\f[V]--packages <MODE>\f[R]
+\f[V]--package_managers <MODE>\f[R]
 .PD 0
 .P
 .PD
 Control package summaries (\f[V]off\f[R], \f[V]on\f[R], \f[V]tiny\f[R]).
 .IP \[bu] 2
-\f[V]--uptime <MODE>\f[R] / \f[V]--os-age <MODE>\f[R]
+\f[V]--uptime_shorthand <MODE>\f[R] /
+\f[V]--os_age_shorthand <MODE>\f[R]
 .PD 0
 .P
 .PD
 Pick shorthand (\f[V]full\f[R], \f[V]tiny\f[R], \f[V]seconds\f[R]).
 .IP \[bu] 2
-\f[V]--distro-display <MODE>\f[R]
+\f[V]--distro_shorthand <MODE>\f[R]
 .PD 0
 .P
 .PD
 Set OS detail level (e.g., \f[V]name\f[R], \f[V]name_version\f[R],
 \f[V]name_model_arch\f[R]).
 .IP \[bu] 2
-\f[V]--cpu-temp-unit <UNIT>\f[R]
+\f[V]--cpu_temp <UNIT>\f[R]
 .PD 0
 .P
 .PD
 Select CPU temperature units (\f[V]C\f[R], \f[V]F\f[R], or \f[V]off\f[R]
 to hide).
+.IP \[bu] 2
+\f[V]--gpu_brand <true|false>\f[R]
+.PD 0
+.P
+.PD
+Show or hide GPU vendor name.
+.IP \[bu] 2
+\f[V]--gpu_type <TYPE>\f[R]
+.PD 0
+.P
+.PD
+Which GPU to show (\f[V]all\f[R], \f[V]dedicated\f[R],
+\f[V]integrated\f[R]).
+.IP \[bu] 2
+\f[V]--kernel_shorthand <true|false>\f[R]
+.PD 0
+.P
+.PD
+Shorten kernel output.
+.IP \[bu] 2
+\f[V]--speed_shorthand <true|false>\f[R]
+.PD 0
+.P
+.PD
+Show CPU speed without decimals.
 .IP \[bu] 2
 \f[V]--format <pretty|json>\f[R]
 .PD 0
@@ -181,6 +219,12 @@ Fetch system info from one or more hosts via SSH, then render locally.
 Each host runs \f[V]leenfetch --format json\f[R] remotely; the output is
 printed locally using the requested format.
 .IP \[bu] 2
+\f[V]--print_config\f[R]
+.PD 0
+.P
+.PD
+Print the default configuration to stdout and exit.
+.IP \[bu] 2
 \f[V]--only <LIST>\f[R]
 .PD 0
 .P
@@ -193,14 +237,20 @@ Render only the listed modules (comma-separated).
 .PD
 Hide specific modules (comma-separated).
 .IP \[bu] 2
+\f[V]--disable <LIST>\f[R]
+.PD 0
+.P
+.PD
+Alias for \f[V]--hide\f[R].
+.IP \[bu] 2
 Boolean toggles use a single flag with an explicit value, for example
-\f[V]--cpu-speed true\f[R], \f[V]--shell-path false\f[R], or
-\f[V]--memory-percent true\f[R].
+\f[V]--cpu_speed true\f[R], \f[V]--shell_path false\f[R], or
+\f[V]--memory_percent true\f[R].
 .SS REMOTE FETCHING OVER SSH
 .PP
 \f[V]--ssh\f[R] lets you pull data from remote hosts and render it
 locally.
-LeenFetch connects with your system SSH client, runs
+\f[B]leenfetch\f[R] connects with your system SSH client, runs
 \f[V]leenfetch --format json\f[R] on each target, parses the output, and
 prints either pretty text (default) or JSON (\f[V]--format json\f[R]).
 .IP \[bu] 2
