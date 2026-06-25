@@ -24,7 +24,9 @@ pub fn get_cpu(
     temp_unit: Option<char>,
 ) -> Option<String> {
     let cpuinfo = fs::read_to_string("/proc/cpuinfo").ok()?;
-    let mut cpu_model = extract_cpu_model(&cpuinfo);
+    let mut cpu_model = extract_cpu_model(&cpuinfo)
+        .or_else(cpu_model_fallback)
+        .unwrap_or_else(|| "Unknown CPU".to_string());
     let cores = if show_cores {
         Some(count_cores(&cpuinfo))
     } else {
@@ -71,7 +73,7 @@ pub fn get_cpu(
     Some(output)
 }
 
-fn extract_cpu_model(cpuinfo: &str) -> String {
+fn extract_cpu_model(cpuinfo: &str) -> Option<String> {
     for line in cpuinfo.lines() {
         if line.contains("model name")
             || line.contains("Model")
@@ -79,28 +81,29 @@ fn extract_cpu_model(cpuinfo: &str) -> String {
             || line.contains("Processor")
         {
             if let Some((_, val)) = line.split_once(':') {
-                return val.trim().to_string();
+                return Some(val.trim().to_string());
             }
         }
     }
+    None
+}
 
-    // Fallback to device tree model
+fn cpu_model_fallback() -> Option<String> {
     if let Ok(model) = fs::read_to_string("/proc/device-tree/model") {
         let trimmed = model.trim_matches(char::from(0)).trim();
         if !trimmed.is_empty() {
-            return trimmed.to_string();
+            return Some(trimmed.to_string());
         }
     }
 
-    // Fallback to SoC machine name
     if let Ok(machine) = fs::read_to_string("/sys/devices/soc0/machine") {
         let trimmed = machine.trim();
         if !trimmed.is_empty() {
-            return trimmed.to_string();
+            return Some(trimmed.to_string());
         }
     }
 
-    "Unknown CPU".to_string()
+    None
 }
 
 fn count_cores(cpuinfo: &str) -> u32 {
@@ -226,13 +229,16 @@ cpu MHz     : 2199.6
     #[test]
     fn test_extract_cpu_model() {
         let model = extract_cpu_model(MOCK_CPUINFO);
-        assert_eq!(model, "Intel(R) Core(TM) i7-8550U CPU @ 1.80GHz");
+        assert_eq!(
+            model,
+            Some("Intel(R) Core(TM) i7-8550U CPU @ 1.80GHz".to_string())
+        );
     }
 
     #[test]
     fn test_extract_cpu_model_unknown() {
         let empty_info = "";
-        assert_eq!(extract_cpu_model(empty_info), "Unknown CPU");
+        assert_eq!(extract_cpu_model(empty_info), None);
     }
 
     #[test]

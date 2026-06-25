@@ -14,7 +14,7 @@ pub(crate) struct EnvLock {
 
 impl EnvLock {
     pub(crate) fn acquire(vars: &[&str]) -> Self {
-        let guard = ENV_GUARD.lock().expect("env mutex poisoned");
+        let guard = ENV_GUARD.lock().unwrap_or_else(|e| e.into_inner());
         let saved = vars
             .iter()
             .map(|key| (OsString::from(key), env::var_os(key)))

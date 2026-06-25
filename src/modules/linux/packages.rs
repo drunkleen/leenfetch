@@ -61,8 +61,13 @@ fn is_snapd_running() -> bool {
     Path::new("/run/snapd.socket").exists() || Path::new("/var/run/snapd.socket").exists()
 }
 
+fn pkg_root() -> String {
+    std::env::var("LEENFETCH_PKG_ROOT").unwrap_or_default()
+}
+
 fn count_dpkg_packages() -> Option<u64> {
-    let status = fs::read_to_string("/var/lib/dpkg/status").ok()?;
+    let root = pkg_root();
+    let status = fs::read_to_string(format!("{root}/var/lib/dpkg/status")).ok()?;
     let count = status
         .lines()
         .filter(|line| line.starts_with("Package: "))
@@ -71,7 +76,8 @@ fn count_dpkg_packages() -> Option<u64> {
 }
 
 fn count_pacman_packages() -> Option<u64> {
-    let entries = fs::read_dir("/var/lib/pacman/local").ok()?;
+    let root = pkg_root();
+    let entries = fs::read_dir(format!("{root}/var/lib/pacman/local")).ok()?;
     let count = entries
         .filter_map(|entry| entry.ok())
         .filter(|entry| entry.file_type().map(|ft| ft.is_dir()).unwrap_or(false))
@@ -80,8 +86,9 @@ fn count_pacman_packages() -> Option<u64> {
 }
 
 fn count_rpm_packages() -> Option<u64> {
+    let root = pkg_root();
     // Try /var/lib/rpm first (RPM DB)
-    if let Ok(db_path) = fs::read_dir("/var/lib/rpm") {
+    if let Ok(db_path) = fs::read_dir(format!("{root}/var/lib/rpm")) {
         // Count packages in RPM database
         for entry in db_path.flatten() {
             let name = entry.file_name();
@@ -95,7 +102,7 @@ fn count_rpm_packages() -> Option<u64> {
     }
 
     // Fallback: try to count from /var/cache/Packages for apt-based systems
-    if let Ok(entries) = fs::read_dir("/var/cache/apt") {
+    if let Ok(entries) = fs::read_dir(format!("{root}/var/cache/apt")) {
         let count = entries.filter_map(|e| e.ok()).count() as u64;
         if count > 0 {
             return Some(count);
@@ -106,11 +113,15 @@ fn count_rpm_packages() -> Option<u64> {
 }
 
 fn count_flatpak_packages() -> Option<u64> {
+    let root = pkg_root();
     // Check flatpak installation directories
-    let paths = ["/var/lib/flatpak/app", "/home/.local/share/flatpak/app"];
+    let paths = [
+        format!("{root}/var/lib/flatpak/app"),
+        format!("{root}/home/.local/share/flatpak/app"),
+    ];
 
     for path in &paths {
-        if let Ok(entries) = fs::read_dir(path) {
+        if let Ok(entries) = fs::read_dir(&path) {
             let count = entries
                 .filter_map(|e| e.ok())
                 .filter(|e| e.path().is_dir())
@@ -123,7 +134,7 @@ fn count_flatpak_packages() -> Option<u64> {
 
     // Try system-wide installations
     if let Ok(home) = std::env::var("HOME") {
-        let user_path = format!("{}/.local/share/flatpak/app", home);
+        let user_path = format!("{root}{home}/.local/share/flatpak/app");
         if let Ok(entries) = fs::read_dir(&user_path) {
             let count = entries
                 .filter_map(|e| e.ok())
@@ -139,10 +150,11 @@ fn count_flatpak_packages() -> Option<u64> {
 }
 
 fn count_snap_packages() -> Option<u64> {
+    let root = pkg_root();
     // Read snap list from /var/lib/snapd/state.json or direct snap data
-    let snap_data_path = "/var/lib/snapd/state.json";
+    let snap_data_path = format!("{root}/var/lib/snapd/state.json");
 
-    if let Ok(content) = fs::read_to_string(snap_data_path) {
+    if let Ok(content) = fs::read_to_string(&snap_data_path) {
         // Try to parse JSON and count installed snaps
         // Simplified: count "name" occurrences in the JSON
         let count = content.matches("\"name\":").count() as u64;
@@ -152,7 +164,7 @@ fn count_snap_packages() -> Option<u64> {
     }
 
     // Fallback: count snap directories
-    if let Ok(entries) = fs::read_dir("/snap") {
+    if let Ok(entries) = fs::read_dir(format!("{root}/snap")) {
         let count = entries
             .filter_map(|e| e.ok())
             .filter(|e| e.path().is_dir() && e.file_name() != "snap")
@@ -172,8 +184,8 @@ mod tests {
 
     #[test]
     fn returns_none_when_no_managers_found() {
-        let env_lock = EnvLock::acquire(&["PATH"]);
-        env_lock.set_var("PATH", "/nonexistent");
+        let env_lock = EnvLock::acquire(&["LEENFETCH_PKG_ROOT"]);
+        env_lock.set_var("LEENFETCH_PKG_ROOT", "/nonexistent");
         let result = get_packages(PackageShorthand::Off);
         assert!(result.is_none());
         drop(env_lock);
