@@ -74,6 +74,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           key: ${{ matrix.target }}
+          cleanup: true
 
       - name: Install system dependencies
         if: matrix.deps != ''
@@ -199,7 +200,5 @@ jobs:
               ;;
           esac
 
-      - uses: actions/upload-artifact@v7
-        with:
-          name: ${{ matrix.name }}
-          path: dist/*
+      - name: Clean up build artifacts
+        run: rm -rf target/ dist/
