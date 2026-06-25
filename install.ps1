@@ -5,8 +5,8 @@ param(
 
 $Repo = "drunkleen/leenfetch"
 $AppName = "leenfetch"
-$InstallDir = Join-Path $env:LOCALAPPDATA "Programs\LeenFetch"
-$BinDir = Join-Path $env:LOCALAPPDATA "Programs\LeenFetch"
+$InstallDir = Join-Path $env:LOCALAPPDATA "Programs\leenfetch"
+$BinDir = Join-Path $env:LOCALAPPDATA "Programs\leenfetch"
 
 function Write-Step($Message) {
     Write-Host "==> $Message" -ForegroundColor Cyan

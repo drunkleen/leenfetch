@@ -28,7 +28,7 @@ You can expect an acknowledgement within **48 hours** and a resolution or status
 
 ## Scope
 
-LeenFetch is a read-only system information tool. It does not accept network connections, write to disk (except config files), or run with elevated privileges. That said, the following are in scope:
+**leenfetch** is a read-only system information tool. It does not accept network connections, write to disk (except config files), or run with elevated privileges. That said, the following are in scope:
 
 - Command injection via crafted config values or environment variables
 - Path traversal in config or ASCII file loading

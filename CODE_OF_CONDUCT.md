@@ -2,7 +2,7 @@
 
 ## Our Pledge
 
-We want LeenFetch to be a welcoming project for everyone. As contributors and maintainers, we pledge to make participation a harassment-free experience regardless of age, background, experience level, nationality, or identity.
+We want **leenfetch** to be a welcoming project for everyone. As contributors and maintainers, we pledge to make participation a harassment-free experience regardless of age, background, experience level, nationality, or identity.
 
 ## Our Standards
 

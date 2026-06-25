@@ -1,4 +1,4 @@
-# 🧠 LeenFetch
+# 🧠 **leenfetch**
 
 [![Crates.io](https://img.shields.io/crates/v/leenfetch)](https://crates.io/crates/leenfetch)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -29,7 +29,7 @@ iwr https://raw.githubusercontent.com/drunkleen/leenfetch/master/install.ps1 | i
 curl -sSfL https://raw.githubusercontent.com/drunkleen/leenfetch/master/install.sh | sh -s -- --update
 
 # Windows
-iwr https://raw.githubusercontent.com/drunkleen/leenfetch/master/install.ps1 | iex; Install-LeenFetch -Update
+iwr https://raw.githubusercontent.com/drunkleen/leenfetch/master/install.ps1 | iex; Install-leenfetch -Update
 ```
 
 > See the [wiki](https://github.com/drunkleen/leenfetch/wiki) for manual installation on Arch/Debian/RPM/Windows/crates.io and build from source.

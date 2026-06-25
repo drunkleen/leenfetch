@@ -14,7 +14,7 @@ BuildRequires:  libXrandr-devel
 
 
 %description
-Leenfetch is a fast and modern Neofetch alternative written in Rust,
+leenfetch is a fast and modern Neofetch alternative written in Rust,
 displaying minimal yet useful system information, fully customizable.
 
 %prep

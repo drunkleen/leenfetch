@@ -32,7 +32,7 @@ assignees: ""
 
 | Field        | Value |
 |--------------|-------|
-| LeenFetch version | `leenfetch --version` |
+| leenfetch version | `leenfetch --version` |
 | OS / Distro  |       |
 | Architecture | x86_64 / aarch64 / other |
 | Shell        |       |

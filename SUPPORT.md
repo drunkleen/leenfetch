@@ -1,6 +1,6 @@
 # Support
 
-LeenFetch is a community-driven project. Here's how to get help or support the project.
+**leenfetch** is a community-driven project. Here's how to get help or support the project.
 
 ## Community Support
 
@@ -9,7 +9,7 @@ LeenFetch is a community-driven project. Here's how to get help or support the p
 
 ## Financial Support
 
-If you find LeenFetch valuable and want to support its development:
+If you find **leenfetch** valuable and want to support its development:
 
 - **Patreon** — [patreon.com/drunkleen](https://patreon.com/drunkleen)
 - **Buy Me a Coffee** — [buymeacoffee.com/drunkleen](https://buymeacoffee.com/drunkleen)

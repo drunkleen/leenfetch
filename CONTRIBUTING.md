@@ -1,6 +1,6 @@
-# Contributing to LeenFetch
+# Contributing to **leenfetch**
 
-First off — thanks for taking the time to contribute! LeenFetch is a community-driven project and every bit of help counts, whether it's a bug report, a new distro logo, a performance tweak, or a full feature.
+First off — thanks for taking the time to contribute! **leenfetch** is a community-driven project and every bit of help counts, whether it's a bug report, a new distro logo, a performance tweak, or a full feature.
 
 ---
 
@@ -9,7 +9,7 @@ First off — thanks for taking the time to contribute! LeenFetch is a community
 ### Report Bugs
 Found something broken? Open an [issue](https://github.com/drunkleen/leenfetch/issues) and include:
 - Your OS and distro (e.g. `Arch Linux`, `Windows 11`)
-- LeenFetch version (`leenfetch --version`)
+- **leenfetch** version (`leenfetch --version`)
 - Steps to reproduce
 - What you expected vs what happened
 
@@ -17,7 +17,7 @@ Found something broken? Open an [issue](https://github.com/drunkleen/leenfetch/i
 Have an idea? Start a [discussion](https://github.com/drunkleen/leenfetch/discussions) or open a feature request issue. Describe the use case — not just the solution.
 
 ### Add a Distro ASCII Art
-LeenFetch supports built-in ASCII art for many distros. To add yours:
+**leenfetch** supports built-in ASCII art for many distros. To add yours:
 1. Find `src/modules/ascii.rs` and add a `const YOUR_DISTRO: &str = r#"..."#;` entry at the bottom
 2. Add a match arm in `get_builtin_ascii_art()` — e.g. `("yourdistro", _) => YOUR_DISTRO`
 3. Optionally add colors in `src/modules/colors.rs` under `get_builtin_distro_colors()`
@@ -26,7 +26,7 @@ LeenFetch supports built-in ASCII art for many distros. To add yours:
 Check the [open issues](https://github.com/drunkleen/leenfetch/issues) — anything tagged `good first issue` or `help wanted` is a great starting point. Performance improvements and correctness fixes are always welcome.
 
 ### Improve Docs
-Typos, unclear explanations, missing examples — all fair game. Docs live in `README.md`, `manual.md`, and `leenfetch.1.md`.
+Typos, unclear explanations, missing examples — all fair game. Docs live in [`README.md`](./README.md) file, [`leenfetch.1.md`](./leenfetch.1.md) file and the [Wiki Page](https://github.com/drunkleen/leenfetch/wiki).
 
 ---
 

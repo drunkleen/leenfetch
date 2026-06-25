@@ -287,7 +287,7 @@ jobs:
           sed -n "/^## \[${VERSION_NUM}\]/,/^## \[/p" CHANGELOG.md | head -n -2 > dist/CHANGELOG_SECTION.md
 
           {
-            echo "# 🐧 LeenFetch ${VERSION}"
+            echo "# 🐧 **leenfetch** ${VERSION}"
             echo ""
             echo "## Changelog"
             echo ""
