@@ -5,6 +5,25 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Version
 
 ---
 
+## [1.3.1] - 2026-06-25
+
+### Added
+- Added more Neofetch-compatible ASCII logos.
+- Added fallback distro detection using `lsb_release` and `uname`.
+- Added `ID_LIKE` detection for parent distro logo fallback.
+
+### Fixed
+- Fixed the `--distro_shorthand` option name in an error message.
+- Fixed Exherbo logo matching.
+- Fixed Artix logo matching by separating normal and small variants.
+
+### Changed
+- Updated Linux install and update instructions to use `sudo`.
+- Updated installer behavior for system-wide installation.
+- Updated README badges.
+
+---
+
 ## [1.3.0] — 2026-06-24
 
 ### Added
