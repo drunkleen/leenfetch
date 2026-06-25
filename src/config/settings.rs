@@ -52,8 +52,6 @@ pub struct Flags {
     #[serde(default)]
     pub package_managers: String, // Package manager display (see PackageShorthand enum)
     #[serde(default)]
-    pub refresh_rate: bool, // Show display refresh rate (true/false)
-    #[serde(default)]
     pub shell_path: bool, // Show full shell path (true/false)
     #[serde(default)]
     pub shell_version: bool, // Show shell version (true/false)
@@ -152,7 +150,6 @@ impl Default for Flags {
             memory_percent: true,
             memory_unit: "mib".into(),
             package_managers: "tiny".into(),
-            refresh_rate: true,
             shell_path: true,
             shell_version: true,
             uptime_shorthand: "full".into(),

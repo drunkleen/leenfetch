@@ -85,10 +85,6 @@ pub const DEFAULT_CONFIG: &str = r#"// ===============================
         // Options: "off", "on", "tiny"
         "package_managers": "tiny",
 
-        // Show the display's refresh rate.
-        // options: true or false
-        "refresh_rate": true,
-
         // Show the full path to your shell.
         // options: true or false
         "shell_path": false,

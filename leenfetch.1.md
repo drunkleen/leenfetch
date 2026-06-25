@@ -2,7 +2,7 @@
 title: leenfetch
 section: 1
 header: Manual
-footer: Leenfetch 1.2.1
+footer: Leenfetch 1.2.2
 ---
 
 # leenfetch — User Commands
@@ -69,7 +69,7 @@ leenfetch can also accept **piped input** to render as ASCII art. This allows us
   Render only the listed modules (comma-separated).
 - `--hide <LIST>`  
   Hide specific modules (comma-separated).
-- Boolean toggles use a single flag with an explicit value, for example `--cpu-speed true`, `--shell-path false`, `--memory-percent true`, or `--refresh-rate false`.
+- Boolean toggles use a single flag with an explicit value, for example `--cpu-speed true`, `--shell-path false`, or `--memory-percent true`.
 
 ## REMOTE FETCHING OVER SSH
 
@@ -121,7 +121,7 @@ Edit the file to adjust appearance, enabled modules, spacing, or output order.
 - `~/.config/leenfetch/config.jsonc`
 
 ## WIKI
-Please report bugs or feature requests at:  
+Please refer to the project wiki at:  
 https://github.com/drunkleen/leenfetch/wiki
 
 ## BUGS

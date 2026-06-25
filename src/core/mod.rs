@@ -2,11 +2,7 @@ mod data;
 
 pub use data::Data;
 
-use std::{
-    collections::HashMap,
-    str::FromStr,
-    sync::Arc,
-};
+use std::{collections::HashMap, str::FromStr, sync::Arc};
 
 use once_cell::sync::OnceCell;
 use rayon::prelude::*;
@@ -467,7 +463,7 @@ impl Core {
                 );
             }
             ModuleKind::Resolution => {
-                data.resolution = get_resolution(flags.refresh_rate);
+                data.resolution = get_resolution();
             }
             ModuleKind::Theme => {
                 let de = context.get_de();

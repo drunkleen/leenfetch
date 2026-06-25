@@ -121,8 +121,6 @@ pub struct Args {
     pub shell_path: Option<bool>,
     #[arg(long = "shell-version")]
     pub shell_version: Option<bool>,
-    #[arg(long = "refresh-rate")]
-    pub refresh_rate: Option<bool>,
     #[arg(long = "de-version")]
     pub de_version: Option<bool>,
 
@@ -208,7 +206,6 @@ impl Args {
         apply_bool_override(&mut overrides, "cpu_brand", self.cpu_brand);
         apply_bool_override(&mut overrides, "shell_path", self.shell_path);
         apply_bool_override(&mut overrides, "shell_version", self.shell_version);
-        apply_bool_override(&mut overrides, "refresh_rate", self.refresh_rate);
         apply_bool_override(&mut overrides, "de_version", self.de_version);
 
         overrides.ssh_hosts = self.ssh_hosts.clone();
@@ -267,7 +264,6 @@ OPTIONS:
   --cpu-brand       <true|false>
   --shell-path      <true|false>
   --shell-version   <true|false>
-  --refresh-rate    <true|false>
   --de-version      <true|false>
 
 DESCRIPTION:
@@ -373,16 +369,13 @@ pub fn list_options() {
   memory_percent      = true | false
       Show memory as percent.
   
-  memory_unit         = "mib" | "gib" | "kib"
+  memory_unit	 = "mib" | "gib" | "kib"
       Memory unit.
   
-  package_managers    = "off" | "on" | "tiny"
+  package_managers	 = "off" | "on" | "tiny"
       Package info: none, full, or compact.
   
-  refresh_rate        = true | false
-      Show display refresh rate.
-  
-  shell_path          = true | false
+  shell_path	 = true | false
       Show full shell path.
   
   shell_version       = true | false
