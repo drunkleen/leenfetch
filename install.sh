@@ -2,12 +2,12 @@
 set -eu
 
 REPO="drunkleen/leenfetch"
-BIN_DIR="${HOME}/.local/bin"
+BIN_DIR="/usr/local/bin"
 CONFIG_DIR="${HOME}/.config/leenfetch"
 
 usage() {
     cat <<'EOF'
-Usage: curl -sSfL https://github.com/drunkleen/leenfetch/releases/latest/download/install.sh | sh [-- [--update|--force]]
+Usage: curl -sSfL https://github.com/drunkleen/leenfetch/releases/latest/download/install.sh | sudo sh [-- [--update|--force]]
 
 Commands:
   (none)    Install leenfetch (aborts if already installed)
