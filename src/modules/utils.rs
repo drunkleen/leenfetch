@@ -144,6 +144,7 @@ fn resolve_ascii_art(distro: &str) -> &'static str {
         return art;
     }
 
+    #[cfg(target_os = "linux")]
     // 2. No match — try ID_LIKE parent distro
     if let Some(parent) = crate::modules::linux::system::distro::get_id_like() {
         if let Some(art) = get_builtin_ascii_art(&parent) {
