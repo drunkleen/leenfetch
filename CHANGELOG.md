@@ -5,7 +5,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Version
 
 ---
 
-## [1.3.1] - 2026-06-25
+## [1.3.1] - 2026-06-27
 
 ### Added
 - Added more Neofetch-compatible ASCII logos.
@@ -16,6 +16,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Version
 - Fixed the `--distro_shorthand` option name in an error message.
 - Fixed Exherbo logo matching.
 - Fixed Artix logo matching by separating normal and small variants.
+- Fixed Windows builds from referencing Linux-only distro detection.
 
 ### Changed
 - Updated Linux install and update instructions to use `sudo`.
