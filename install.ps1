@@ -72,7 +72,7 @@ if ($CurrentVer) {
 Write-Step "Version: $LatestVer"
 Write-Step "Architecture: $Arch"
 
-$FileName = "leenfetch-$($LatestVer.Substring(1))-windows-$Arch.zip"
+$FileName = "leenfetch-v$($LatestVer.Substring(1))-windows-$Arch.zip"
 $DownloadUrl = "https://github.com/$Repo/releases/download/$LatestVer/$FileName"
 $TempZip = Join-Path $env:TEMP $FileName
 
