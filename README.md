@@ -45,6 +45,7 @@ iwr https://raw.githubusercontent.com/drunkleen/leenfetch/master/install.ps1 | i
 - Detects packages, shell, GPU, DE/WM, and more
 - Custom ASCII art support
 - Piped ASCII input (`fortune | cowsay | leenfetch`)
+- First-run config chooser with a Neofetch-style preset option
 - Remote system info over SSH using the remote machine's config/layout
 - Machine-readable JSON output
 

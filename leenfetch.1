@@ -67,7 +67,15 @@ List all configuration keys and accepted values.
 .PD 0
 .P
 .PD
-Create the default configuration file if it does not exist.
+Open the config chooser when no config exists, then write the selected
+preset.
+.IP \[bu] 2
+\f[V]--choose-config\f[R]
+.PD 0
+.P
+.PD
+Open the config chooser and overwrite the existing config after
+confirmation.
 .IP \[bu] 2
 \f[V]-r\f[R], \f[V]--reinit\f[R]
 .PD 0
@@ -264,8 +272,8 @@ string; a short connect timeout is applied.
 Per-host ASCII art, colors, module order, and toggles come from the remote
 machine's effective config.
 .IP \[bu] 2
-If the remote config file is missing or invalid, built-in defaults are
-used on the remote host.
+If the remote config file is missing, the remote host falls back to the
+Neofetch-style preset.
 .IP \[bu] 2
 JSON mode prints one JSON object per host (separated by blank lines).
 .SS CONFIGURATION
@@ -307,7 +315,14 @@ Show system info with Debian ASCII art, regardless of detected distro.
 .PD 0
 .P
 .PD
-Create the default config file if missing.
+Open the config chooser and create the selected preset if missing.
+.IP \[bu] 2
+\f[V]leenfetch --choose-config\f[R]
+.PD 0
+.P
+.PD
+Open the config chooser and overwrite the existing config after
+confirmation.
 .IP \[bu] 2
 \f[V]leenfetch --reinit\f[R]
 .PD 0

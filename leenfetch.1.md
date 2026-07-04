@@ -30,7 +30,9 @@ leenfetch can also accept **piped input** to render as ASCII art. This allows us
 - `-l`, `--list-options`  
   List all configuration keys and accepted values.
 - `-i`, `--init`  
-  Create the default configuration file if it does not exist.
+  Open the config chooser when no config exists, then write the selected preset.
+- `--choose-config`  
+  Open the config chooser and overwrite the existing config after confirmation.
 - `-r`, `--reinit`  
   Delete the configuration file and regenerate it with bundled defaults.
 - `--config <PATH>`  
@@ -94,7 +96,7 @@ leenfetch can also accept **piped input** to render as ASCII art. This allows us
 - Requirements: the remote host must have `leenfetch` in `PATH`.
 - Uses your SSH config/agent, honoring usernames/ports in the target string; a short connect timeout is applied.
 - Per-host ASCII art, colors, module order, and toggles come from the remote machine's effective config.
-- If the remote config file is missing or invalid, built-in defaults are used on the remote host.
+- If the remote config file is missing, the remote host falls back to the Neofetch-style preset.
 - JSON mode prints one JSON object per host (separated by blank lines).
 
 
@@ -116,7 +118,9 @@ Edit the file to adjust appearance, enabled modules, spacing, or output order.
 - `leenfetch --ascii_distro debian`  
   Show system info with Debian ASCII art, regardless of detected distro.
 - `leenfetch --init`  
-  Create the default config file if missing.
+  Open the config chooser and create the selected preset if missing.
+- `leenfetch --choose-config`  
+  Open the config chooser and overwrite the existing config after confirmation.
 - `leenfetch --reinit`  
   Delete and regenerate the config file.
 - `leenfetch --ssh user@server`  
