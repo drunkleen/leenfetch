@@ -1,3 +1,5 @@
+#![allow(clippy::collapsible_if)]
+
 use std::fs;
 use std::path::Path;
 

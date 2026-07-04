@@ -1,10 +1,10 @@
 use std::ptr::null_mut;
 
-use windows_sys::core::GUID;
 use windows_sys::Win32::Devices::DeviceAndDriverInstallation::{
-    SetupDiDestroyDeviceInfoList, SetupDiEnumDeviceInfo, SetupDiGetClassDevsW,
-    SetupDiGetDeviceRegistryPropertyW, DIGCF_PRESENT, SPDRP_DEVICEDESC, SP_DEVINFO_DATA,
+    DIGCF_PRESENT, SP_DEVINFO_DATA, SPDRP_DEVICEDESC, SetupDiDestroyDeviceInfoList,
+    SetupDiEnumDeviceInfo, SetupDiGetClassDevsW, SetupDiGetDeviceRegistryPropertyW,
 };
+use windows_sys::core::GUID;
 
 pub fn get_gpus() -> Vec<String> {
     // Enumerate display adapters via SetupAPI (fast, no WMI/PowerShell)

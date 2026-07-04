@@ -192,10 +192,8 @@ fn run_remote(overrides: &CliOverrides, pipe_input: &str) -> Result<()> {
             let payload = fetch_remote_payload(host)?;
             let mut data = Data::from(&payload.system_info);
             if let Some(parsed) = parse_ssh_target_parts(host) {
-                if let Some(ssh_user) = parsed.user {
-                    if !ssh_user.is_empty() {
-                        data.username = Some(ssh_user.to_string());
-                    }
+                if let Some(ssh_user) = parsed.user && !ssh_user.is_empty() {
+                    data.username = Some(ssh_user.to_string());
                 }
                 if !parsed.host.is_empty() {
                     data.hostname = Some(parsed.host.to_string());
@@ -233,10 +231,8 @@ fn run_remote(overrides: &CliOverrides, pipe_input: &str) -> Result<()> {
         };
 
         if let Some(parsed) = parse_ssh_target_parts(host) {
-            if let Some(ssh_user) = parsed.user {
-                if !ssh_user.is_empty() {
-                    data.username = Some(ssh_user.to_string());
-                }
+            if let Some(ssh_user) = parsed.user && !ssh_user.is_empty() {
+                data.username = Some(ssh_user.to_string());
             }
             if !parsed.host.is_empty() {
                 data.hostname = Some(parsed.host.to_string());
@@ -285,7 +281,7 @@ fn fetch_remote_payload_with_args(target: &str, remote_args: &[&str]) -> Result<
 
 fn fetch_remote_output(target: &str, remote_args: &[&str]) -> Result<String> {
     let ssh_bin = detect_ssh_binary();
-    let parsed = parse_ssh_target_parts(target).unwrap_or_else(|| ParsedSshTarget {
+    let parsed = parse_ssh_target_parts(target).unwrap_or(ParsedSshTarget {
         user: None,
         host: target,
         port: None,
@@ -362,12 +358,12 @@ fn parse_ssh_target_parts(target: &str) -> Option<ParsedSshTarget<'_>> {
     };
 
     // Handle [ipv6]:port
-    if let Some(stripped) = host_port.strip_prefix('[') {
-        if let Some(end) = stripped.find(']') {
-            let host = &stripped[..end];
-            let port = stripped[end + 1..].strip_prefix(':');
-            return Some(ParsedSshTarget { user, host, port });
-        }
+    if let Some(stripped) = host_port.strip_prefix('[')
+        && let Some(end) = stripped.find(']')
+    {
+        let host = &stripped[..end];
+        let port = stripped[end + 1..].strip_prefix(':');
+        return Some(ParsedSshTarget { user, host, port });
     }
 
     // Handle host:port (avoid false split on bare IPv6 without brackets)
@@ -702,7 +698,7 @@ fn layout_item_key(item: &config::settings::LayoutItem) -> Option<String> {
             .eq_ignore_ascii_case("break")
             .then(|| "break".to_string()),
         config::settings::LayoutItem::Module(module) => {
-            module.field_name().map(|name| normalize_module_name(name))
+            module.field_name().map(normalize_module_name)
         }
     }
 }

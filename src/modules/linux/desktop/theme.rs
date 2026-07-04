@@ -1,9 +1,9 @@
+#![allow(clippy::collapsible_if)]
+
 use std::{env, fs, process::Command};
 
 pub fn get_theme(de: Option<&str>) -> Option<String> {
-    if env::var_os("DISPLAY").is_none() {
-        return None;
-    }
+    env::var_os("DISPLAY")?;
 
     let de = de.unwrap_or("").to_lowercase();
     let home = env::var("HOME").unwrap_or_default();
@@ -22,11 +22,11 @@ pub fn get_theme(de: Option<&str>) -> Option<String> {
         ];
 
         for path in kde_paths {
-            if let Ok(content) = fs::read_to_string(&path) {
-                if let Some(line) = content.lines().find(|l| l.starts_with("Name=")) {
-                    kde = Some(line.trim_start_matches("Name=").trim().to_string());
-                    break;
-                }
+            if let Ok(content) = fs::read_to_string(&path)
+                && let Some(line) = content.lines().find(|l| l.starts_with("Name="))
+            {
+                kde = Some(line.trim_start_matches("Name=").trim().to_string());
+                break;
             }
         }
     }
@@ -44,21 +44,19 @@ pub fn get_theme(de: Option<&str>) -> Option<String> {
     }
 
     // Fallback to gsettings if config file not found
-    if gtk3.is_none() {
-        if let Ok(output) = Command::new("gsettings")
+    if gtk3.is_none()
+        && let Ok(output) = Command::new("gsettings")
             .args(["get", "org.gnome.desktop.interface", "gtk-theme"])
             .output()
-        {
-            if output.status.success() {
-                let val = String::from_utf8_lossy(&output.stdout)
-                    .trim()
-                    .trim_matches('\'')
-                    .to_string();
-                if !val.is_empty() {
-                    gtk3 = Some(val.clone());
-                    gtk2 = Some(val.clone());
-                }
-            }
+        && output.status.success()
+    {
+        let val = String::from_utf8_lossy(&output.stdout)
+            .trim()
+            .trim_matches('\'')
+            .to_string();
+        if !val.is_empty() {
+            gtk3 = Some(val.clone());
+            gtk2 = Some(val.clone());
         }
     }
 

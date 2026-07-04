@@ -1,3 +1,10 @@
+#![allow(
+    clippy::collapsible_if,
+    clippy::explicit_auto_deref,
+    clippy::unused_enumerate_index,
+    clippy::useless_format
+)]
+
 use once_cell::sync::Lazy;
 use std::collections::HashMap;
 use std::fs;

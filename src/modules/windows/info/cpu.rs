@@ -1,7 +1,7 @@
 use std::ptr::null_mut;
 use windows_sys::Win32::Foundation::ERROR_SUCCESS;
 use windows_sys::Win32::System::Registry::{
-    RegGetValueW, HKEY, HKEY_LOCAL_MACHINE, RRF_RT_REG_DWORD, RRF_RT_REG_SZ,
+    HKEY, HKEY_LOCAL_MACHINE, RRF_RT_REG_DWORD, RRF_RT_REG_SZ, RegGetValueW,
 };
 use windows_sys::Win32::System::SystemInformation::{GetSystemInfo, SYSTEM_INFO};
 
@@ -68,11 +68,7 @@ fn get_core_count() -> u32 {
         let mut info: SYSTEM_INFO = std::mem::zeroed();
         GetSystemInfo(&mut info as *mut _);
         let n = info.dwNumberOfProcessors;
-        if n == 0 {
-            1
-        } else {
-            n
-        }
+        if n == 0 { 1 } else { n }
     }
 }
 

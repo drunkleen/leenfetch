@@ -1,3 +1,5 @@
+#![allow(clippy::collapsible_if)]
+
 use std::fmt::Write;
 use std::fs;
 use std::time::{SystemTime, UNIX_EPOCH};

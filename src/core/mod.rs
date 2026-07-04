@@ -345,12 +345,11 @@ impl Core {
                     continue;
                 }
 
-                if let Some(field_name) = module.field_name() {
-                    if let Some(kind) = ModuleKind::from_field_name(field_name) {
-                        if seen.insert(kind) {
-                            required.push(kind);
-                        }
-                    }
+                if let Some(field_name) = module.field_name()
+                    && let Some(kind) = ModuleKind::from_field_name(field_name)
+                    && seen.insert(kind)
+                {
+                    required.push(kind);
                 }
             }
         }
@@ -573,29 +572,17 @@ impl Core {
     ) -> (String, HashMap<&str, &str>) {
         let custom_ascii_path = {
             let path = self.flags.custom_ascii_path.trim();
-            if path.is_empty() {
-                None
-            } else {
-                Some(path)
-            }
+            if path.is_empty() { None } else { Some(path) }
         };
 
         let ascii_color_value = {
             let value = self.flags.ascii_colors.trim();
-            if value.is_empty() {
-                "distro"
-            } else {
-                value
-            }
+            if value.is_empty() { "distro" } else { value }
         };
 
         let ascii_distro_value = {
             let value = self.flags.ascii_distro.trim();
-            if value.is_empty() {
-                "distro"
-            } else {
-                value
-            }
+            if value.is_empty() { "distro" } else { value }
         };
 
         let resolved_distro = match ascii_distro_value {
@@ -640,5 +627,11 @@ impl Core {
                 output.push_str(format!("${{c1}}{} ${{reset}}{}\n", label, "Unknown").as_str());
             }
         }
+    }
+}
+
+impl Default for Core {
+    fn default() -> Self {
+        Self::new()
     }
 }

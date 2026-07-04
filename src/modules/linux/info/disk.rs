@@ -101,7 +101,9 @@ fn get_disk_info_for_path(
         return None;
     }
 
-    let percent = ((used as f64 / total as f64) * 100.0).round().clamp(0.0, 100.0) as u8;
+    let percent = ((used as f64 / total as f64) * 100.0)
+        .round()
+        .clamp(0.0, 100.0) as u8;
 
     // Format sizes in human-readable form
     let total_h = format_size(total);
@@ -220,4 +222,3 @@ fn format_size(bytes: u64) -> String {
 
 //     results
 // }
-

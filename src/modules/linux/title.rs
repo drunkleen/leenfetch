@@ -1,3 +1,8 @@
+#![allow(
+    clippy::collapsible_if,
+    clippy::manual_strip
+)]
+
 use std::env;
 use std::ffi::CString;
 use std::fs;

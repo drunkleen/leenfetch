@@ -1,3 +1,5 @@
+#![allow(clippy::collapsible_if, clippy::useless_vec)]
+
 use std::{collections::HashMap, fs, path::Path};
 
 use super::{ascii::get_builtin_ascii_art, colors::get_builtin_distro_colors};
@@ -94,7 +96,7 @@ pub fn get_terminal_color(color_blocks: &str) -> String {
 
     for &code in &color_codes {
         normal.push(format!("\x1b[{}m{}\x1b[0m", code, color_blocks)); // normal
-                                                                       // bold.push(format!("\x1b[1;{}m{}\x1b[0m", code, color_blocks)); // bold
+        // bold.push(format!("\x1b[1;{}m{}\x1b[0m", code, color_blocks)); // bold
     }
 
     // vec![normal.join(""), bold.join("")]

@@ -8,7 +8,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use crate::modules::enums::OsAgeShorthand;
 use windows_sys::Win32::Foundation::ERROR_SUCCESS;
 use windows_sys::Win32::System::Registry::{
-    RegGetValueW, HKEY_LOCAL_MACHINE, RRF_RT_REG_DWORD, RRF_RT_REG_QWORD,
+    HKEY_LOCAL_MACHINE, RRF_RT_REG_DWORD, RRF_RT_REG_QWORD, RegGetValueW,
 };
 
 /// Returns the OS "age" (time since Windows installation) formatted per shorthand.
@@ -135,11 +135,7 @@ fn read_windows_dir_creation() -> Option<u64> {
     let created = metadata.created().ok()?;
     let duration = created.duration_since(UNIX_EPOCH).ok()?;
     let secs = duration.as_secs();
-    if secs > 0 {
-        Some(secs)
-    } else {
-        None
-    }
+    if secs > 0 { Some(secs) } else { None }
 }
 
 fn filetime_to_unix_epoch(filetime: u64) -> Option<u64> {

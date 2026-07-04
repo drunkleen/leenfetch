@@ -5,19 +5,15 @@ pub fn get_de(show_version: bool, wm: Option<&str>) -> Option<String> {
     let mut de = detect_de_env().or_else(detect_de_fallback)?;
 
     // Avoid false-positive where WM == DE
-    if let Some(wm_name) = wm {
-        if de.eq_ignore_ascii_case(wm_name) {
-            return None;
-        }
+    if let Some(wm_name) = wm && de.eq_ignore_ascii_case(wm_name) {
+        return None;
     }
 
     normalize_de_name(&mut de);
 
     // Detect version if requested
-    if show_version {
-        if let Some(ver) = get_de_version(&de) {
-            de = format!("{} {}", de, ver);
-        }
+    if show_version && let Some(ver) = get_de_version(&de) {
+        de = format!("{} {}", de, ver);
     }
 
     // Tag if under Wayland

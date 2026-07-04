@@ -1,3 +1,5 @@
+#![allow(clippy::print_literal, clippy::field_reassign_with_default)]
+
 use clap::{ArgAction, Parser, ValueEnum};
 use std::collections::{HashMap, HashSet};
 
@@ -26,16 +28,11 @@ impl CliOverrides {
     }
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, ValueEnum)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, ValueEnum)]
 pub enum OutputFormat {
+    #[default]
     Pretty,
     Json,
-}
-
-impl Default for OutputFormat {
-    fn default() -> Self {
-        OutputFormat::Pretty
-    }
 }
 
 #[derive(Parser, Debug)]

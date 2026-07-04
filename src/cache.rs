@@ -65,11 +65,17 @@ impl<T> Cache<T> {
     }
 
     pub fn invalidate(&self, key: &str) {
-        self.entries.lock().unwrap_or_else(|e| e.into_inner()).remove(key);
+        self.entries
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .remove(key);
     }
 
     pub fn clear(&self) {
-        self.entries.lock().unwrap_or_else(|e| e.into_inner()).clear();
+        self.entries
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .clear();
     }
 }
 

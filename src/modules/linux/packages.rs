@@ -1,3 +1,8 @@
+#![allow(
+    clippy::collapsible_if,
+    clippy::needless_borrows_for_generic_args
+)]
+
 use std::fs;
 use std::path::Path;
 

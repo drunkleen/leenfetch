@@ -1,3 +1,5 @@
+#![allow(clippy::if_same_then_else)]
+
 pub fn get_builtin_distro_colors(distro: &str) -> &'static [u8] {
     let mut small_size = false;
 

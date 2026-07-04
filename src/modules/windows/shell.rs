@@ -5,10 +5,10 @@ use std::process::{Command as Cmd, Stdio};
 use std::time::{Duration, Instant};
 use windows_sys::Win32::Foundation::CloseHandle;
 use windows_sys::Win32::System::Diagnostics::ToolHelp::{
-    CreateToolhelp32Snapshot, Process32FirstW, Process32NextW, PROCESSENTRY32W, TH32CS_SNAPPROCESS,
+    CreateToolhelp32Snapshot, PROCESSENTRY32W, Process32FirstW, Process32NextW, TH32CS_SNAPPROCESS,
 };
 use windows_sys::Win32::System::Threading::{
-    OpenProcess, QueryFullProcessImageNameW, PROCESS_QUERY_LIMITED_INFORMATION,
+    OpenProcess, PROCESS_QUERY_LIMITED_INFORMATION, QueryFullProcessImageNameW,
 };
 
 pub fn get_shell(show_path: bool, show_version: bool) -> Option<String> {
@@ -118,11 +118,7 @@ fn detect_parent_shell() -> Option<String> {
         let path = String::from_utf16_lossy(&buf[..size as usize])
             .trim()
             .to_string();
-        if path.is_empty() {
-            None
-        } else {
-            Some(path)
-        }
+        if path.is_empty() { None } else { Some(path) }
     }
 }
 
