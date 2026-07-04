@@ -89,11 +89,12 @@ leenfetch can also accept **piped input** to render as ASCII art. This allows us
 
 ## REMOTE FETCHING OVER SSH
 
-`--ssh` lets you pull data from remote hosts and render it locally. **leenfetch** connects with your system SSH client, runs `leenfetch --format json` on each target, parses the output, and prints either pretty text (default) or JSON (`--format json`).
+`--ssh` lets you pull data from remote hosts and render it locally. **leenfetch** connects with your system SSH client, runs `leenfetch` on each target, parses the remote payload, and prints either pretty text (default) or JSON (`--format json`).
 
 - Requirements: the remote host must have `leenfetch` in `PATH`.
 - Uses your SSH config/agent, honoring usernames/ports in the target string; a short connect timeout is applied.
-- Per-host ASCII art/colors come from the remote distro while layout comes from your local config.
+- Per-host ASCII art, colors, module order, and toggles come from the remote machine's effective config.
+- If the remote config file is missing or invalid, built-in defaults are used on the remote host.
 - JSON mode prints one JSON object per host (separated by blank lines).
 
 
@@ -121,7 +122,7 @@ Edit the file to adjust appearance, enabled modules, spacing, or output order.
 - `leenfetch --ssh user@server`  
 - `leenfetch --ssh user@server:port`  
 - `leenfetch --ssh user@server:port --ssh user@server:port`  
-  Fetch system info from a remote host over SSH and render locally.
+  Fetch system info from a remote host over SSH and render locally using the remote machine's effective config.
 - `echo "Rustacean" | leenfetch`  
   Display system info with a piped ASCII logo generated from the input text.
 - `fortune | cowsay | leenfetch`  

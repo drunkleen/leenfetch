@@ -216,8 +216,9 @@ Choose human-readable pretty output (default) or machine-readable JSON.
 .P
 .PD
 Fetch system info from one or more hosts via SSH, then render locally.
-Each host runs \f[V]leenfetch --format json\f[R] remotely; the output is
-printed locally using the requested format.
+Each host runs \f[V]leenfetch\f[R] remotely; the remote payload carries
+the effective config and system info so the local machine can render the
+remote layout, colors, and logo correctly.
 .IP \[bu] 2
 \f[V]--print_config\f[R]
 .PD 0
@@ -251,8 +252,8 @@ Boolean toggles use a single flag with an explicit value, for example
 \f[V]--ssh\f[R] lets you pull data from remote hosts and render it
 locally.
 \f[B]leenfetch\f[R] connects with your system SSH client, runs
-\f[V]leenfetch --format json\f[R] on each target, parses the output, and
-prints either pretty text (default) or JSON (\f[V]--format json\f[R]).
+\f[V]leenfetch\f[R] on each target, parses the remote payload, and prints
+either pretty text (default) or JSON (\f[V]--format json\f[R]).
 .IP \[bu] 2
 Requirements: the remote host must have \f[V]leenfetch\f[R] in
 \f[V]PATH\f[R].
@@ -260,8 +261,11 @@ Requirements: the remote host must have \f[V]leenfetch\f[R] in
 Uses your SSH config/agent, honoring usernames/ports in the target
 string; a short connect timeout is applied.
 .IP \[bu] 2
-Per-host ASCII art/colors come from the remote distro while layout comes
-from your local config.
+Per-host ASCII art, colors, module order, and toggles come from the remote
+machine's effective config.
+.IP \[bu] 2
+If the remote config file is missing or invalid, built-in defaults are
+used on the remote host.
 .IP \[bu] 2
 JSON mode prints one JSON object per host (separated by blank lines).
 .SS CONFIGURATION
