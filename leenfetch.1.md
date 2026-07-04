@@ -16,7 +16,7 @@ leenfetch [OPTIONS]
 ```
 
 ## DESCRIPTION
-**leenfetch** is a modern, fast, and highly configurable system information tool written in Rust. It displays system information alongside a distribution logo or custom ASCII art, similar to Neofetch, and is designed for both terminal enthusiasts and new users. It can also fetch data from remote hosts over SSH and render it locally in pretty or JSON form.
+**leenfetch** is a modern, fast, and highly configurable system information tool written in Rust. It displays system information alongside a distribution logo, custom ASCII art, or a local image logo, similar to Neofetch, and is designed for both terminal enthusiasts and new users. It can also fetch data from remote hosts over SSH and render it locally in pretty or JSON form.
 
 Configuration lives in a single JSON-with-comments file (`config.jsonc`), with inline explanations for every option.
 
@@ -43,8 +43,9 @@ leenfetch can also accept **piped input** to render as ASCII art. This allows us
   Override the ASCII art distribution for this run (e.g., `arch`, `ubuntu`, `debian`).
 - `--ascii_colors <COLORS>`  
   Override the ASCII palette (comma-separated indices such as `1,2,3,4,5,6,7` or `distro`).
-- `--custom_ascii_path <PATH>`  
-  Use a custom ASCII art file for this run.
+- `--custom_logo_path <PATH>`  
+  Use a custom ASCII art file or image path for this run.
+  Local terminals with kitty-style image support show the image inline; others fall back to ASCII with a warning.
 - `--color_blocks <GLYPH>`  
   Change the glyph used for the color swatch (default: `●`).
 - `--battery_display <MODE>`  
@@ -108,7 +109,7 @@ $XDG_CONFIG_HOME/leenfetch/
 ```
 
 The configuration file is:
-- **config.jsonc**: Includes `flags`, an ordered `modules` (`layout`) array, and an optional `logo` override. Use strings like `"break"` for spacers or objects with `type`/`key` to control the output. JSONC keeps comments intact so every option is documented in place.
+- **config.jsonc**: Includes `flags`, an ordered `modules` (`layout`) array, and an optional `custom_logo_path` override. Use strings like `"break"` for spacers or objects with `type`/`key` to control the output. JSONC keeps comments intact so every option is documented in place.
 
 Edit the file to adjust appearance, enabled modules, spacing, or output order.
 

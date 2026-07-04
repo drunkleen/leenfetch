@@ -6,7 +6,9 @@ use leenfetch_core::{
     gather_system_info,
     modules::{
         helper::{Args, CliOverrides, OutputFormat, list_options, print_custom_help},
-        utils::colorize_text,
+        utils::{
+            colorize_text, is_image_path, render_inline_image, terminal_supports_inline_images,
+        },
     },
 };
 use once_cell::sync::Lazy;
@@ -160,27 +162,67 @@ fn run() -> Result<()> {
 
     let data = Data::from(&system_info);
     let info_layout = core.render_layout(&data);
-    let (ascii, colors) = core.get_ascii_and_colors();
+    let custom_logo_path = config.flags.custom_logo_path.trim();
+    let custom_is_image = is_image_path(custom_logo_path);
 
-    if !pipe_input.is_empty() {
-        print_ascii_and_info(
-            &pipe_input,
-            &colorize_text(info_layout, &colors)
-                .lines()
-                .map(|l| l.to_string())
-                .collect::<Vec<_>>(),
-        );
+    if custom_is_image {
+        if terminal_supports_inline_images() {
+            if let Err(err) = render_inline_image(custom_logo_path, 40) {
+                println!("⚠️ {err}; falling back to ASCII.");
+                render_ascii_output(&config, "", &info_layout)?;
+            } else {
+                let (_, colors) = core.get_ascii_and_colors();
+                print_info_side_by_side(&info_layout, &colors, 44);
+            }
+        } else {
+            println!(
+                "⚠️ Inline image rendering is not supported in this terminal; falling back to ASCII."
+            );
+            render_ascii_output(&config, "", &info_layout)?;
+        }
     } else {
-        print_ascii_and_info(
-            &colorize_text(ascii, &colors),
-            &colorize_text(info_layout, &colors)
-                .lines()
-                .map(|l| l.to_string())
-                .collect::<Vec<_>>(),
-        );
+        render_ascii_output(&config, &pipe_input, &info_layout)?;
     }
 
     Ok(())
+}
+
+fn render_ascii_output(
+    config: &config::settings::Config,
+    pipe_input: &str,
+    info_layout: &str,
+) -> Result<()> {
+    let mut render_config = config.clone();
+    if is_image_path(render_config.flags.custom_logo_path.trim()) {
+        render_config.flags.custom_logo_path.clear();
+    }
+
+    let render_core = Core::new_with(render_config.flags.clone(), render_config.layout.clone());
+    let (ascii, colors) = render_core.get_ascii_and_colors();
+    let colored_info = colorize_text(info_layout.to_string(), &colors)
+        .lines()
+        .map(|l| l.to_string())
+        .collect::<Vec<_>>();
+
+    if !pipe_input.is_empty() {
+        print_ascii_and_info(pipe_input, &colored_info);
+    } else {
+        print_ascii_and_info(&colorize_text(ascii, &colors), &colored_info);
+    }
+
+    Ok(())
+}
+
+fn print_info_side_by_side(
+    info_layout: &str,
+    colors: &std::collections::HashMap<&str, &str>,
+    column: usize,
+) {
+    let colored_info = colorize_text(info_layout.to_string(), colors);
+    for line in colored_info.lines() {
+        print!("\x1b[{}G", column);
+        println!("{line}");
+    }
 }
 
 fn run_ssh_payload(args: &Args) -> Result<()> {
@@ -201,7 +243,7 @@ fn load_remote_effective_config(path: Option<&str>) -> config::settings::Config 
     if config::config_exists() {
         config::load_effective_config()
     } else {
-        config::load_preset_config(config::ConfigPreset::Neofetch)
+        config::load_preset_config(config::ConfigPreset::ClassicNeofetch)
     }
 }
 
@@ -222,14 +264,15 @@ fn choose_config_preset() -> Result<Option<config::ConfigPreset>> {
 
     loop {
         println!("Choose a config preset:");
-        println!(
-            "  1) {}",
-            config::preset_label(config::ConfigPreset::Default)
-        );
-        println!(
-            "  2) {}",
-            config::preset_label(config::ConfigPreset::Neofetch)
-        );
+        for (index, preset) in [
+            config::ConfigPreset::Default,
+            config::ConfigPreset::ClassicNeofetch,
+        ]
+        .iter()
+        .enumerate()
+        {
+            println!("  {}) {}", index + 1, config::preset_label(*preset));
+        }
         println!("  q) Quit without writing");
         print!("Selection [1-2]: ");
         io::stdout().flush().context("Failed to flush prompt")?;
@@ -246,7 +289,7 @@ fn choose_config_preset() -> Result<Option<config::ConfigPreset>> {
 
         let preset = match trimmed {
             "1" => config::ConfigPreset::Default,
-            "2" => config::ConfigPreset::Neofetch,
+            "2" => config::ConfigPreset::ClassicNeofetch,
             _ => {
                 println!("Invalid selection: {trimmed}");
                 println!();
@@ -370,7 +413,7 @@ fn fetch_remote_payload(target: &str) -> Result<RemoteSshPayload> {
         Ok(payload) => Ok(payload),
         Err(primary_err) => match fetch_remote_system_info_legacy(target) {
             Ok(info) => Ok(RemoteSshPayload::new(
-                config::load_preset_config(config::ConfigPreset::Neofetch),
+                config::load_preset_config(config::ConfigPreset::ClassicNeofetch),
                 info,
             )),
             Err(_) => Err(primary_err),
@@ -394,7 +437,7 @@ fn fetch_remote_payload_with_args(target: &str, remote_args: &[&str]) -> Result<
     let info: SystemInfo = serde_json::from_str(&stdout)
         .with_context(|| format!("Failed to parse JSON from {target}: {}", stdout.trim()))?;
     Ok(RemoteSshPayload::new(
-        config::load_preset_config(config::ConfigPreset::Neofetch),
+        config::load_preset_config(config::ConfigPreset::ClassicNeofetch),
         info,
     ))
 }
@@ -582,8 +625,8 @@ fn apply_flag_overrides(
         flags.ascii_colors = value.clone();
     }
 
-    if let Some(value) = overrides.flags.get("custom_ascii_path") {
-        flags.custom_ascii_path = value.clone();
+    if let Some(value) = overrides.flags.get("custom_logo_path") {
+        flags.custom_logo_path = value.clone();
     }
 
     if let Some(value) = overrides.flags.get("color_blocks") {

@@ -43,7 +43,7 @@ iwr https://raw.githubusercontent.com/drunkleen/leenfetch/master/install.ps1 | i
 - Customizable output layout with colorized terminal output
 - Modular — enable or disable components via config
 - Detects packages, shell, GPU, DE/WM, and more
-- Custom ASCII art support
+- Custom ASCII art or image support via `custom_logo_path`
 - Piped ASCII input (`fortune | cowsay | leenfetch`)
 - First-run config chooser with a Neofetch-style preset option
 - Remote system info over SSH using the remote machine's config/layout

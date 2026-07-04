@@ -79,8 +79,9 @@ pub struct Args {
     pub ascii_distro: Option<String>,
     #[arg(long = "ascii_colors")]
     pub ascii_colors: Option<String>,
-    #[arg(long = "custom_ascii_path")]
-    pub custom_ascii_path: Option<String>,
+    /// Use ASCII art or an image file from the given path
+    #[arg(long = "custom_logo_path")]
+    pub custom_logo_path: Option<String>,
     #[arg(long = "battery_display")]
     pub battery_display: Option<String>,
     #[arg(long = "disk_display")]
@@ -162,8 +163,8 @@ impl Args {
         if let Some(val) = self.ascii_colors {
             overrides.set_string("ascii_colors", val);
         }
-        if let Some(val) = self.custom_ascii_path {
-            overrides.set_string("custom_ascii_path", val);
+        if let Some(val) = self.custom_logo_path {
+            overrides.set_string("custom_logo_path", val);
         }
         if let Some(val) = self.battery_display {
             overrides.set_string("battery_display", val);
@@ -280,7 +281,7 @@ OPTIONS:
 
   --ascii_distro <s>       Override detected distro (e.g., ubuntu, arch, arch_small)
   --ascii_colors <s>       Override color palette (e.g., 2,7,3 or "distro")
-  --custom_ascii_path <p>  Use ASCII art from the given file path
+  --custom_logo_path <p>  Use ASCII art or an image file from the given path
 
   --battery_display <mode> Battery output style (off, bar, infobar, barinfo)
   --disk_display <mode>    Disk output style (info, percentage, infobar, barinfo, bar)
@@ -373,7 +374,7 @@ pub fn list_options() {
   ascii_colors        = "distro" | <list>
       Color palette for ASCII art. "distro" uses default, or provide a comma-separated list (e.g., "1,2,3,4").
   
-  custom_ascii_path   = "" | <path>
+  custom_logo_path   = "" | <path>
       Path to a custom ASCII art file. Empty for default.
   
   battery_display     = "off" | "bar" | "infobar" | "barinfo"

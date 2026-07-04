@@ -2,7 +2,10 @@ pub mod defaults;
 pub mod settings;
 
 use self::{
-    defaults::{DEFAULT_CONFIG, NEOFETCH_CONFIG},
+    defaults::{
+        CLASSIC_NEOFETCH_CONFIG, CLEAN_MONO_CONFIG, DEFAULT_CONFIG, HARDWARE_HEAVY_CONFIG,
+        MINIMAL_CONFIG, NEOFETCH_CONFIG, SCREENSHOT_CONFIG, SYSTEM_ADMIN_CONFIG, TINY_CONFIG,
+    },
     settings::{Config, Flags, LayoutItem},
 };
 use dirs::config_dir;
@@ -19,11 +22,58 @@ use std::{
 pub enum ConfigPreset {
     Default,
     Neofetch,
+    ClassicNeofetch,
+    Minimal,
+    Screenshot,
+    HardwareHeavy,
+    SystemAdmin,
+    CleanMono,
+    Tiny,
 }
 
 static DEFAULT_CONFIG_CACHE: Lazy<Config> = Lazy::new(|| {
     json5::from_str(DEFAULT_CONFIG)
         .unwrap_or_else(|e| panic!("Built-in default config is invalid JSON: {e}"))
+});
+
+static NEOFETCH_CONFIG_CACHE: Lazy<Config> = Lazy::new(|| {
+    json5::from_str(NEOFETCH_CONFIG)
+        .unwrap_or_else(|e| panic!("Built-in neofetch config is invalid JSON: {e}"))
+});
+
+static CLASSIC_NEOFETCH_CONFIG_CACHE: Lazy<Config> = Lazy::new(|| {
+    json5::from_str(CLASSIC_NEOFETCH_CONFIG)
+        .unwrap_or_else(|e| panic!("Built-in classic neofetch config is invalid JSON: {e}"))
+});
+
+static MINIMAL_CONFIG_CACHE: Lazy<Config> = Lazy::new(|| {
+    json5::from_str(MINIMAL_CONFIG)
+        .unwrap_or_else(|e| panic!("Built-in minimal config is invalid JSON: {e}"))
+});
+
+static SCREENSHOT_CONFIG_CACHE: Lazy<Config> = Lazy::new(|| {
+    json5::from_str(SCREENSHOT_CONFIG)
+        .unwrap_or_else(|e| panic!("Built-in screenshot config is invalid JSON: {e}"))
+});
+
+static HARDWARE_HEAVY_CONFIG_CACHE: Lazy<Config> = Lazy::new(|| {
+    json5::from_str(HARDWARE_HEAVY_CONFIG)
+        .unwrap_or_else(|e| panic!("Built-in hardware-heavy config is invalid JSON: {e}"))
+});
+
+static SYSTEM_ADMIN_CONFIG_CACHE: Lazy<Config> = Lazy::new(|| {
+    json5::from_str(SYSTEM_ADMIN_CONFIG)
+        .unwrap_or_else(|e| panic!("Built-in system-admin config is invalid JSON: {e}"))
+});
+
+static CLEAN_MONO_CONFIG_CACHE: Lazy<Config> = Lazy::new(|| {
+    json5::from_str(CLEAN_MONO_CONFIG)
+        .unwrap_or_else(|e| panic!("Built-in clean mono config is invalid JSON: {e}"))
+});
+
+static TINY_CONFIG_CACHE: Lazy<Config> = Lazy::new(|| {
+    json5::from_str(TINY_CONFIG)
+        .unwrap_or_else(|e| panic!("Built-in tiny config is invalid JSON: {e}"))
 });
 
 /// Loads the unified configuration from `config.jsonc`.
@@ -39,15 +89,30 @@ fn load_config_from_str(data: &str) -> Result<Config, String> {
 }
 
 pub fn load_preset_config(preset: ConfigPreset) -> Config {
-    let content = preset_content(preset);
-    json5::from_str(content)
-        .unwrap_or_else(|e| panic!("Built-in preset config is invalid JSON: {e}"))
+    match preset {
+        ConfigPreset::Default => default_config(),
+        ConfigPreset::Neofetch => NEOFETCH_CONFIG_CACHE.clone(),
+        ConfigPreset::ClassicNeofetch => CLASSIC_NEOFETCH_CONFIG_CACHE.clone(),
+        ConfigPreset::Minimal => MINIMAL_CONFIG_CACHE.clone(),
+        ConfigPreset::Screenshot => SCREENSHOT_CONFIG_CACHE.clone(),
+        ConfigPreset::HardwareHeavy => HARDWARE_HEAVY_CONFIG_CACHE.clone(),
+        ConfigPreset::SystemAdmin => SYSTEM_ADMIN_CONFIG_CACHE.clone(),
+        ConfigPreset::CleanMono => CLEAN_MONO_CONFIG_CACHE.clone(),
+        ConfigPreset::Tiny => TINY_CONFIG_CACHE.clone(),
+    }
 }
 
 pub fn preset_label(preset: ConfigPreset) -> &'static str {
     match preset {
         ConfigPreset::Default => "leenfetch default",
         ConfigPreset::Neofetch => "neofetch-compatible",
+        ConfigPreset::ClassicNeofetch => "classic neofetch",
+        ConfigPreset::Minimal => "minimal",
+        ConfigPreset::Screenshot => "screenshot",
+        ConfigPreset::HardwareHeavy => "hardware-heavy",
+        ConfigPreset::SystemAdmin => "system-admin",
+        ConfigPreset::CleanMono => "clean mono",
+        ConfigPreset::Tiny => "tiny",
     }
 }
 
@@ -55,6 +120,13 @@ pub fn preset_content(preset: ConfigPreset) -> &'static str {
     match preset {
         ConfigPreset::Default => DEFAULT_CONFIG,
         ConfigPreset::Neofetch => NEOFETCH_CONFIG,
+        ConfigPreset::ClassicNeofetch => CLASSIC_NEOFETCH_CONFIG,
+        ConfigPreset::Minimal => MINIMAL_CONFIG,
+        ConfigPreset::Screenshot => SCREENSHOT_CONFIG,
+        ConfigPreset::HardwareHeavy => HARDWARE_HEAVY_CONFIG,
+        ConfigPreset::SystemAdmin => SYSTEM_ADMIN_CONFIG,
+        ConfigPreset::CleanMono => CLEAN_MONO_CONFIG,
+        ConfigPreset::Tiny => TINY_CONFIG,
     }
 }
 
@@ -292,15 +364,24 @@ mod tests {
 
     #[test]
     fn preset_configs_parse_successfully() {
-        let default_config = load_preset_config(ConfigPreset::Default);
-        let neofetch_config = load_preset_config(ConfigPreset::Neofetch);
-
-        assert!(!default_config.layout.is_empty());
-        assert!(!neofetch_config.layout.is_empty());
-        assert_ne!(
-            default_config.flags.color_blocks,
-            neofetch_config.flags.color_blocks
-        );
+        for preset in [
+            ConfigPreset::Default,
+            ConfigPreset::Neofetch,
+            ConfigPreset::ClassicNeofetch,
+            ConfigPreset::Minimal,
+            ConfigPreset::Screenshot,
+            ConfigPreset::HardwareHeavy,
+            ConfigPreset::SystemAdmin,
+            ConfigPreset::CleanMono,
+            ConfigPreset::Tiny,
+        ] {
+            let config = load_preset_config(preset);
+            assert!(
+                !config.layout.is_empty(),
+                "{} had an empty layout",
+                preset_label(preset)
+            );
+        }
     }
 
     #[test]
@@ -315,11 +396,11 @@ mod tests {
         let env = EnvLock::acquire(&["XDG_CONFIG_HOME"]);
         env.set_var("XDG_CONFIG_HOME", temp_dir.to_str().unwrap());
 
-        write_config_preset(ConfigPreset::Neofetch).unwrap();
+        write_config_preset(ConfigPreset::Tiny).unwrap();
 
         let written = fs::read_to_string(config_path()).unwrap();
-        assert!(written.contains("\"title\"") || written.contains("\"modules\""));
-        assert!(written.contains("\"color_blocks\""));
+        assert!(written.contains("\"ascii_distro\": \"off\""));
+        assert!(written.contains("\"modules\""));
 
         fs::remove_dir_all(temp_dir).unwrap();
     }

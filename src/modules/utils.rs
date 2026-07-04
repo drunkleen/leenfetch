@@ -1,6 +1,12 @@
 #![allow(clippy::collapsible_if, clippy::useless_vec)]
 
-use std::{collections::HashMap, fs, path::Path};
+use image::{ImageFormat, ImageReader};
+use std::{
+    collections::HashMap,
+    env, fs,
+    io::{Cursor, Write},
+    path::Path,
+};
 
 use super::{ascii::get_builtin_ascii_art, colors::get_builtin_distro_colors};
 
@@ -123,6 +129,87 @@ pub fn get_custom_ascii(custom_path: &str) -> String {
     }
 
     "".to_string()
+}
+
+pub fn is_image_path(path: &str) -> bool {
+    Path::new(path)
+        .extension()
+        .and_then(|ext| ext.to_str())
+        .map(|ext| matches!(ext.to_ascii_lowercase().as_str(), "png" | "jpg" | "jpeg"))
+        .unwrap_or(false)
+}
+
+pub fn terminal_supports_inline_images() -> bool {
+    matches!(env::var("TERM"), Ok(term) if term == "xterm-kitty")
+        || env::var_os("KITTY_WINDOW_ID").is_some()
+}
+
+pub fn render_inline_image(path: &str, columns: usize) -> Result<(), String> {
+    let reader = ImageReader::open(path)
+        .map_err(|err| format!("Failed to open image {path}: {err}"))?
+        .with_guessed_format()
+        .map_err(|err| format!("Failed to detect image format for {path}: {err}"))?;
+
+    let image = reader
+        .decode()
+        .map_err(|err| format!("Failed to decode image {path}: {err}"))?;
+
+    let mut png_bytes = Cursor::new(Vec::new());
+    image
+        .write_to(&mut png_bytes, ImageFormat::Png)
+        .map_err(|err| format!("Failed to encode image {path} as PNG: {err}"))?;
+
+    let encoded = base64_encode(png_bytes.get_ref());
+    let mut stdout = std::io::stdout();
+    if columns > 0 {
+        write!(
+            &mut stdout,
+            "\x1b_Ga=T,C=1,f=100,c={columns};{encoded}\x1b\\"
+        )
+    } else {
+        write!(&mut stdout, "\x1b_Ga=T,C=1,f=100;{encoded}\x1b\\")
+    }
+    .map_err(|err| format!("Failed to write inline image escape sequence: {err}"))?;
+    stdout
+        .flush()
+        .map_err(|err| format!("Failed to flush inline image: {err}"))?;
+
+    Ok(())
+}
+
+fn base64_encode(data: &[u8]) -> String {
+    const TABLE: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+    let mut out = String::with_capacity(data.len().div_ceil(3) * 4);
+    let mut chunks = data.chunks_exact(3);
+
+    for chunk in &mut chunks {
+        let n = ((chunk[0] as u32) << 16) | ((chunk[1] as u32) << 8) | chunk[2] as u32;
+        out.push(TABLE[((n >> 18) & 0x3f) as usize] as char);
+        out.push(TABLE[((n >> 12) & 0x3f) as usize] as char);
+        out.push(TABLE[((n >> 6) & 0x3f) as usize] as char);
+        out.push(TABLE[(n & 0x3f) as usize] as char);
+    }
+
+    match chunks.remainder() {
+        [b0] => {
+            let n = (*b0 as u32) << 16;
+            out.push(TABLE[((n >> 18) & 0x3f) as usize] as char);
+            out.push(TABLE[((n >> 12) & 0x3f) as usize] as char);
+            out.push('=');
+            out.push('=');
+        }
+        [b0, b1] => {
+            let n = ((*b0 as u32) << 16) | ((*b1 as u32) << 8);
+            out.push(TABLE[((n >> 18) & 0x3f) as usize] as char);
+            out.push(TABLE[((n >> 12) & 0x3f) as usize] as char);
+            out.push(TABLE[((n >> 6) & 0x3f) as usize] as char);
+            out.push('=');
+        }
+        _ => {}
+    }
+
+    out
 }
 
 /// Given a distro name, returns a string of its corresponding ASCII art.
@@ -321,6 +408,7 @@ pub fn get_distro_colors(distro: &str) -> HashMap<&'static str, &'static str> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::test_utils::EnvLock;
 
     #[test]
     fn bar_respects_percentage_bounds() {
@@ -356,5 +444,30 @@ mod tests {
         assert_eq!(map.get("c3"), Some(&DEFAULT_ANSI_ALL_COLORS[3]));
         assert!(map.contains_key("c4"));
         assert_eq!(map.get("reset"), Some(&"\x1b[0m"));
+    }
+
+    #[test]
+    fn image_path_detection_is_extension_based() {
+        assert!(is_image_path("/tmp/logo.png"));
+        assert!(is_image_path("/tmp/logo.JPG"));
+        assert!(is_image_path("/tmp/logo.jpeg"));
+        assert!(!is_image_path("/tmp/logo.txt"));
+    }
+
+    #[test]
+    fn kitty_detection_uses_terminal_hints() {
+        let env = EnvLock::acquire(&["TERM", "KITTY_WINDOW_ID"]);
+
+        env.set_var("TERM", "xterm-kitty");
+        env.remove_var("KITTY_WINDOW_ID");
+        assert!(terminal_supports_inline_images());
+
+        env.set_var("TERM", "xterm-256color");
+        env.set_var("KITTY_WINDOW_ID", "1");
+        assert!(terminal_supports_inline_images());
+
+        env.set_var("TERM", "xterm-256color");
+        env.remove_var("KITTY_WINDOW_ID");
+        assert!(!terminal_supports_inline_images());
     }
 }

@@ -34,7 +34,7 @@ pub struct Flags {
     )]
     pub cpu_temp: String,
     #[serde(default)]
-    pub custom_ascii_path: String,
+    pub custom_logo_path: String,
     #[serde(default)]
     pub de_version: bool,
     #[serde(default)]
@@ -172,7 +172,7 @@ impl Default for Flags {
         Self {
             ascii_distro: "auto".into(),
             ascii_colors: "distro".into(),
-            custom_ascii_path: String::new(),
+            custom_logo_path: String::new(),
             battery_display: "barinfo".into(),
             color_blocks: "███".into(),
             cpu_brand: true,

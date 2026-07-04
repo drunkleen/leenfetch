@@ -570,8 +570,8 @@ impl Core {
         &self,
         distro_override: Option<&str>,
     ) -> (String, HashMap<&str, &str>) {
-        let custom_ascii_path = {
-            let path = self.flags.custom_ascii_path.trim();
+        let custom_logo_path = {
+            let path = self.flags.custom_logo_path.trim();
             if path.is_empty() { None } else { Some(path) }
         };
 
@@ -599,7 +599,7 @@ impl Core {
         };
 
         // Load ASCII Art
-        let raw_ascii_art = custom_ascii_path
+        let raw_ascii_art = custom_logo_path
             .map(get_custom_ascii)
             .unwrap_or_else(|| get_ascii_and_colors(&resolved_distro));
 
