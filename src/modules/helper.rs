@@ -143,6 +143,9 @@ pub struct Args {
     /// Print the default config to stdout and exit
     #[arg(long = "print_config", action = ArgAction::SetTrue)]
     pub print_config: bool,
+
+    #[arg(long = "ssh-payload", action = ArgAction::SetTrue, hide = true)]
+    pub ssh_payload: bool,
 }
 
 impl Args {

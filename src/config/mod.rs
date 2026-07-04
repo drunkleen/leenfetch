@@ -16,7 +16,8 @@ use std::{
 };
 
 static DEFAULT_CONFIG_CACHE: Lazy<Config> = Lazy::new(|| {
-    json5::from_str(DEFAULT_CONFIG).unwrap_or_else(|e| panic!("Built-in default config is invalid JSON: {e}"))
+    json5::from_str(DEFAULT_CONFIG)
+        .unwrap_or_else(|e| panic!("Built-in default config is invalid JSON: {e}"))
 });
 
 /// Loads the unified configuration from `config.jsonc`.
@@ -53,16 +54,32 @@ pub fn default_layout() -> Vec<LayoutItem> {
     default_config().layout
 }
 
+/// Loads the effective configuration, falling back to built-in defaults on any error.
+pub fn load_effective_config_at(path: Option<&str>) -> Config {
+    let mut config = load_config_at(path).unwrap_or_else(|_| default_config());
+    if config.layout.is_empty() {
+        config.layout = default_layout();
+    }
+    config
+}
+
+/// Loads the effective configuration from the default path, falling back to built-in defaults.
+pub fn load_effective_config() -> Config {
+    load_effective_config_at(None)
+}
+
 /// Loads the modules section from `config.jsonc`.
 ///
 /// # Returns
 ///
 /// A `Vec<LayoutItem>` containing the loaded module configuration.
 pub fn load_print_layout() -> Vec<LayoutItem> {
-    let layout = load_config().unwrap_or_else(|e| {
-        eprintln!("leenfetch: config error: {e}; using defaults");
-        default_config()
-    }).layout;
+    let layout = load_config()
+        .unwrap_or_else(|e| {
+            eprintln!("leenfetch: config error: {e}; using defaults");
+            default_config()
+        })
+        .layout;
     if layout.is_empty() {
         default_layout()
     } else {
@@ -76,10 +93,12 @@ pub fn load_print_layout() -> Vec<LayoutItem> {
 ///
 /// A `Flags` struct containing the loaded configuration.
 pub fn load_flags() -> Flags {
-    load_config().unwrap_or_else(|e| {
-        eprintln!("leenfetch: config error: {e}; using defaults");
-        default_config()
-    }).flags
+    load_config()
+        .unwrap_or_else(|e| {
+            eprintln!("leenfetch: config error: {e}; using defaults");
+            default_config()
+        })
+        .flags
 }
 
 /// Generates the default unified configuration file.
@@ -201,4 +220,30 @@ fn ensure_config_file_exists(file_name: &str, default_content: &str) -> std::io:
 
     save_to_config_file(file_name, default_content)?;
     Ok(true) // Created
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::fs;
+    use std::time::{SystemTime, UNIX_EPOCH};
+
+    #[test]
+    fn load_effective_config_falls_back_to_defaults_for_invalid_custom_file() {
+        let unique = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let path = std::env::temp_dir().join(format!("leenfetch_invalid_config_{unique}.jsonc"));
+        fs::write(&path, "{ invalid jsonc").unwrap();
+
+        let config = load_effective_config_at(path.to_str());
+        assert!(!config.layout.is_empty());
+        assert_eq!(
+            config.flags.ascii_distro,
+            default_config().flags.ascii_distro
+        );
+
+        fs::remove_file(path).unwrap();
+    }
 }

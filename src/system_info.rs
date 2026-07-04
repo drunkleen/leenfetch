@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{core::Data, modules::enums::SongInfo};
+use crate::{config::settings::Config, core::Data, modules::enums::SongInfo};
 
 pub const PROTOCOL_VERSION: u32 = 1;
 
@@ -30,6 +30,22 @@ pub struct SystemInfo {
     pub battery: Option<Vec<String>>,
     pub song: Option<SongInfo>,
     pub colors: Option<String>,
+}
+
+/// Remote SSH payload containing the effective remote config and collected system data.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RemoteSshPayload {
+    pub config: Config,
+    pub system_info: SystemInfo,
+}
+
+impl RemoteSshPayload {
+    pub fn new(config: Config, system_info: SystemInfo) -> Self {
+        Self {
+            config,
+            system_info,
+        }
+    }
 }
 
 impl From<Data> for SystemInfo {
@@ -93,5 +109,50 @@ impl From<&SystemInfo> for Data {
             song: value.song.clone(),
             colors: value.colors.clone(),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::config::default_config;
+
+    fn sample_system_info() -> SystemInfo {
+        SystemInfo {
+            protocol_version: PROTOCOL_VERSION,
+            username: Some("anakin".to_string()),
+            hostname: Some("tattooine".to_string()),
+            host: Some("anakin@tattooine".to_string()),
+            os: Some("Linux".to_string()),
+            distro: Some("Arch Linux".to_string()),
+            model: Some("X1".to_string()),
+            kernel: Some("6.0.0".to_string()),
+            os_age: None,
+            uptime: None,
+            packages: None,
+            shell: None,
+            wm: None,
+            de: None,
+            cpu: None,
+            gpu: None,
+            memory: None,
+            disk: None,
+            resolution: None,
+            theme: None,
+            battery: None,
+            song: None,
+            colors: None,
+        }
+    }
+
+    #[test]
+    fn remote_ssh_payload_round_trips() {
+        let payload = RemoteSshPayload::new(default_config(), sample_system_info());
+        let encoded = serde_json::to_string(&payload).unwrap();
+        let decoded: RemoteSshPayload = serde_json::from_str(&encoded).unwrap();
+
+        assert_eq!(decoded.system_info.username.as_deref(), Some("anakin"));
+        assert_eq!(decoded.system_info.hostname.as_deref(), Some("tattooine"));
+        assert!(!decoded.config.layout.is_empty());
     }
 }

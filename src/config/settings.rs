@@ -1,7 +1,7 @@
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 /// Describes a single entry in the `modules` array.
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 #[serde(untagged)]
 pub enum LayoutItem {
     Break(String),
@@ -9,7 +9,7 @@ pub enum LayoutItem {
 }
 
 /// Configuration flags corresponding to display and formatting options.
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Flags {
     #[serde(default)]
     pub ascii_distro: String,
@@ -72,7 +72,7 @@ pub struct Flags {
 }
 
 /// Root configuration structure.
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Config {
     #[serde(default, rename = "$schema")]
     #[allow(dead_code)]
@@ -87,7 +87,7 @@ pub struct Config {
 }
 
 /// Minimal representation of the logo block.
-#[derive(Debug, Deserialize, Clone, Default)]
+#[derive(Debug, Deserialize, Serialize, Clone, Default)]
 pub struct Logo {
     #[serde(rename = "type", default)]
     #[allow(dead_code)]
@@ -98,7 +98,7 @@ pub struct Logo {
 }
 
 /// Configuration for an individual info module.
-#[derive(Debug, Deserialize, Clone, Default)]
+#[derive(Debug, Deserialize, Serialize, Clone, Default)]
 pub struct ModuleEntry {
     #[serde(rename = "type", default)]
     pub module_type: Option<String>,

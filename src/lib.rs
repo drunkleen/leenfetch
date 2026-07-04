@@ -6,7 +6,7 @@ pub mod system_info;
 #[cfg(test)]
 pub mod test_utils;
 
-pub use system_info::{SystemInfo, PROTOCOL_VERSION};
+pub use system_info::{PROTOCOL_VERSION, RemoteSshPayload, SystemInfo};
 
 use anyhow::Result;
 use cache::Cache;

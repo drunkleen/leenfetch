@@ -1,14 +1,13 @@
-use anyhow::{anyhow, Context, Result};
+use anyhow::{Context, Result, anyhow};
 use clap::Parser;
 use leenfetch_core::{
-    config,
+    RemoteSshPayload, SystemInfo, config,
     core::{Core, Data},
     gather_system_info,
     modules::{
-        helper::{list_options, print_custom_help, Args, CliOverrides, OutputFormat},
+        helper::{Args, CliOverrides, OutputFormat, list_options, print_custom_help},
         utils::colorize_text,
     },
-    SystemInfo,
 };
 use once_cell::sync::Lazy;
 use regex::Regex;
@@ -86,6 +85,10 @@ fn run() -> Result<()> {
         return Ok(());
     }
 
+    if args.ssh_payload {
+        return run_ssh_payload(&args);
+    }
+
     let overrides = args.into_overrides();
 
     if !overrides.use_defaults && overrides.config_path.is_none() {
@@ -131,7 +134,7 @@ fn run() -> Result<()> {
     let core = Core::new_with(flags, layout);
 
     if !overrides.ssh_hosts.is_empty() {
-        return run_remote(&core, &overrides, &pipe_input);
+        return run_remote(&overrides, &pipe_input);
     }
 
     let system_info = gather_system_info(&config).context("Failed to gather system information")?;
@@ -168,7 +171,17 @@ fn run() -> Result<()> {
     Ok(())
 }
 
-fn run_remote(core: &Core, overrides: &CliOverrides, pipe_input: &str) -> Result<()> {
+fn run_ssh_payload(args: &Args) -> Result<()> {
+    let config = config::load_effective_config_at(args.config_path.as_deref());
+    let system_info = gather_system_info(&config).context("Failed to gather system information")?;
+    let payload = RemoteSshPayload::new(config, system_info);
+    let json = serde_json::to_string_pretty(&payload)
+        .context("Failed to serialize remote SSH payload to JSON")?;
+    println!("{json}");
+    Ok(())
+}
+
+fn run_remote(overrides: &CliOverrides, pipe_input: &str) -> Result<()> {
     let is_json = matches!(overrides.output_format, OutputFormat::Json);
 
     if is_json {
@@ -176,8 +189,8 @@ fn run_remote(core: &Core, overrides: &CliOverrides, pipe_input: &str) -> Result
             if index > 0 {
                 println!();
             }
-            let info = fetch_remote_system_info(host)?;
-            let mut data = Data::from(&info);
+            let payload = fetch_remote_payload(host)?;
+            let mut data = Data::from(&payload.system_info);
             if let Some(parsed) = parse_ssh_target_parts(host) {
                 if let Some(ssh_user) = parsed.user {
                     if !ssh_user.is_empty() {
@@ -201,11 +214,18 @@ fn run_remote(core: &Core, overrides: &CliOverrides, pipe_input: &str) -> Result
             println!();
         }
         println!("=== Remote: {host} ===");
-        let info = fetch_remote_system_info(host)?;
-        let mut data = Data::from(&info);
+        let payload = fetch_remote_payload(host)?;
+        let mut data = Data::from(&payload.system_info);
 
-        let distro_hint = info.distro.as_deref().or(info.os.as_deref());
-        let (ascii, colors) = core.get_ascii_and_colors_for_distro(distro_hint);
+        let remote_core =
+            Core::new_with(payload.config.flags.clone(), payload.config.layout.clone());
+
+        let distro_hint = payload
+            .system_info
+            .distro
+            .as_deref()
+            .or(payload.system_info.os.as_deref());
+        let (ascii, colors) = remote_core.get_ascii_and_colors_for_distro(distro_hint);
         let ascii_block = if !pipe_input.is_empty() {
             pipe_input.to_string()
         } else {
@@ -223,7 +243,7 @@ fn run_remote(core: &Core, overrides: &CliOverrides, pipe_input: &str) -> Result
             }
         }
 
-        let info_layout = core.render_layout(&data);
+        let info_layout = remote_core.render_layout(&data);
         let info_lines = colorize_text(info_layout, &colors)
             .lines()
             .map(|l| l.to_string())
@@ -235,7 +255,35 @@ fn run_remote(core: &Core, overrides: &CliOverrides, pipe_input: &str) -> Result
     Ok(())
 }
 
-fn fetch_remote_system_info(target: &str) -> Result<SystemInfo> {
+fn fetch_remote_payload(target: &str) -> Result<RemoteSshPayload> {
+    match fetch_remote_payload_with_args(target, &["--ssh-payload"]) {
+        Ok(payload) => Ok(payload),
+        Err(primary_err) => match fetch_remote_system_info_legacy(target) {
+            Ok(info) => Ok(RemoteSshPayload::new(config::default_config(), info)),
+            Err(_) => Err(primary_err),
+        },
+    }
+}
+
+fn fetch_remote_system_info_legacy(target: &str) -> Result<SystemInfo> {
+    let stdout = fetch_remote_output(target, &["--format", "json"])?;
+    let info: SystemInfo = serde_json::from_str(&stdout)
+        .with_context(|| format!("Failed to parse JSON from {target}: {}", stdout.trim()))?;
+    Ok(info)
+}
+
+fn fetch_remote_payload_with_args(target: &str, remote_args: &[&str]) -> Result<RemoteSshPayload> {
+    let stdout = fetch_remote_output(target, remote_args)?;
+    if let Ok(payload) = serde_json::from_str::<RemoteSshPayload>(&stdout) {
+        return Ok(payload);
+    }
+
+    let info: SystemInfo = serde_json::from_str(&stdout)
+        .with_context(|| format!("Failed to parse JSON from {target}: {}", stdout.trim()))?;
+    Ok(RemoteSshPayload::new(config::default_config(), info))
+}
+
+fn fetch_remote_output(target: &str, remote_args: &[&str]) -> Result<String> {
     let ssh_bin = detect_ssh_binary();
     let parsed = parse_ssh_target_parts(target).unwrap_or_else(|| ParsedSshTarget {
         user: None,
@@ -260,11 +308,12 @@ fn fetch_remote_system_info(target: &str) -> Result<SystemInfo> {
         parsed.host.to_string()
     };
 
+    cmd.arg(destination).arg("leenfetch");
+    for arg in remote_args {
+        cmd.arg(arg);
+    }
+
     let output = cmd
-        .arg(destination)
-        .arg("leenfetch")
-        .arg("--format")
-        .arg("json")
         .output()
         .with_context(|| format!("Failed to spawn ssh for target {target}"))?;
 
@@ -282,9 +331,7 @@ fn fetch_remote_system_info(target: &str) -> Result<SystemInfo> {
 
     let stdout = String::from_utf8(output.stdout)
         .with_context(|| format!("Invalid UTF-8 in ssh output from {target}"))?;
-    let info: SystemInfo = serde_json::from_str(&stdout)
-        .with_context(|| format!("Failed to parse JSON from {target}: {}", stdout.trim()))?;
-    Ok(info)
+    Ok(stdout)
 }
 
 #[cfg(target_os = "windows")]
