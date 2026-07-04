@@ -75,7 +75,7 @@ pub const DEFAULT_CONFIG: &str = r#"// ===============================
         "distro_shorthand": "name",
 
         // How to display disk usage information.
-        // Options: "info", "percentage", "infobar", "barinfo", or "bar".
+        // Options: comma-separated list of "info", "percentage", and "bar".
         "disk_display": "info",
 
         // What label to show for each disk.
@@ -87,7 +87,7 @@ pub const DEFAULT_CONFIG: &str = r#"// ===============================
         "disk_percent": true,
 
         // Which disks to display.
-        // Options: "/" or comma-separated mount points
+        // Options: "/" or comma-separated mount points/paths
         "disk_show": "/",
 
         // Show memory usage as a percentage.
@@ -232,7 +232,7 @@ pub const CLASSIC_NEOFETCH_CONFIG: &str = r#"// ===============================
         "distro_shorthand": "name",
 
         // How to display disk usage information.
-        // Options: "info", "percentage", "infobar", "barinfo", or "bar".
+        // Options: comma-separated list of "info", "percentage", and "bar".
         "disk_display": "info",
 
         // What label to show for each disk.
@@ -383,7 +383,7 @@ pub const NEOFETCH_CONFIG: &str = r#"// ===============================
         "distro_shorthand": "name",
 
         // How to display disk usage information.
-        // Options: "info", "percentage", "infobar", "barinfo", or "bar".
+        // Options: comma-separated list of "info", "percentage", and "bar".
         "disk_display": "info",
 
         // What label to show for each disk.
@@ -516,7 +516,7 @@ pub const SCREENSHOT_CONFIG: &str = r#"{
         "gpu_type": "all",
         "kernel_shorthand": true,
         "distro_shorthand": "name",
-        "disk_display": "barinfo",
+        "disk_display": "bar, info",
         "disk_subtitle": "dir",
         "disk_percent": true,
         "disk_show": "/",
@@ -567,7 +567,7 @@ pub const HARDWARE_HEAVY_CONFIG: &str = r#"{
         "gpu_type": "all",
         "kernel_shorthand": true,
         "distro_shorthand": "name_model_version",
-        "disk_display": "barinfo",
+        "disk_display": "bar, info",
         "disk_subtitle": "dir",
         "disk_percent": true,
         "disk_show": "/",

@@ -284,10 +284,10 @@ OPTIONS:
   --custom_logo_path <p>  Use ASCII art or an image file from the given path
 
   --battery_display <mode> Battery output style (off, bar, infobar, barinfo)
-  --disk_display <mode>    Disk output style (info, percentage, infobar, barinfo, bar)
+  --disk_display <mode>    Disk output style (comma-separated info, percentage, bar)
   --disk_subtitle <mode>   Disk subtitle (name, dir, none, mount)
   --disk_percent <bool>    Show disk percentage
-  --disk_show <path>       Which disks to display (comma-separated mount points)
+  --disk_show <path>       Which disks to display (comma-separated mount points or paths)
   --memory_unit <unit>     Force memory unit (kib, mib, gib)
   --package_managers <mode> Package summary verbosity (off, on, tiny)
   --uptime_shorthand <mode> Uptime shorthand (full, tiny, seconds)
@@ -341,7 +341,7 @@ EXAMPLES:
   leenfetch --list-options          📜 View all available configuration keys
 
 TIPS:
-  • Adjust styles in the `flags` section (e.g., ascii_distro, disk_display, battery_display)
+  • Adjust styles in the `flags` section (e.g., ascii_distro, disk_display, disk_show, battery_display)
   • Reorder entries in the `modules` array (use "break" for spacing)
   • Tweak `logo.padding` to add margins around the ASCII art
 
@@ -404,17 +404,17 @@ pub fn list_options() {
   distro_shorthand    = "name" | "name_version" | "name_arch" | "name_model" | "name_model_version" | "name_model_arch" | "name_model_version_arch"
       How much detail to show for OS info.
   
-  disk_display        = "info" | "percentage" | "infobar" | "barinfo" | "bar"
-      Disk usage display style.
+  disk_display        = "info, percentage, bar"
+      Any ordered combination of `info`, `percentage`, and `bar`. Whitespace around commas is ignored.
   
   disk_percent        = true | false
       Show disk usage percentage.
   
   disk_show           = <path>
-      Which disks to display (default "/").
+      Which disks to display (default "/"; comma-separated mount points or paths).
   
   disk_subtitle       = "name" | "dir" | "none" | "mount"
-      Disk label: device, last dir, none, or full mount point.
+      Disk label: device, last mount segment, none, or full mount point.
   
   gpu_brand           = true | false
       Show GPU vendor name.
