@@ -5,6 +5,29 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Version
 
 ---
 
+## [1.4.0] - 2026-07-05
+
+### Added
+- Added preset chooser flow for first run and reinit.
+- Added local image logo rendering for `custom_logo_path` with PNG and JPEG support.
+
+### Changed
+- Remote SSH rendering now uses the remote machine's effective config and layout.
+- Remote SSH output now honors the remote logo, colors, module order, and other config-driven settings.
+- Updated docs, wiki, and man page content to match `custom_logo_path` and the new logo flow.
+
+### Fixed
+- Image logos now fall back cleanly to the normal ASCII/logo renderer with a warning when unsupported.
+- Remote image logos stay local-only and fall back cleanly instead of trying to transfer image output.
+- Non-Linux targets no longer hit Linux-only module paths.
+- Windows installer filename formatting was fixed.
+
+### Internal
+- Cleaned up clippy warnings across the codebase.
+- Added agent guidance files for repository workflow.
+
+---
+
 ## [1.3.1] - 2026-06-27
 
 ### Added
