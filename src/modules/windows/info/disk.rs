@@ -1,5 +1,5 @@
 use crate::modules::{
-    enums::{DiskDisplay, DiskSubtitle},
+    enums::{DiskDisplayPart, DiskSubtitle, parse_disk_display_parts},
     utils::get_bar,
 };
 use std::ffi::OsString;
@@ -12,7 +12,7 @@ const DRIVE_FIXED: u32 = 3;
 
 pub fn get_disks(
     subtitle_mode: DiskSubtitle,
-    display_mode: DiskDisplay,
+    display_mode: &str,
     _paths: Option<Vec<&str>>,
 ) -> Option<Vec<(String, String)>> {
     let drives = enumerate_fixed_drives();
@@ -29,13 +29,7 @@ pub fn get_disks(
             let total_str = format!("{:.1}G", total as f64 / 1024.0 / 1024.0 / 1024.0);
             let usage_display = format!("{} / {}", used_str, total_str);
             let bar = get_bar(perc);
-            let final_str = match display_mode {
-                DiskDisplay::Info => usage_display.clone(),
-                DiskDisplay::Percentage => format!("{}% {}", perc, bar),
-                DiskDisplay::InfoBar => format!("{} {}", usage_display, bar),
-                DiskDisplay::BarInfo => format!("{} {}", bar, usage_display),
-                DiskDisplay::Bar => bar,
-            };
+            let final_str = render_disk_display(display_mode, &usage_display, perc, &bar);
             let mount = root
                 .trim_end_matches('\u{0}')
                 .trim_end_matches('\\')
@@ -46,16 +40,26 @@ pub fn get_disks(
                 DiskSubtitle::Mount => mount.clone(),
                 DiskSubtitle::None => String::new(),
             };
-            let label = if subtitle.is_empty() {
-                "Disk".to_string()
-            } else {
-                format!("Disk ({})", subtitle)
-            };
-            results.push((label, final_str));
+            results.push((subtitle, final_str));
         }
     }
 
     Some(results)
+}
+
+fn render_disk_display(spec: &str, usage_display: &str, percent: u8, bar: &str) -> String {
+    let parts = parse_disk_display_parts(spec).unwrap_or_else(|_| vec![DiskDisplayPart::Info]);
+
+    let mut rendered = Vec::new();
+    for part in parts {
+        match part {
+            DiskDisplayPart::Info => rendered.push(usage_display.to_string()),
+            DiskDisplayPart::Percentage => rendered.push(format!("{}%", percent)),
+            DiskDisplayPart::Bar => rendered.push(bar.to_string()),
+        }
+    }
+
+    rendered.join(" ")
 }
 
 fn enumerate_fixed_drives() -> Vec<String> {

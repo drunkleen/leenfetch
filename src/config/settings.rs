@@ -181,7 +181,7 @@ impl Default for Flags {
             cpu_speed: true,
             cpu_temp: "C".into(),
             de_version: true,
-            disk_display: "barinfo".into(),
+            disk_display: "info".into(),
             disk_percent: true,
             disk_show: "/".into(),
             disk_subtitle: "dir".into(),

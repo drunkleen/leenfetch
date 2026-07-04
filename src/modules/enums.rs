@@ -175,33 +175,36 @@ impl FromStr for DiskSubtitle {
     }
 }
 
-/// Controls the format of the disk usage display.
-/// - Info: Show used/total (e.g., "40G / 100G").
-/// - Percentage: Show percent used and a bar (e.g., "40% [███]"). (default)
-/// - InfoBar: Show used/total and a bar (e.g., "40G / 100G [███]").
-/// - BarInfo: Show bar first, then used/total.
-/// - Bar: Show only the bar.
-pub enum DiskDisplay {
+/// Controls one piece of disk usage output.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum DiskDisplayPart {
     Info,
     Percentage,
-    InfoBar,
-    BarInfo,
     Bar,
 }
 
-impl FromStr for DiskDisplay {
-    type Err = ();
+pub fn parse_disk_display_parts(spec: &str) -> Result<Vec<DiskDisplayPart>, String> {
+    let mut parts = Vec::new();
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s.to_lowercase().as_str() {
-            "info" => Ok(DiskDisplay::Info),
-            "percentage" => Ok(DiskDisplay::Percentage),
-            "infobar" => Ok(DiskDisplay::InfoBar),
-            "barinfo" => Ok(DiskDisplay::BarInfo),
-            "bar" => Ok(DiskDisplay::Bar),
-            _ => Ok(DiskDisplay::InfoBar),
+    for token in spec.split(',') {
+        let normalized = token.trim().to_ascii_lowercase();
+        if normalized.is_empty() {
+            continue;
+        }
+
+        match normalized.as_str() {
+            "info" => parts.push(DiskDisplayPart::Info),
+            "percentage" => parts.push(DiskDisplayPart::Percentage),
+            "bar" => parts.push(DiskDisplayPart::Bar),
+            _ => return Err(format!("invalid disk_display part: {normalized}")),
         }
     }
+
+    if parts.is_empty() {
+        return Err("disk_display is empty".to_string());
+    }
+
+    Ok(parts)
 }
 
 /// Controls how battery information is displayed.

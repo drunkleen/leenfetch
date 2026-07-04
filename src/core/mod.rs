@@ -12,8 +12,8 @@ use crate::{
     modules::{
         desktop::{de::get_de, resolution::get_resolution, theme::get_theme, wm::get_wm},
         enums::{
-            BatteryDisplayMode, DiskDisplay, DiskSubtitle, DistroDisplay, MemoryUnit,
-            OsAgeShorthand, PackageShorthand, UptimeShorthand,
+            BatteryDisplayMode, DiskSubtitle, DistroDisplay, MemoryUnit, OsAgeShorthand,
+            PackageShorthand, UptimeShorthand,
         },
         info::{
             battery::get_battery, cpu::get_cpu, disk::get_disks, gpu::get_gpus, memory::get_memory,
@@ -260,10 +260,14 @@ impl Core {
                                     final_output.push_str(&line);
                                 } else {
                                     for (name, summary) in disks {
-                                        let line = format!(
-                                            "${{c1}}{} {} ${{reset}}{}\n",
-                                            label, name, summary
-                                        );
+                                        let line = if name.is_empty() {
+                                            format!("${{c1}}{} ${{reset}}{}\n", label, summary)
+                                        } else {
+                                            format!(
+                                                "${{c1}}{} {} ${{reset}}{}\n",
+                                                label, name, summary
+                                            )
+                                        };
                                         final_output.push_str(&line);
                                     }
                                 }
@@ -456,8 +460,7 @@ impl Core {
                 data.disk = get_disks(
                     DiskSubtitle::from_str(flags.disk_subtitle.as_str())
                         .unwrap_or(DiskSubtitle::Dir),
-                    DiskDisplay::from_str(flags.disk_display.as_str())
-                        .unwrap_or(DiskDisplay::InfoBar),
+                    flags.disk_display.as_str(),
                     None,
                 );
             }

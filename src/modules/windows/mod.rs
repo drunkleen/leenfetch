@@ -28,7 +28,7 @@ pub fn is_safe_mode() -> bool {
 mod tests {
     use super::*;
     use crate::modules::enums::{
-        BatteryDisplayMode, DiskDisplay, DiskSubtitle, DistroDisplay, MemoryUnit, OsAgeShorthand,
+        BatteryDisplayMode, DiskSubtitle, DistroDisplay, MemoryUnit, OsAgeShorthand,
         PackageShorthand, UptimeShorthand,
     };
 
@@ -103,7 +103,7 @@ mod tests {
 
     #[test]
     fn disks_present_and_queryable() {
-        let disks = info::disk::get_disks(DiskSubtitle::Dir, DiskDisplay::InfoBar, None);
+        let disks = info::disk::get_disks(DiskSubtitle::Dir, "info, bar", None);
         assert!(disks.is_some(), "Should detect at least one fixed drive");
         let list = disks.unwrap();
         assert!(!list.is_empty());

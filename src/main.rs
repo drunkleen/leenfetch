@@ -644,13 +644,15 @@ fn apply_flag_overrides(
     }
 
     if let Some(value) = overrides.flags.get("disk_display") {
-        let normalized = value.to_ascii_lowercase();
-        match normalized.as_str() {
-            "info" | "percentage" | "infobar" | "barinfo" | "bar" => {
-                flags.disk_display = normalized;
+        match leenfetch_core::modules::enums::parse_disk_display_parts(value) {
+            Ok(_) => {
+                flags.disk_display = value.clone();
             }
-            _ => {
-                return Err(format!("Invalid value for --disk_display: {}", value));
+            Err(err) => {
+                return Err(format!(
+                    "Invalid value for --disk_display: {} ({err})",
+                    value
+                ));
             }
         }
     }
