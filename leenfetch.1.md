@@ -2,7 +2,7 @@
 title: leenfetch
 section: 1
 header: Manual
-footer: leenfetch 1.4.0
+footer: leenfetch 1.4.1
 ---
 
 # leenfetch — User Commands
@@ -51,13 +51,13 @@ leenfetch can also accept **piped input** to render as ASCII art. This allows us
 - `--battery_display <MODE>`  
   Switch battery output between `off`, `bar`, `infobar`, and `barinfo`.
 - `--disk_display <MODE>`  
-  Select disk output (`info`, `percentage`, `infobar`, `barinfo`, `bar`).
+  Select disk output as a comma-separated list of `info`, `percentage`, and `bar`.
 - `--disk_subtitle <MODE>`  
   Choose disk labels (`name`, `dir`, `none`, `mount`).
 - `--disk_percent <true|false>`  
   Show or hide disk usage percentage.
 - `--disk_show <PATH>`  
-  Which disks to display (comma-separated mount points).
+  Which disks to display (comma-separated mount points or paths).
 - `--memory_unit <UNIT>`  
   Force memory units (`kib`, `mib`, `gib`).
 - `--package_managers <MODE>`  

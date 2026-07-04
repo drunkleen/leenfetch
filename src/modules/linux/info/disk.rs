@@ -197,8 +197,10 @@ fn format_size(bytes: u64) -> String {
 #[cfg(test)]
 mod tests {
     use super::{
-        is_visible_storage_mount, mount_priority, push_preferred_mount, render_disk_display,
+        is_visible_storage_mount, mount_dir_label, mount_priority, push_preferred_mount,
+        render_disk_display,
     };
+    use crate::modules::utils::get_bar;
 
     #[test]
     fn keeps_user_visible_storage_mounts() {
@@ -254,7 +256,7 @@ mod tests {
         );
         assert_eq!(
             render_disk_display("percentage, bar", "1G / 2G", 50, 50),
-            "50% ████████████████"
+            format!("50% {}", get_bar(50))
         );
     }
 }

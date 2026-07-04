@@ -5,6 +5,27 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Version
 
 ---
 
+## [1.4.1] - 2026-07-05
+
+### Added
+- Added ordered, comma-separated `disk_display` syntax for both config and CLI.
+- Added support for mixing `info`, `percentage`, and `bar` in any order.
+
+### Changed
+- Disk output now renders only the requested parts in the order provided.
+- Updated disk option docs, defaults, and generated manpage to use list syntax instead of preset modes.
+- `disk_subtitle = "none"` now suppresses the per-disk label instead of inventing one.
+
+### Removed
+- Removed the old `infobar` and `barinfo` disk display presets in favor of list syntax.
+
+### Fixed
+- Default Linux disk output now dedupes shared filesystems and prefers the more useful mount point.
+- Disk row labels no longer print a redundant `Disk` prefix.
+- Disk rows no longer show duplicate mount entries when multiple paths resolve to the same filesystem.
+
+---
+
 ## [1.4.0] - 2026-07-05
 
 ### Added
