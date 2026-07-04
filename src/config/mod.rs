@@ -2,7 +2,7 @@ pub mod defaults;
 pub mod settings;
 
 use self::{
-    defaults::DEFAULT_CONFIG,
+    defaults::{DEFAULT_CONFIG, NEOFETCH_CONFIG},
     settings::{Config, Flags, LayoutItem},
 };
 use dirs::config_dir;
@@ -14,6 +14,12 @@ use std::{
     collections::HashMap,
     fs::{self, File},
 };
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ConfigPreset {
+    Default,
+    Neofetch,
+}
 
 static DEFAULT_CONFIG_CACHE: Lazy<Config> = Lazy::new(|| {
     json5::from_str(DEFAULT_CONFIG)
@@ -30,6 +36,38 @@ fn load_config() -> Result<Config, String> {
 
 fn load_config_from_str(data: &str) -> Result<Config, String> {
     json5::from_str(data).map_err(|e| format!("Invalid JSONC in config.jsonc: {}", e))
+}
+
+pub fn load_preset_config(preset: ConfigPreset) -> Config {
+    let content = preset_content(preset);
+    json5::from_str(content)
+        .unwrap_or_else(|e| panic!("Built-in preset config is invalid JSON: {e}"))
+}
+
+pub fn preset_label(preset: ConfigPreset) -> &'static str {
+    match preset {
+        ConfigPreset::Default => "leenfetch default",
+        ConfigPreset::Neofetch => "neofetch-compatible",
+    }
+}
+
+pub fn preset_content(preset: ConfigPreset) -> &'static str {
+    match preset {
+        ConfigPreset::Default => DEFAULT_CONFIG,
+        ConfigPreset::Neofetch => NEOFETCH_CONFIG,
+    }
+}
+
+pub fn config_path() -> PathBuf {
+    config_file("config.jsonc")
+}
+
+pub fn config_file_path(name: &str) -> PathBuf {
+    config_file(name)
+}
+
+pub fn config_exists() -> bool {
+    config_path().exists()
 }
 
 /// Loads configuration from a custom path when provided.
@@ -108,10 +146,14 @@ pub fn load_flags() -> Flags {
 pub fn generate_config_files() -> HashMap<String, bool> {
     let mut results = HashMap::new();
 
-    let result = save_to_config_file("config.jsonc", DEFAULT_CONFIG).is_ok();
+    let result = write_config_preset(ConfigPreset::Default).is_ok();
     results.insert("config.jsonc".to_string(), result);
 
     results
+}
+
+pub fn write_config_preset(preset: ConfigPreset) -> std::io::Result<()> {
+    save_to_config_file("config.jsonc", preset_content(preset))
 }
 
 /// Saves the provided content to a configuration file with the specified file name.
@@ -225,6 +267,7 @@ fn ensure_config_file_exists(file_name: &str, default_content: &str) -> std::io:
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::test_utils::EnvLock;
     use std::fs;
     use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -245,5 +288,39 @@ mod tests {
         );
 
         fs::remove_file(path).unwrap();
+    }
+
+    #[test]
+    fn preset_configs_parse_successfully() {
+        let default_config = load_preset_config(ConfigPreset::Default);
+        let neofetch_config = load_preset_config(ConfigPreset::Neofetch);
+
+        assert!(!default_config.layout.is_empty());
+        assert!(!neofetch_config.layout.is_empty());
+        assert_ne!(
+            default_config.flags.color_blocks,
+            neofetch_config.flags.color_blocks
+        );
+    }
+
+    #[test]
+    fn write_config_preset_overwrites_existing_file() {
+        let unique = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let temp_dir = std::env::temp_dir().join(format!("leenfetch_config_write_{unique}"));
+        fs::create_dir_all(&temp_dir).unwrap();
+
+        let env = EnvLock::acquire(&["XDG_CONFIG_HOME"]);
+        env.set_var("XDG_CONFIG_HOME", temp_dir.to_str().unwrap());
+
+        write_config_preset(ConfigPreset::Neofetch).unwrap();
+
+        let written = fs::read_to_string(config_path()).unwrap();
+        assert!(written.contains("\"title\"") || written.contains("\"modules\""));
+        assert!(written.contains("\"color_blocks\""));
+
+        fs::remove_dir_all(temp_dir).unwrap();
     }
 }

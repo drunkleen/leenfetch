@@ -59,6 +59,10 @@ pub struct Args {
     #[arg(short = 'r', long, action = ArgAction::SetTrue)]
     pub reinit: bool,
 
+    /// Choose a config preset and write it to config.jsonc
+    #[arg(long = "choose-config", action = ArgAction::SetTrue)]
+    pub choose_config: bool,
+
     /// Show all available config options and values
     #[arg(short = 'l', long = "list-options", action = ArgAction::SetTrue)]
     pub list_options: bool,
@@ -268,7 +272,8 @@ OPTIONS:
   -i, --init               Create the default config file in ~/.config/leenfetch/
   -r, --reinit             Reinitialize the config file to defaults
   -l, --list-options       Show all available config options and values
-      --config <path>      Load configuration from a custom file
+      --choose-config      Pick a preset config and write it to config.jsonc
+       --config <path>      Load configuration from a custom file
       --no-config          Ignore config files and use built-in defaults
       --ssh <host>         Fetch info from remote hosts via SSH (repeatable)
       --format <kind>      Output format: pretty (default) or json
