@@ -22,7 +22,7 @@ A fast, minimal, and customizable system information tool built in Rust — your
 curl -sSfL https://raw.githubusercontent.com/drunkleen/leenfetch/master/install.sh | sudo sh
 
 # Windows (PowerShell)
-iwr https://raw.githubusercontent.com/drunkleen/leenfetch/master/install.ps1 | iex
+iex (iwr https://raw.githubusercontent.com/drunkleen/leenfetch/master/install.ps1).Content; Install-Leenfetch
 ```
 
 ### Update
@@ -32,7 +32,7 @@ iwr https://raw.githubusercontent.com/drunkleen/leenfetch/master/install.ps1 | i
 curl -sSfL https://raw.githubusercontent.com/drunkleen/leenfetch/master/install.sh | sudo sh -s -- --update
 
 # Windows
-iwr https://raw.githubusercontent.com/drunkleen/leenfetch/master/install.ps1 | iex; Install-leenfetch -Update
+iex (iwr https://raw.githubusercontent.com/drunkleen/leenfetch/master/install.ps1).Content; Install-Leenfetch -Update
 ```
 
 > See the [wiki](https://github.com/drunkleen/leenfetch/wiki) for manual installation on Arch/Debian/RPM/Windows/crates.io and build from source.
