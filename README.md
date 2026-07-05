@@ -17,21 +17,25 @@ A fast, minimal, and customizable system information tool built in Rust — your
 
 ## 🚀 Quick Install
 
+**Linux:**
 ```bash
-# Linux
 curl -sSfL https://raw.githubusercontent.com/drunkleen/leenfetch/master/install.sh | sudo sh
+```
 
-# Windows (PowerShell)
-iex (iwr https://raw.githubusercontent.com/drunkleen/leenfetch/master/install.ps1).Content; Install-Leenfetch
+**Windows (PowerShell):**
+```powershell
+iex (iwr https://raw.githubusercontent.com/drunkleen/leenfetch/master/install.ps1).Content; Install-Leenfetch -Update
 ```
 
 ### Update
 
+**Linux:**
 ```bash
-# Linux
 curl -sSfL https://raw.githubusercontent.com/drunkleen/leenfetch/master/install.sh | sudo sh -s -- --update
+```
 
-# Windows
+**Windows (PowerShell):**
+```powershell
 iex (iwr https://raw.githubusercontent.com/drunkleen/leenfetch/master/install.ps1).Content; Install-Leenfetch -Update
 ```
 
