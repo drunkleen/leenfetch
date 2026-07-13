@@ -36,6 +36,8 @@ pub struct Flags {
     #[serde(default)]
     pub custom_logo_path: String,
     #[serde(default)]
+    pub logo_scale: f32,
+    #[serde(default)]
     pub de_version: bool,
     #[serde(default)]
     pub disk_display: String,
@@ -173,6 +175,7 @@ impl Default for Flags {
             ascii_distro: "auto".into(),
             ascii_colors: "distro".into(),
             custom_logo_path: String::new(),
+            logo_scale: 1.0,
             battery_display: "barinfo".into(),
             color_blocks: "███".into(),
             cpu_brand: true,

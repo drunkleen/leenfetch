@@ -7,7 +7,8 @@ use leenfetch_core::{
     modules::{
         helper::{Args, CliOverrides, OutputFormat, list_options, print_custom_help},
         utils::{
-            colorize_text, is_image_path, render_inline_image, terminal_supports_inline_images,
+            colorize_text, inline_image_width, is_image_path, render_inline_image,
+            terminal_supports_inline_images,
         },
     },
 };
@@ -165,14 +166,17 @@ fn run() -> Result<()> {
     let custom_logo_path = config.flags.custom_logo_path.trim();
     let custom_is_image = is_image_path(custom_logo_path);
 
-    if custom_is_image {
+    if !pipe_input.is_empty() {
+        render_ascii_output(&config, &pipe_input, &info_layout)?;
+    } else if custom_is_image {
         if terminal_supports_inline_images() {
-            if let Err(err) = render_inline_image(custom_logo_path, 40) {
+            if let Err(err) = render_inline_image(custom_logo_path, config.flags.logo_scale) {
                 println!("⚠️ {err}; falling back to ASCII.");
                 render_ascii_output(&config, "", &info_layout)?;
             } else {
                 let (_, colors) = core.get_ascii_and_colors();
-                print_info_side_by_side(&info_layout, &colors, 44);
+                let info_column = (inline_image_width(config.flags.logo_scale) + 4) as usize;
+                print_info_side_by_side(&info_layout, &colors, info_column);
             }
         } else {
             println!(
@@ -627,6 +631,17 @@ fn apply_flag_overrides(
 
     if let Some(value) = overrides.flags.get("custom_logo_path") {
         flags.custom_logo_path = value.clone();
+    }
+
+    if let Some(value) = overrides.flags.get("logo_scale") {
+        let scale: f32 = value
+            .parse()
+            .map_err(|_| format!("Invalid value for --logo_scale: {}", value))?;
+        if scale.is_finite() && scale > 0.0 {
+            flags.logo_scale = scale;
+        } else {
+            return Err(format!("Invalid value for --logo_scale: {}", value));
+        }
     }
 
     if let Some(value) = overrides.flags.get("color_blocks") {

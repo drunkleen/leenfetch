@@ -5,6 +5,22 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Version
 
 ---
 
+## [1.4.2] - 2026-07-13
+
+### Added
+- Added `logo_scale` for image logos in config and CLI.
+
+### Changed
+- Image logos now render at a terminal-friendly capped width instead of a fixed width.
+- The info column now follows the rendered image width, so smaller `logo_scale` values stay tight.
+- `logo_scale` controls image logo resizing while leaving ASCII logos unchanged.
+
+### Fixed
+- Removed the hardcoded image width used by inline kitty logo rendering.
+- Piped input now takes priority over configured image or ASCII logos.
+
+---
+
 ## [1.4.1] - 2026-07-05
 
 ### Added

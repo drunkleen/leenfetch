@@ -2,7 +2,7 @@
 title: leenfetch
 section: 1
 header: Manual
-footer: leenfetch 1.4.1
+footer: leenfetch 1.4.2
 ---
 
 # leenfetch — User Commands
@@ -16,7 +16,7 @@ leenfetch [OPTIONS]
 ```
 
 ## DESCRIPTION
-**leenfetch** is a modern, fast, and highly configurable system information tool written in Rust. It displays system information alongside a distribution logo, custom ASCII art, or a local image logo, similar to Neofetch, and is designed for both terminal enthusiasts and new users. It can also fetch data from remote hosts over SSH and render it locally in pretty or JSON form.
+**leenfetch** is a modern, fast, and highly configurable system information tool written in Rust. It displays system information alongside a distribution logo, custom ASCII art, or a local image logo, similar to Neofetch, and is designed for both terminal enthusiasts and new users. Piped input takes priority over configured logos, so `fortune | cowsay | leenfetch` will render the pipe contents instead of a stored logo. It can also fetch data from remote hosts over SSH and render it locally in pretty or JSON form.
 
 Configuration lives in a single JSON-with-comments file (`config.jsonc`), with inline explanations for every option.
 
@@ -46,6 +46,8 @@ leenfetch can also accept **piped input** to render as ASCII art. This allows us
 - `--custom_logo_path <PATH>`  
   Use a custom ASCII art file or image path for this run.
   Local terminals with kitty-style image support show the image inline; others fall back to ASCII with a warning.
+- `--logo_scale <FLOAT>`  
+  Scale image logos. `1.0` keeps original size. Image logos stay capped to a terminal-friendly width, and the info column follows the rendered logo width.
 - `--color_blocks <GLYPH>`  
   Change the glyph used for the color swatch (default: `●`).
 - `--battery_display <MODE>`  

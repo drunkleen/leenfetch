@@ -102,7 +102,7 @@ pub fn get_terminal_color(color_blocks: &str) -> String {
 
     for &code in &color_codes {
         normal.push(format!("\x1b[{}m{}\x1b[0m", code, color_blocks)); // normal
-        // bold.push(format!("\x1b[1;{}m{}\x1b[0m", code, color_blocks)); // bold
+                                                                       // bold.push(format!("\x1b[1;{}m{}\x1b[0m", code, color_blocks)); // bold
     }
 
     // vec![normal.join(""), bold.join("")]
@@ -144,7 +144,7 @@ pub fn terminal_supports_inline_images() -> bool {
         || env::var_os("KITTY_WINDOW_ID").is_some()
 }
 
-pub fn render_inline_image(path: &str, columns: usize) -> Result<(), String> {
+pub fn render_inline_image(path: &str, scale: f32) -> Result<(), String> {
     let reader = ImageReader::open(path)
         .map_err(|err| format!("Failed to open image {path}: {err}"))?
         .with_guessed_format()
@@ -154,6 +154,8 @@ pub fn render_inline_image(path: &str, columns: usize) -> Result<(), String> {
         .decode()
         .map_err(|err| format!("Failed to decode image {path}: {err}"))?;
 
+    let width = inline_image_width(scale);
+
     let mut png_bytes = Cursor::new(Vec::new());
     image
         .write_to(&mut png_bytes, ImageFormat::Png)
@@ -161,20 +163,27 @@ pub fn render_inline_image(path: &str, columns: usize) -> Result<(), String> {
 
     let encoded = base64_encode(png_bytes.get_ref());
     let mut stdout = std::io::stdout();
-    if columns > 0 {
-        write!(
-            &mut stdout,
-            "\x1b_Ga=T,C=1,f=100,c={columns};{encoded}\x1b\\"
-        )
-    } else {
-        write!(&mut stdout, "\x1b_Ga=T,C=1,f=100;{encoded}\x1b\\")
-    }
-    .map_err(|err| format!("Failed to write inline image escape sequence: {err}"))?;
+    write!(&mut stdout, "\x1b_Ga=T,C=1,f=100,c={width};{encoded}\x1b\\")
+        .map_err(|err| format!("Failed to write inline image escape sequence: {err}"))?;
     stdout
         .flush()
         .map_err(|err| format!("Failed to flush inline image: {err}"))?;
 
     Ok(())
+}
+
+pub fn inline_image_width(scale: f32) -> u32 {
+    const BASE_WIDTH: u32 = 40;
+    const MAX_WIDTH: u32 = 48;
+
+    let scale = if scale.is_finite() && scale > 0.0 {
+        scale
+    } else {
+        1.0
+    };
+
+    let width = ((BASE_WIDTH as f64) * (scale as f64)).round().max(1.0);
+    width.min(MAX_WIDTH as f64) as u32
 }
 
 fn base64_encode(data: &[u8]) -> String {
@@ -469,5 +478,13 @@ mod tests {
         env.set_var("TERM", "xterm-256color");
         env.remove_var("KITTY_WINDOW_ID");
         assert!(!terminal_supports_inline_images());
+    }
+
+    #[test]
+    fn image_width_respects_scale_and_cap() {
+        assert_eq!(inline_image_width(1.0), 40);
+        assert_eq!(inline_image_width(0.5), 20);
+        assert_eq!(inline_image_width(2.0), 48);
+        assert_eq!(inline_image_width(0.0), 40);
     }
 }

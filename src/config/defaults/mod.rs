@@ -26,6 +26,9 @@ pub const DEFAULT_CONFIG: &str = r#"// ===============================
         // Path to a custom ASCII art file. Leave blank to use the built-in art.
         // Options: "" or a file path
         "custom_logo_path": "",
+        // Scale factor for image logos. 1.0 keeps the original size.
+        // Options: any positive float
+        "logo_scale": 1.0,
 
         // How to display battery information.
         // Options: "off", "bar", "infobar", "barinfo"
@@ -183,6 +186,7 @@ pub const CLASSIC_NEOFETCH_CONFIG: &str = r#"// ===============================
         // Path to a custom ASCII art file. Leave blank to use the built-in art.
         // Options: "" or a file path
         "custom_logo_path": "",
+        "logo_scale": 1.0,
 
         // How to display battery information.
         // Options: "off", "bar", "infobar", "barinfo"
@@ -334,6 +338,7 @@ pub const NEOFETCH_CONFIG: &str = r#"// ===============================
         // Path to a custom ASCII art file. Leave blank to use the built-in art.
         // Options: "" or a file path
         "custom_logo_path": "",
+        "logo_scale": 1.0,
 
         // How to display battery information.
         // Options: "off", "bar", "infobar", "barinfo"
@@ -465,6 +470,7 @@ pub const MINIMAL_CONFIG: &str = r#"{
         "ascii_distro": "auto",
         "ascii_colors": "distro",
         "custom_logo_path": "",
+        "logo_scale": 1.0,
         "battery_display": "off",
         "color_blocks": "●",
         "cpu_brand": true,
@@ -504,6 +510,7 @@ pub const SCREENSHOT_CONFIG: &str = r#"{
         "ascii_distro": "auto",
         "ascii_colors": "distro",
         "custom_logo_path": "",
+        "logo_scale": 1.0,
         "battery_display": "off",
         "color_blocks": "██",
         "cpu_brand": true,
@@ -555,6 +562,7 @@ pub const HARDWARE_HEAVY_CONFIG: &str = r#"{
         "ascii_distro": "auto",
         "ascii_colors": "distro",
         "custom_logo_path": "",
+        "logo_scale": 1.0,
         "battery_display": "off",
         "color_blocks": "●",
         "cpu_brand": true,
@@ -596,6 +604,7 @@ pub const SYSTEM_ADMIN_CONFIG: &str = r#"{
         "ascii_distro": "auto",
         "ascii_colors": "distro",
         "custom_logo_path": "",
+        "logo_scale": 1.0,
         "battery_display": "off",
         "color_blocks": "●",
         "cpu_brand": true,
@@ -639,6 +648,7 @@ pub const CLEAN_MONO_CONFIG: &str = r#"{
         "ascii_distro": "auto",
         "ascii_colors": "7",
         "custom_logo_path": "",
+        "logo_scale": 1.0,
         "battery_display": "off",
         "color_blocks": "██",
         "cpu_brand": true,
@@ -678,6 +688,7 @@ pub const TINY_CONFIG: &str = r#"{
         "ascii_distro": "off",
         "ascii_colors": "distro",
         "custom_logo_path": "",
+        "logo_scale": 1.0,
         "battery_display": "off",
         "color_blocks": "●",
         "cpu_brand": false,

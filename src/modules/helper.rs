@@ -82,6 +82,9 @@ pub struct Args {
     /// Use ASCII art or an image file from the given path
     #[arg(long = "custom_logo_path")]
     pub custom_logo_path: Option<String>,
+    /// Scale factor for image logos (1.0 = original size)
+    #[arg(long = "logo_scale")]
+    pub logo_scale: Option<f32>,
     #[arg(long = "battery_display")]
     pub battery_display: Option<String>,
     #[arg(long = "disk_display")]
@@ -165,6 +168,9 @@ impl Args {
         }
         if let Some(val) = self.custom_logo_path {
             overrides.set_string("custom_logo_path", val);
+        }
+        if let Some(val) = self.logo_scale {
+            overrides.set_string("logo_scale", val.to_string());
         }
         if let Some(val) = self.battery_display {
             overrides.set_string("battery_display", val);
@@ -282,6 +288,7 @@ OPTIONS:
   --ascii_distro <s>       Override detected distro (e.g., ubuntu, arch, arch_small)
   --ascii_colors <s>       Override color palette (e.g., 2,7,3 or "distro")
   --custom_logo_path <p>  Use ASCII art or an image file from the given path
+  --logo_scale <f>         Scale image logos (1.0 = original size)
 
   --battery_display <mode> Battery output style (off, bar, infobar, barinfo)
   --disk_display <mode>    Disk output style (comma-separated info, percentage, bar)
@@ -371,12 +378,15 @@ pub fn list_options() {
   ascii_distro        = "auto" | <name>
       Which ASCII art to use. "auto" detects your distro or specify a distro name (e.g., "arch").
   
-  ascii_colors        = "distro" | <list>
-      Color palette for ASCII art. "distro" uses default, or provide a comma-separated list (e.g., "1,2,3,4").
-  
-  custom_logo_path   = "" | <path>
-      Path to a custom ASCII art file. Empty for default.
-  
+   ascii_colors        = "distro" | <list>
+       Color palette for ASCII art. "distro" uses default, or provide a comma-separated list (e.g., "1,2,3,4").
+
+   custom_logo_path    = "" | <path>
+       Path to a custom ASCII art file. Empty for default.
+
+   logo_scale          = <float>
+       Scale factor for image logos. 1.0 keeps original size.
+
   battery_display     = "off" | "bar" | "infobar" | "barinfo"
       How to show battery info: none, bar only, info+bar, or bar+info.
   

@@ -13,6 +13,8 @@ A fast, minimal, and customizable system information tool built in Rust — your
 
 ## 📸 Screenshots
 
+<img src="./assets/piped_cowsay.png" width="49%" /><img src="./assets/arch_with_image.png" width="49%" />
+
 <img src="./assets/TokyoNight.png" width="32%" /><img src="./assets/SandStorm.png" width="32%" /><img src="./assets/Aura.png" width="32%" />
 
 ## 🚀 Quick Install
@@ -47,8 +49,8 @@ iex (iwr https://raw.githubusercontent.com/drunkleen/leenfetch/master/install.ps
 - Customizable output layout with colorized terminal output
 - Modular — enable or disable components via config
 - Detects packages, shell, GPU, DE/WM, and more
-- Custom ASCII art or image support via `custom_logo_path`
-- Piped ASCII input (`fortune | cowsay | leenfetch`)
+- Custom ASCII art or image support via `custom_logo_path` and `logo_scale`, with image logos capped to a terminal-friendly width
+- Piped ASCII input (`fortune | cowsay | leenfetch`) takes priority over configured logos
 - First-run config chooser with a Neofetch-style preset option
 - Remote system info over SSH using the remote machine's config/layout
 - Machine-readable JSON output
