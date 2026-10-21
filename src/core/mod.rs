@@ -448,7 +448,7 @@ impl Core {
                 );
             }
             ModuleKind::Gpu => {
-                data.gpu = Some(get_gpus());
+                data.gpu = Some(get_gpus(flags.gpu_brand.as_str()));
             }
             ModuleKind::Memory => {
                 data.memory = get_memory(

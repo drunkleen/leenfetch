@@ -70,8 +70,6 @@ leenfetch can also accept **piped input** to render as ASCII art. This allows us
   Set OS detail level (e.g., `name`, `name_version`, `name_model_arch`).
 - `--cpu_temp <UNIT>`  
   Select CPU temperature units (`C`, `F`, or `off` to hide).
-- `--gpu_brand <true|false>`  
-  Show or hide GPU vendor name.
 - `--gpu_type <TYPE>`  
   Which GPU to show (`all`, `dedicated`, `integrated`).
 - `--kernel_shorthand <true|false>`  

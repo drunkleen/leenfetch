@@ -6,7 +6,7 @@ use windows_sys::Win32::Devices::DeviceAndDriverInstallation::{
 };
 use windows_sys::core::GUID;
 
-pub fn get_gpus() -> Vec<String> {
+pub fn get_gpus(gpu_brand: &str) -> Vec<String> {
     // Enumerate display adapters via SetupAPI (fast, no WMI/PowerShell)
     unsafe {
         let class_guid = GUID_DEVCLASS_DISPLAY;
@@ -41,7 +41,7 @@ pub fn get_gpus() -> Vec<String> {
                 &mut req,
             );
             if ok != 0 {
-                let name = widestr_to_string(&buf);
+                let name = format_gpu_name(&widestr_to_string(&buf), gpu_brand);
                 if !name.is_empty() && !names.contains(&name) {
                     names.push(name);
                 }
@@ -60,9 +60,57 @@ pub fn get_gpus() -> Vec<String> {
     }
 }
 
+fn format_gpu_name(name: &str, gpu_brand: &str) -> String {
+    let vendor_and_model = name
+        .strip_prefix("AMD ")
+        .map(|model| ("Advanced Micro Devices", "AMD", model))
+        .or_else(|| {
+            name.strip_prefix("Advanced Micro Devices, Inc. ")
+                .or_else(|| name.strip_prefix("Advanced Micro Devices "))
+                .map(|model| ("Advanced Micro Devices", "AMD", model))
+        })
+        .or_else(|| {
+            name.strip_prefix("NVIDIA Corporation ")
+                .or_else(|| name.strip_prefix("NVIDIA "))
+                .map(|model| ("NVIDIA Corporation", "NVIDIA", model))
+        });
+
+    match vendor_and_model {
+        Some((full, _, model)) if gpu_brand.eq_ignore_ascii_case("full") => {
+            format!("{full} {model}")
+        }
+        Some((_, short, model)) if gpu_brand.eq_ignore_ascii_case("short") => {
+            format!("{short} {model}")
+        }
+        Some((_, _, model)) if gpu_brand.eq_ignore_ascii_case("off") => model.to_string(),
+        _ => name.to_string(),
+    }
+}
+
 fn widestr_to_string(buf: &[u16]) -> String {
     let len = buf.iter().position(|&c| c == 0).unwrap_or(buf.len());
     String::from_utf16_lossy(&buf[..len]).trim().to_string()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::format_gpu_name;
+
+    #[test]
+    fn formats_amd_and_nvidia_vendor_labels() {
+        assert_eq!(
+            format_gpu_name("AMD Radeon RX 7600", "full"),
+            "Advanced Micro Devices Radeon RX 7600"
+        );
+        assert_eq!(
+            format_gpu_name("NVIDIA Corporation GeForce RTX 5080", "short"),
+            "NVIDIA GeForce RTX 5080"
+        );
+        assert_eq!(
+            format_gpu_name("NVIDIA GeForce RTX 5080", "off"),
+            "GeForce RTX 5080"
+        );
+    }
 }
 
 // {4d36e968-e325-11ce-bfc1-08002be10318}

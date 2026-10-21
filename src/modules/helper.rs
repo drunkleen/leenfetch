@@ -128,8 +128,6 @@ pub struct Args {
     pub shell_version: Option<bool>,
     #[arg(long = "de_version")]
     pub de_version: Option<bool>,
-    #[arg(long = "gpu_brand")]
-    pub gpu_brand: Option<bool>,
     #[arg(long = "kernel_shorthand")]
     pub kernel_shorthand: Option<bool>,
     #[arg(long = "speed_shorthand")]
@@ -248,7 +246,6 @@ impl Args {
         apply_bool_override(&mut overrides, "shell_path", self.shell_path);
         apply_bool_override(&mut overrides, "shell_version", self.shell_version);
         apply_bool_override(&mut overrides, "de_version", self.de_version);
-        apply_bool_override(&mut overrides, "gpu_brand", self.gpu_brand);
         apply_bool_override(&mut overrides, "kernel_shorthand", self.kernel_shorthand);
         apply_bool_override(&mut overrides, "speed_shorthand", self.speed_shorthand);
         apply_bool_override(&mut overrides, "disk_percent", self.disk_percent);
@@ -315,7 +312,6 @@ OPTIONS:
   --shell_path      <true|false>
   --shell_version   <true|false>
   --de_version      <true|false>
-  --gpu_brand       <true|false>
   --kernel_shorthand <true|false>
   --speed_shorthand <true|false>
   --disk_percent    <true|false>
@@ -426,9 +422,9 @@ pub fn list_options() {
   disk_subtitle       = "name" | "dir" | "none" | "mount"
       Disk label: device, last mount segment, none, or full mount point.
   
-  gpu_brand           = true | false
-      Show GPU vendor name.
-  
+  gpu_brand           = "full" | "short" | "off"
+      AMD and NVIDIA GPU vendor label.
+
   gpu_type            = "all" | "dedicated" | "integrated"
       Which GPU to display.
   

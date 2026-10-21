@@ -49,8 +49,8 @@ pub struct Flags {
     pub disk_subtitle: String,
     #[serde(default, alias = "distro_display")]
     pub distro_shorthand: String,
-    #[serde(default)]
-    pub gpu_brand: bool,
+    #[serde(default = "default_gpu_brand")]
+    pub gpu_brand: String,
     #[serde(default)]
     pub gpu_type: String,
     #[serde(default)]
@@ -169,6 +169,10 @@ where
     deserializer.deserialize_any(CpuTempVisitor)
 }
 
+fn default_gpu_brand() -> String {
+    "full".to_string()
+}
+
 impl Default for Flags {
     fn default() -> Self {
         Self {
@@ -189,7 +193,7 @@ impl Default for Flags {
             disk_show: "/".into(),
             disk_subtitle: "dir".into(),
             distro_shorthand: "name".into(),
-            gpu_brand: true,
+            gpu_brand: "full".into(),
             gpu_type: "all".into(),
             kernel_shorthand: true,
             memory_percent: true,

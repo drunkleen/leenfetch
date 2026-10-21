@@ -11,10 +11,10 @@ use std::fs;
 use std::path::Path;
 use std::process::Command;
 
-pub fn get_gpus() -> Vec<String> {
-    let mut entries = collect_from_sysfs();
+pub fn get_gpus(gpu_brand: &str) -> Vec<String> {
+    let mut entries = collect_from_sysfs(gpu_brand);
     if entries.is_empty() {
-        entries = collect_from_lspci();
+        entries = collect_from_lspci(gpu_brand);
     }
 
     if entries.is_empty() {
@@ -28,11 +28,11 @@ pub fn get_gpus() -> Vec<String> {
         .collect()
 }
 
-fn collect_from_sysfs() -> Vec<String> {
-    collect_from_sysfs_root(Path::new("/sys/class/drm"))
+fn collect_from_sysfs(gpu_brand: &str) -> Vec<String> {
+    collect_from_sysfs_root(Path::new("/sys/class/drm"), gpu_brand)
 }
 
-fn collect_from_sysfs_root(root: &Path) -> Vec<String> {
+fn collect_from_sysfs_root(root: &Path, gpu_brand: &str) -> Vec<String> {
     let Ok(read_dir) = fs::read_dir(root) else {
         return Vec::new();
     };
@@ -50,7 +50,7 @@ fn collect_from_sysfs_root(root: &Path) -> Vec<String> {
             continue;
         }
 
-        if let Some(line) = describe_device(&device_dir) {
+        if let Some(line) = describe_device(&device_dir, gpu_brand) {
             out.push(line);
         }
     }
@@ -58,7 +58,7 @@ fn collect_from_sysfs_root(root: &Path) -> Vec<String> {
     out
 }
 
-fn describe_device(device_dir: &Path) -> Option<String> {
+fn describe_device(device_dir: &Path, gpu_brand: &str) -> Option<String> {
     let vendor_hex = read_trimmed(device_dir.join("vendor")).and_then(|s| normalize_hex(&s));
     let device_hex = read_trimmed(device_dir.join("device")).and_then(|s| normalize_hex(&s));
     let driver_path = device_dir.join("driver");
@@ -101,9 +101,28 @@ fn describe_device(device_dir: &Path) -> Option<String> {
 
     let mut label = match (vendor_name, device_name) {
         (Some(vendor), Some(model)) => {
-            format!("{} {}", vendor.replace(" Corporation", ""), model)
+            let is_configurable = is_configurable_gpu_vendor(&vendor);
+            let vendor = format_gpu_vendor(&vendor, gpu_brand);
+            format!(
+                "{} {}",
+                if is_configurable {
+                    vendor
+                } else {
+                    vendor.replace(" Corporation", "")
+                },
+                model
+            )
+            .trim()
+            .to_string()
         }
-        (Some(vendor), _) => vendor,
+        (Some(vendor), _) => {
+            let vendor = format_gpu_vendor(&vendor, gpu_brand);
+            if vendor.is_empty() {
+                "GPU".to_string()
+            } else {
+                vendor
+            }
+        }
         (_, Some(model)) => model,
         _ => {
             if let Some(driver) = driver.as_deref() {
@@ -125,7 +144,7 @@ fn describe_device(device_dir: &Path) -> Option<String> {
     Some(label)
 }
 
-fn collect_from_lspci() -> Vec<String> {
+fn collect_from_lspci(gpu_brand: &str) -> Vec<String> {
     let output = Command::new("lspci")
         .arg("-mm")
         .output()
@@ -145,7 +164,7 @@ fn collect_from_lspci() -> Vec<String> {
             continue;
         }
 
-        let vendor = parts[3].trim();
+        let vendor = format_gpu_vendor(parts[3].trim(), gpu_brand);
         let model = parts[5].trim();
         if vendor.is_empty() && model.is_empty() {
             continue;
@@ -161,6 +180,28 @@ fn collect_from_lspci() -> Vec<String> {
     }
 
     gpus
+}
+
+fn format_gpu_vendor(vendor: &str, gpu_brand: &str) -> String {
+    let vendor = vendor.trim();
+    let labels = if vendor.starts_with("Advanced Micro Devices") || vendor == "AMD" {
+        Some(("Advanced Micro Devices", "AMD"))
+    } else if vendor.starts_with("NVIDIA") {
+        Some(("NVIDIA Corporation", "NVIDIA"))
+    } else {
+        None
+    };
+
+    match labels {
+        Some((full, _)) if gpu_brand.eq_ignore_ascii_case("full") => full.to_string(),
+        Some((_, short)) if gpu_brand.eq_ignore_ascii_case("short") => short.to_string(),
+        Some(_) if gpu_brand.eq_ignore_ascii_case("off") => String::new(),
+        _ => vendor.to_string(),
+    }
+}
+
+fn is_configurable_gpu_vendor(vendor: &str) -> bool {
+    vendor.starts_with("Advanced Micro Devices") || vendor == "AMD" || vendor.starts_with("NVIDIA")
 }
 
 fn read_trimmed<P: AsRef<Path>>(path: P) -> Option<String> {
@@ -326,7 +367,7 @@ mod tests {
         fs::write(device_dir.join("device"), "0xEEEE\n").unwrap();
         fs::write(device_dir.join("driver"), "virtio-pci\n").unwrap();
 
-        let line = super::describe_device(&device_dir).expect("device string");
+        let line = super::describe_device(&device_dir, "full").expect("device string");
         assert!(
             line.contains("FFFF") || line.contains("Illegal Vendor ID"),
             "unexpected output: {line}"
@@ -360,11 +401,22 @@ mod tests {
         let env_lock = EnvLock::acquire(&["LEENFETCH_PCI_IDS"]);
         env_lock.set_var("LEENFETCH_PCI_IDS", db_path.to_str().unwrap());
 
-        let result = super::collect_from_sysfs_root(temp.as_path());
+        let result = super::collect_from_sysfs_root(temp.as_path(), "full");
         assert_eq!(result, vec!["Intel UHD Graphics [Integrated]"]);
 
         env_lock.remove_var("LEENFETCH_PCI_IDS");
         drop(env_lock);
         fs::remove_dir_all(temp).unwrap();
+    }
+
+    #[test]
+    fn formats_gpu_vendor_label() {
+        assert_eq!(
+            format_gpu_vendor("Advanced Micro Devices, Inc.", "short"),
+            "AMD"
+        );
+        assert_eq!(format_gpu_vendor("AMD", "full"), "Advanced Micro Devices");
+        assert_eq!(format_gpu_vendor("NVIDIA Corporation", "short"), "NVIDIA");
+        assert_eq!(format_gpu_vendor("NVIDIA", "off"), "");
     }
 }

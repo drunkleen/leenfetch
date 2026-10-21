@@ -381,7 +381,14 @@ mod tests {
                 "{} had an empty layout",
                 preset_label(preset)
             );
+            assert_eq!(config.flags.gpu_brand, "full");
         }
+    }
+
+    #[test]
+    fn gpu_brand_defaults_to_full() {
+        let config = load_config_from_str(r#"{ "flags": {} }"#).expect("valid config");
+        assert_eq!(config.flags.gpu_brand, "full");
     }
 
     #[test]

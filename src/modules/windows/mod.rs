@@ -75,7 +75,7 @@ mod tests {
 
     #[test]
     fn gpus_list_non_empty() {
-        let gpus = info::gpu::get_gpus();
+        let gpus = info::gpu::get_gpus("full");
         assert!(!gpus.is_empty());
         assert!(gpus.iter().all(|g| !g.trim().is_empty()));
     }

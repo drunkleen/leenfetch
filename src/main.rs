@@ -773,7 +773,6 @@ fn apply_flag_overrides(
         f.shell_version = v
     })?;
     apply_bool_override(flags, overrides, "de_version", |f, v| f.de_version = v)?;
-    apply_bool_override(flags, overrides, "gpu_brand", |f, v| f.gpu_brand = v)?;
     apply_bool_override(flags, overrides, "kernel_shorthand", |f, v| {
         f.kernel_shorthand = v
     })?;

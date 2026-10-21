@@ -61,9 +61,9 @@ pub const DEFAULT_CONFIG: &str = r#"// ===============================
         // options: true or false
         "de_version": true,
 
-        // Show the GPU vendor name.
-        // options: true or false
-        "gpu_brand": true,
+        // AMD and NVIDIA GPU vendor label.
+        // Options: "full", "short", "off"
+        "gpu_brand": "full",
 
         // Which GPU to display.
         // Options: "all", "dedicated", "integrated"
@@ -219,9 +219,9 @@ pub const CLASSIC_NEOFETCH_CONFIG: &str = r#"// ===============================
         // options: true or false
         "de_version": true,
 
-        // Show the GPU vendor name.
-        // options: true or false
-        "gpu_brand": true,
+        // AMD and NVIDIA GPU vendor label.
+        // Options: "full", "short", "off"
+        "gpu_brand": "full",
 
         // Which GPU to display.
         // Options: "all", "dedicated", "integrated"
@@ -371,9 +371,9 @@ pub const NEOFETCH_CONFIG: &str = r#"// ===============================
         // options: true or false
         "de_version": true,
 
-        // Show the GPU vendor name.
-        // options: true or false
-        "gpu_brand": true,
+        // AMD and NVIDIA GPU vendor label.
+        // Options: "full", "short", "off"
+        "gpu_brand": "full",
 
         // Which GPU to display.
         // Options: "all", "dedicated", "integrated"
@@ -479,7 +479,7 @@ pub const MINIMAL_CONFIG: &str = r#"{
         "cpu_speed": true,
         "cpu_temp": "C",
         "de_version": false,
-        "gpu_brand": true,
+        "gpu_brand": "full",
         "gpu_type": "all",
         "kernel_shorthand": true,
         "distro_shorthand": "name",
@@ -519,7 +519,7 @@ pub const SCREENSHOT_CONFIG: &str = r#"{
         "cpu_speed": true,
         "cpu_temp": "C",
         "de_version": true,
-        "gpu_brand": true,
+        "gpu_brand": "full",
         "gpu_type": "all",
         "kernel_shorthand": true,
         "distro_shorthand": "name",
@@ -571,7 +571,7 @@ pub const HARDWARE_HEAVY_CONFIG: &str = r#"{
         "cpu_speed": true,
         "cpu_temp": "C",
         "de_version": false,
-        "gpu_brand": true,
+        "gpu_brand": "full",
         "gpu_type": "all",
         "kernel_shorthand": true,
         "distro_shorthand": "name_model_version",
@@ -613,7 +613,7 @@ pub const SYSTEM_ADMIN_CONFIG: &str = r#"{
         "cpu_speed": true,
         "cpu_temp": "C",
         "de_version": true,
-        "gpu_brand": true,
+        "gpu_brand": "full",
         "gpu_type": "all",
         "kernel_shorthand": true,
         "distro_shorthand": "name_version",
@@ -657,7 +657,7 @@ pub const CLEAN_MONO_CONFIG: &str = r#"{
         "cpu_speed": false,
         "cpu_temp": "off",
         "de_version": false,
-        "gpu_brand": false,
+        "gpu_brand": "full",
         "gpu_type": "all",
         "kernel_shorthand": true,
         "distro_shorthand": "name",
@@ -697,7 +697,7 @@ pub const TINY_CONFIG: &str = r#"{
         "cpu_speed": false,
         "cpu_temp": "off",
         "de_version": false,
-        "gpu_brand": false,
+        "gpu_brand": "full",
         "gpu_type": "all",
         "kernel_shorthand": true,
         "distro_shorthand": "name",
