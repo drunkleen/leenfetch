@@ -18,9 +18,9 @@ pub fn get_cpu(
     if !core_display.eq_ignore_ascii_case("off") {
         let cores = get_core_count();
         let counts = match core_display.to_ascii_lowercase().as_str() {
-            "full" => format!("({cores} cores / {cores} threads)"),
-            "core" => format!("({cores} cores)"),
-            "thread" => format!("({cores} threads)"),
+            "full" => format!("{cores} cores / {cores} threads"),
+            "core" => format!("{cores} cores)"),
+            "thread" => format!("{cores} threads"),
             _ => String::new(),
         };
         if !counts.is_empty() {

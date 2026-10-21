@@ -414,15 +414,15 @@ cpu cores   : 2
     fn formats_core_counts_by_mode() {
         assert_eq!(
             format_core_counts(16, 32, "full"),
-            Some("(16 cores / 32 threads)".to_string())
+            Some("16 cores / 32 threads".to_string())
         );
         assert_eq!(
             format_core_counts(16, 32, "core"),
-            Some("(16 cores)".to_string())
+            Some("16 cores".to_string())
         );
         assert_eq!(
             format_core_counts(16, 32, "thread"),
-            Some("(32 threads)".to_string())
+            Some("32 threads".to_string())
         );
         assert_eq!(format_core_counts(16, 32, "off"), None);
     }
