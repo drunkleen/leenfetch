@@ -297,7 +297,7 @@ dependencies = [
 
 [[package]]
 name = "leenfetch"
-version = "1.4.2"
+version = "1.4.3"
 dependencies = [
  "anyhow",
  "clap",

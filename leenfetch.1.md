@@ -2,7 +2,7 @@
 title: leenfetch
 section: 1
 header: Manual
-footer: leenfetch 1.4.2
+footer: leenfetch 1.4.3
 ---
 
 # leenfetch — User Commands
@@ -70,6 +70,8 @@ leenfetch can also accept **piped input** to render as ASCII art. This allows us
   Set OS detail level (e.g., `name`, `name_version`, `name_model_arch`).
 - `--cpu_temp <UNIT>`  
   Select CPU temperature units (`C`, `F`, or `off` to hide).
+- `--cpu_cores <MODE>`
+  Select CPU count output: `full`, `core`, `thread`, or `off`.
 - `--gpu_type <TYPE>`  
   Which GPU to show (`all`, `dedicated`, `integrated`).
 - `--kernel_shorthand <true|false>`  
@@ -112,6 +114,13 @@ The configuration file is:
 - **config.jsonc**: Includes `flags`, an ordered `modules` (`layout`) array, and an optional `custom_logo_path` override. Use strings like `"break"` for spacers or objects with `type`/`key` to control the output. JSONC keeps comments intact so every option is documented in place.
 
 Edit the file to adjust appearance, enabled modules, spacing, or output order.
+
+CPU and GPU display options include:
+
+```jsonc
+"cpu_cores": "full", // "full", "core", "thread", "off"
+"gpu_brand": "short" // "full", "short", "off" for AMD and NVIDIA
+```
 
 ## EXAMPLES
 - `leenfetch`  

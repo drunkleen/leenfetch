@@ -54,6 +54,18 @@ iex (iwr https://raw.githubusercontent.com/drunkleen/leenfetch/master/install.ps
 - First-run config chooser with a Neofetch-style preset option
 - Remote system info over SSH using the remote machine's config/layout
 - Machine-readable JSON output
+- Configurable CPU core/thread and AMD/NVIDIA GPU vendor labels
+
+### Hardware display options
+
+```jsonc
+{
+  "flags": {
+    "cpu_cores": "full", // "full", "core", "thread", "off"
+    "gpu_brand": "short" // "full", "short", "off"
+  }
+}
+```
 
 ## 📖 Full Documentation
 

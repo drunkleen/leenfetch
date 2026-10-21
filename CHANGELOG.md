@@ -5,6 +5,26 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Version
 
 ---
 
+## [1.4.3] - 2026-10-21
+
+### Added
+- Added GPU vendor label formatting through `gpu_brand`: `"full"`, `"short"`, or `"off"` for AMD and NVIDIA GPUs.
+- Added CPU count display modes through `cpu_cores`: `"full"`, `"core"`, `"thread"`, or `"off"`.
+
+### Changed
+- `gpu_brand` is now a GPU vendor label mode instead of an unused boolean setting.
+- `cpu_cores` is now a display mode instead of a boolean setting; `"full"` shows physical cores and logical threads.
+- Linux system model output now shortens `ASUSTeK COMPUTER INC.` to `ASUS`.
+
+### Fixed
+- Removed the stray `16-` text left behind when cleaning CPU model names such as `16-Core Processor`.
+
+### Migration
+- Replace boolean `gpu_brand` values with `"full"`, `"short"`, or `"off"`.
+- Replace boolean `cpu_cores` values with `"full"`, `"core"`, `"thread"`, or `"off"`.
+
+---
+
 ## [1.4.2] - 2026-07-13
 
 ### Added
