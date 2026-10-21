@@ -73,6 +73,14 @@ fn cleanup_model_string(model: &str) -> String {
         s = s.replace(g, "").trim().to_string();
     }
 
+    if s.starts_with("ASUSTeK COMPUTER INC.") {
+        s = s.replacen("ASUSTeK COMPUTER INC.", "ASUS", 1);
+    } else if s.starts_with("ASUSTeK COMPUTER INC") {
+        s = s.replacen("ASUSTeK COMPUTER INC", "ASUS", 1);
+    } else if s.starts_with("ASUSTeK") {
+        s = s.replacen("ASUSTeK", "ASUS", 1);
+    }
+
     if s.starts_with("Standard PC") {
         s = format!("KVM/QEMU ({})", model.trim());
     } else if s.starts_with("OpenBSD") {
@@ -95,6 +103,10 @@ mod tests {
         let raw = "Standard PC (i440FX)";
         let cleaned = cleanup_model_string(raw);
         assert!(cleaned.contains("KVM/QEMU"));
+
+        let raw = "ASUSTeK COMPUTER INC. ROG STRIX X670E-E GAMING WIFI";
+        let cleaned = cleanup_model_string(raw);
+        assert_eq!(cleaned, "ASUS ROG STRIX X670E-E GAMING WIFI");
     }
 
     #[test]
