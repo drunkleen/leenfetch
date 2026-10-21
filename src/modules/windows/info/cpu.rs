@@ -8,16 +8,24 @@ use windows_sys::Win32::System::SystemInformation::{GetSystemInfo, SYSTEM_INFO};
 pub fn get_cpu(
     cpu_brand: bool,
     show_speed: bool,
-    show_cores: bool,
+    core_display: &str,
     show_temp: bool,
     speed_shorthand: bool,
     temp_unit: Option<char>,
 ) -> Option<String> {
     let mut output = get_cpu_model(cpu_brand);
 
-    if show_cores {
+    if !core_display.eq_ignore_ascii_case("off") {
         let cores = get_core_count();
-        output = format!("{} ({})", output, cores);
+        let counts = match core_display.to_ascii_lowercase().as_str() {
+            "full" => format!("({cores} cores / {cores} threads)"),
+            "core" => format!("({cores} cores)"),
+            "thread" => format!("({cores} threads)"),
+            _ => String::new(),
+        };
+        if !counts.is_empty() {
+            output = format!("{output} {counts}");
+        }
     }
 
     if show_speed {

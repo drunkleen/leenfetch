@@ -41,9 +41,9 @@ pub const DEFAULT_CONFIG: &str = r#"// ===============================
         // options: true or false
         "cpu_brand": true,
 
-        // Show the number of CPU cores.
-        // options: true or false
-        "cpu_cores": true,
+        // Show CPU core and thread counts.
+        // Options: "full", "core", "thread", "off"
+        "cpu_cores": "full",
 
         // Show the CPU frequency.
         // options: true or false
@@ -199,9 +199,9 @@ pub const CLASSIC_NEOFETCH_CONFIG: &str = r#"// ===============================
         // options: true or false
         "cpu_brand": true,
 
-        // Show the number of CPU cores.
-        // options: true or false
-        "cpu_cores": true,
+        // Show CPU core and thread counts.
+        // Options: "full", "core", "thread", "off"
+        "cpu_cores": "full",
 
         // Show the CPU frequency.
         // options: true or false
@@ -351,9 +351,9 @@ pub const NEOFETCH_CONFIG: &str = r#"// ===============================
         // options: true or false
         "cpu_brand": true,
 
-        // Show the number of CPU cores.
-        // options: true or false
-        "cpu_cores": true,
+        // Show CPU core and thread counts.
+        // Options: "full", "core", "thread", "off"
+        "cpu_cores": "full",
 
         // Show the CPU frequency.
         // options: true or false
@@ -474,7 +474,7 @@ pub const MINIMAL_CONFIG: &str = r#"{
         "battery_display": "off",
         "color_blocks": "●",
         "cpu_brand": true,
-        "cpu_cores": false,
+        "cpu_cores": "off",
         "cpu_frequency": false,
         "cpu_speed": true,
         "cpu_temp": "C",
@@ -514,7 +514,7 @@ pub const SCREENSHOT_CONFIG: &str = r#"{
         "battery_display": "off",
         "color_blocks": "██",
         "cpu_brand": true,
-        "cpu_cores": true,
+        "cpu_cores": "full",
         "cpu_frequency": true,
         "cpu_speed": true,
         "cpu_temp": "C",
@@ -566,7 +566,7 @@ pub const HARDWARE_HEAVY_CONFIG: &str = r#"{
         "battery_display": "off",
         "color_blocks": "●",
         "cpu_brand": true,
-        "cpu_cores": true,
+        "cpu_cores": "full",
         "cpu_frequency": true,
         "cpu_speed": true,
         "cpu_temp": "C",
@@ -608,7 +608,7 @@ pub const SYSTEM_ADMIN_CONFIG: &str = r#"{
         "battery_display": "off",
         "color_blocks": "●",
         "cpu_brand": true,
-        "cpu_cores": true,
+        "cpu_cores": "full",
         "cpu_frequency": true,
         "cpu_speed": true,
         "cpu_temp": "C",
@@ -652,7 +652,7 @@ pub const CLEAN_MONO_CONFIG: &str = r#"{
         "battery_display": "off",
         "color_blocks": "██",
         "cpu_brand": true,
-        "cpu_cores": false,
+        "cpu_cores": "off",
         "cpu_frequency": false,
         "cpu_speed": false,
         "cpu_temp": "off",
@@ -692,7 +692,7 @@ pub const TINY_CONFIG: &str = r#"{
         "battery_display": "off",
         "color_blocks": "●",
         "cpu_brand": false,
-        "cpu_cores": false,
+        "cpu_cores": "off",
         "cpu_frequency": false,
         "cpu_speed": false,
         "cpu_temp": "off",

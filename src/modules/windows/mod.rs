@@ -65,7 +65,7 @@ mod tests {
     #[test]
     fn cpu_string_is_returned() {
         let s = info::cpu::get_cpu(
-            /*cpu_brand*/ true, /*show_speed*/ true, /*show_cores*/ true,
+            /*cpu_brand*/ true, /*show_speed*/ true, /*core_display*/ "full",
             /*show_temp*/ false, // robust in environments without temp
             /*speed_shorthand*/ true, /*temp_unit*/ None,
         );

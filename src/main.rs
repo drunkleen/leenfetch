@@ -766,7 +766,6 @@ fn apply_flag_overrides(
     apply_bool_override(flags, overrides, "cpu_frequency", |f, v| {
         f.cpu_frequency = v
     })?;
-    apply_bool_override(flags, overrides, "cpu_cores", |f, v| f.cpu_cores = v)?;
     apply_bool_override(flags, overrides, "cpu_brand", |f, v| f.cpu_brand = v)?;
     apply_bool_override(flags, overrides, "shell_path", |f, v| f.shell_path = v)?;
     apply_bool_override(flags, overrides, "shell_version", |f, v| {
@@ -780,6 +779,14 @@ fn apply_flag_overrides(
         f.speed_shorthand = v
     })?;
     apply_bool_override(flags, overrides, "disk_percent", |f, v| f.disk_percent = v)?;
+
+    if let Some(value) = overrides.flags.get("cpu_cores") {
+        let normalized = value.to_ascii_lowercase();
+        match normalized.as_str() {
+            "full" | "core" | "thread" | "off" => flags.cpu_cores = normalized,
+            _ => return Err(format!("Invalid value for --cpu_cores: {value}")),
+        }
+    }
 
     apply_string_override(flags, overrides, "gpu_type", |f, v| f.gpu_type = v)?;
     apply_string_override(flags, overrides, "disk_show", |f, v| f.disk_show = v)?;

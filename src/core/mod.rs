@@ -437,7 +437,7 @@ impl Core {
                 data.cpu = get_cpu(
                     flags.cpu_brand,
                     flags.cpu_frequency,
-                    flags.cpu_cores,
+                    flags.cpu_cores.as_str(),
                     flags.cpu_temp != "off",
                     flags.speed_shorthand,
                     match flags.cpu_temp.as_str() {

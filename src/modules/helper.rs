@@ -119,7 +119,7 @@ pub struct Args {
     #[arg(long = "cpu_frequency")]
     pub cpu_frequency: Option<bool>,
     #[arg(long = "cpu_cores")]
-    pub cpu_cores: Option<bool>,
+    pub cpu_cores: Option<String>,
     #[arg(long = "cpu_brand")]
     pub cpu_brand: Option<bool>,
     #[arg(long = "shell_path")]
@@ -200,6 +200,9 @@ impl Args {
         if let Some(val) = self.cpu_temp {
             overrides.set_string("cpu_temp", val);
         }
+        if let Some(val) = self.cpu_cores {
+            overrides.set_string("cpu_cores", val);
+        }
         if let Some(val) = self.gpu_type {
             overrides.set_string("gpu_type", val);
         }
@@ -241,7 +244,6 @@ impl Args {
         apply_bool_override(&mut overrides, "memory_percent", self.memory_percent);
         apply_bool_override(&mut overrides, "cpu_speed", self.cpu_speed);
         apply_bool_override(&mut overrides, "cpu_frequency", self.cpu_frequency);
-        apply_bool_override(&mut overrides, "cpu_cores", self.cpu_cores);
         apply_bool_override(&mut overrides, "cpu_brand", self.cpu_brand);
         apply_bool_override(&mut overrides, "shell_path", self.shell_path);
         apply_bool_override(&mut overrides, "shell_version", self.shell_version);
@@ -307,7 +309,7 @@ OPTIONS:
   --memory_percent  <true|false>
   --cpu_speed       <true|false>
   --cpu_frequency   <true|false>
-  --cpu_cores       <true|false>
+  --cpu_cores       <mode>
   --cpu_brand       <true|false>
   --shell_path      <true|false>
   --shell_version   <true|false>
@@ -392,8 +394,8 @@ pub fn list_options() {
   cpu_brand           = true | false
       Show CPU brand name.
   
-  cpu_cores           = true | false
-      Show CPU core count.
+  cpu_cores           = "full" | "core" | "thread" | "off"
+      Show both counts, physical cores, logical threads, or neither.
   
   cpu_frequency       = true | false
       Show CPU frequency.

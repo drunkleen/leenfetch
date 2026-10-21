@@ -21,8 +21,8 @@ pub struct Flags {
     pub color_blocks: String,
     #[serde(default)]
     pub cpu_brand: bool,
-    #[serde(default)]
-    pub cpu_cores: bool,
+    #[serde(default = "default_cpu_cores")]
+    pub cpu_cores: String,
     #[serde(default)]
     pub cpu_frequency: bool,
     #[serde(default)]
@@ -173,6 +173,10 @@ fn default_gpu_brand() -> String {
     "full".to_string()
 }
 
+fn default_cpu_cores() -> String {
+    "full".to_string()
+}
+
 impl Default for Flags {
     fn default() -> Self {
         Self {
@@ -183,7 +187,7 @@ impl Default for Flags {
             battery_display: "barinfo".into(),
             color_blocks: "███".into(),
             cpu_brand: true,
-            cpu_cores: true,
+            cpu_cores: "full".into(),
             cpu_frequency: true,
             cpu_speed: true,
             cpu_temp: "C".into(),

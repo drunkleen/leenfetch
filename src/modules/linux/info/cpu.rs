@@ -2,13 +2,14 @@
 
 use std::fs;
 use std::path::Path;
+use std::{collections::HashSet, str::FromStr};
 
 /// Gets the CPU model, number of cores, speed, and temperature.
 ///
 /// CPU model is sanitized to remove generic brand prefixes if `cpu_brand` is
-/// false. The number of cores is only included if `show_cores` is true. The
-/// speed is only included if `show_speed` is true. The temperature is only
-/// included if `show_temp` is true.
+/// false. Physical core and logical thread counts are only included if
+/// `core_display` is not "off". The speed is only included if `show_speed` is true.
+/// The temperature is only included if `show_temp` is true.
 ///
 /// The speed is formatted as "XMHz" if it is less than 1000, and as "X.YGHz"
 /// if it is greater than or equal to 1000. If `speed_shorthand` is true, the
@@ -20,7 +21,7 @@ use std::path::Path;
 pub fn get_cpu(
     cpu_brand: bool,
     show_freq: bool,
-    show_cores: bool,
+    core_display: &str,
     show_temp: bool,
     speed_shorthand: bool,
     temp_unit: Option<char>,
@@ -29,8 +30,11 @@ pub fn get_cpu(
     let mut cpu_model = extract_cpu_model(&cpuinfo)
         .or_else(cpu_model_fallback)
         .unwrap_or_else(|| "Unknown CPU".to_string());
-    let cores = if show_cores {
-        Some(count_cores(&cpuinfo))
+    let core_counts = if !core_display.eq_ignore_ascii_case("off") {
+        Some((
+            count_physical_cores(&cpuinfo).unwrap_or_else(|| count_cores(&cpuinfo)),
+            count_cores(&cpuinfo),
+        ))
     } else {
         None
     };
@@ -48,8 +52,10 @@ pub fn get_cpu(
     cpu_model = sanitize_cpu_model(&cpu_model, cpu_brand);
     let mut output = cpu_model;
 
-    if let Some(c) = cores {
-        output = format!("{} ({})", output, c);
+    if let Some((physical, logical)) = core_counts {
+        if let Some(counts) = format_core_counts(physical, logical, core_display) {
+            output = format!("{} {counts}", output);
+        }
     }
 
     if let Some(s) = speed {
@@ -73,6 +79,15 @@ pub fn get_cpu(
     }
 
     Some(output)
+}
+
+fn format_core_counts(physical: u32, logical: u32, core_display: &str) -> Option<String> {
+    match core_display.to_ascii_lowercase().as_str() {
+        "full" => Some(format!("{physical} cores / {logical} threads")),
+        "core" => Some(format!("{physical} cores")),
+        "thread" => Some(format!("{logical} threads")),
+        _ => None,
+    }
 }
 
 fn extract_cpu_model(cpuinfo: &str) -> Option<String> {
@@ -115,6 +130,52 @@ fn count_cores(cpuinfo: &str) -> u32 {
         .count()
         .try_into()
         .unwrap_or(u32::MAX)
+}
+
+fn count_physical_cores(cpuinfo: &str) -> Option<u32> {
+    let mut core_ids = HashSet::new();
+    let mut package_core_counts = HashSet::new();
+    let mut fallback_cores = None;
+
+    for processor in cpuinfo.split("\n\n") {
+        let mut package_id = None;
+        let mut core_id = None;
+        let mut cores_per_package = None;
+
+        for line in processor.lines() {
+            let Some((key, value)) = line.split_once(':') else {
+                continue;
+            };
+            let value = value.trim();
+            match key.trim() {
+                "physical id" => package_id = u32::from_str(value).ok(),
+                "core id" => core_id = u32::from_str(value).ok(),
+                "cpu cores" => cores_per_package = u32::from_str(value).ok(),
+                _ => {}
+            }
+        }
+
+        if let (Some(package_id), Some(core_id)) = (package_id, core_id) {
+            core_ids.insert((package_id, core_id));
+        }
+        if let (Some(package_id), Some(cores)) = (package_id, cores_per_package) {
+            package_core_counts.insert((package_id, cores));
+        }
+        fallback_cores = fallback_cores.or(cores_per_package);
+    }
+
+    if !core_ids.is_empty() {
+        Some(core_ids.len().try_into().unwrap_or(u32::MAX))
+    } else if !package_core_counts.is_empty() {
+        Some(
+            package_core_counts
+                .into_iter()
+                .map(|(_, cores)| cores)
+                .sum(),
+        )
+    } else {
+        fallback_cores
+    }
 }
 
 fn extract_speed(cpuinfo: &str) -> Option<u32> {
@@ -178,7 +239,6 @@ fn sanitize_cpu_model(model: &str, show_brand: bool) -> String {
         "Core2",
         "Chip Revision",
         "Compute Cores",
-        "Core ",
     ];
 
     for pat in replacements.iter() {
@@ -202,6 +262,8 @@ fn sanitize_cpu_model(model: &str, show_brand: bool) -> String {
         })
         .collect::<Vec<_>>()
         .join(" ");
+
+    s = s.replace("Core ", "");
 
     s.trim().to_string()
 }
@@ -228,6 +290,28 @@ processor   : 0
 cpu MHz     : 2199.6
 "#;
 
+    const MOCK_CPUINFO_WITH_THREADS: &str = r#"
+processor   : 0
+physical id : 0
+core id     : 0
+cpu cores   : 2
+
+processor   : 1
+physical id : 0
+core id     : 0
+cpu cores   : 2
+
+processor   : 2
+physical id : 0
+core id     : 1
+cpu cores   : 2
+
+processor   : 3
+physical id : 0
+core id     : 1
+cpu cores   : 2
+"#;
+
     #[test]
     fn test_extract_cpu_model() {
         let model = extract_cpu_model(MOCK_CPUINFO);
@@ -247,6 +331,12 @@ cpu MHz     : 2199.6
     fn test_count_cores() {
         let core_count = count_cores(MOCK_CPUINFO);
         assert_eq!(core_count, 2);
+    }
+
+    #[test]
+    fn test_count_physical_cores() {
+        assert_eq!(count_cores(MOCK_CPUINFO_WITH_THREADS), 4);
+        assert_eq!(count_physical_cores(MOCK_CPUINFO_WITH_THREADS), Some(2));
     }
 
     #[test]
@@ -276,6 +366,7 @@ cpu MHz     : 2199.6
         let result = sanitize_cpu_model(input, true);
         assert!(!result.contains("(TM)"));
         assert!(!result.contains("6-Core"));
+        assert!(!result.contains("6-"));
         assert!(result.contains("Ryzen"));
     }
 
@@ -312,10 +403,27 @@ cpu MHz     : 2199.6
     fn test_get_cpu_basic() {
         // This test will only validate that the function returns something,
         // since it depends on system files.
-        let result = get_cpu(true, true, true, false, false, None);
+        let result = get_cpu(true, true, "full", false, false, None);
         assert!(result.is_some());
         let output = result.unwrap();
         assert!(!output.is_empty());
         println!("CPU Info: {}", output);
+    }
+
+    #[test]
+    fn formats_core_counts_by_mode() {
+        assert_eq!(
+            format_core_counts(16, 32, "full"),
+            Some("(16 cores / 32 threads)".to_string())
+        );
+        assert_eq!(
+            format_core_counts(16, 32, "core"),
+            Some("(16 cores)".to_string())
+        );
+        assert_eq!(
+            format_core_counts(16, 32, "thread"),
+            Some("(32 threads)".to_string())
+        );
+        assert_eq!(format_core_counts(16, 32, "off"), None);
     }
 }
